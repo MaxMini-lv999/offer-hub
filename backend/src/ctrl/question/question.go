@@ -48,16 +48,8 @@ var sortByWhitelist = map[string]bool{
 	"dislike_count":   true,
 }
 
-// ListQuestions GET /api/v1/question/list 题目列表
-func ListQuestions(c *gin.Context) {
-	// ① 读参数
-	var req model.ListQuestionReq
-	if err := c.ShouldBindQuery(&req); err != nil {
-		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
-		return
-	}
-
-	// ② 补默认值
+// normalizeListReq 给题目列表请求补默认值并校验，list 和 meta/list 共用。参数不合法时返回 false
+func normalizeListReq(req *model.ListQuestionReq) bool {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -70,33 +62,81 @@ func ListQuestions(c *gin.Context) {
 	if req.SortBy == "" {
 		req.SortBy = "order"
 	}
-	// ③ 校验
+	// 校验
 	if !sortByWhitelist[req.SortBy] {
-		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
-		return
+		return false
 	}
-	// SortOrder 既不是 "asc" 也不是 "desc" 时，同样返回参数错误
 	if req.SortOrder == "" {
 		req.SortOrder = "asc"
 	}
+	// SortOrder 既不是 "asc" 也不是 "desc" 时，同样返回参数错误
 	if req.SortOrder != "asc" && req.SortOrder != "desc" {
+		return false
+	}
+
+	return true
+}
+
+// ListQuestions GET /api/v1/question/list 题目列表
+func ListQuestions(c *gin.Context) {
+	// ① 读参数
+	var req model.ListQuestionReq
+	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
 		return
 	}
-	// ④ 调 service
-	// 照 GetAllQuestionList 的写法调用 service.ListQuestions，
-	//         出错时打日志并返回 500，成功时返回 model.ListQuestionResp{Code: 0, Msg: "success", Data: ...}
+
+	// ② 补默认值 + 校验
+	if !normalizeListReq(&req) {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	// ③ 调 service
 	list, err := service.ListQuestions(c.Request.Context(), &req)
 	if err != nil {
 		log.Printf("service.ListQuestions: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 500,
-			"msg":  "ListQuestion error",
+			"msg":  "服务器内部错误",
 			"data": nil,
 		})
 		return
 	}
 	c.JSON(http.StatusOK, model.ListQuestionResp{
+		Code: 0,
+		Msg:  "success",
+		Data: list,
+	})
+}
+
+// ListQuestionsMeta GET /api/v1/question/meta/list 题目元数据列表
+func ListQuestionsMeta(c *gin.Context) {
+	// ① 读参数
+	var req model.ListQuestionMetaReq
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	// ② 补默认值 + 校验
+	if !normalizeListReq(&req) {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	// ③ 调 service
+	list, err := service.ListQuestionsMeta(c.Request.Context(), &req)
+	if err != nil {
+		log.Printf("service.ListQuestionsMeta: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "服务器内部错误",
+			"data": nil,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, model.ListQuestionMetaResp{
 		Code: 0,
 		Msg:  "success",
 		Data: list,

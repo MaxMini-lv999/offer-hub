@@ -45,6 +45,7 @@ type QuestionFilter struct {
 	SortOrder  string // asc / desc
 	Page       int
 	PageSize   int
+	MetaOnly   bool // true 时只取 question_id 和 title（meta/list 用）；默认 false，取全部字段
 }
 
 // QuestionBankSeries 对应 question_bank_series 集合
@@ -189,6 +190,14 @@ func FilterQuestions(ctx context.Context, f QuestionFilter) ([]Question, int64, 
 		SetSort(bson.D{{Key: f.SortBy, Value: dir}, {Key: "_id", Value: 1}}).
 		SetSkip(int64((f.Page - 1) * f.PageSize)).
 		SetLimit(int64(f.PageSize))
+
+	if f.MetaOnly {
+		opts.SetProjection(bson.M{
+			"question_id": 1,
+			"title":       1,
+			"_id":         0,
+		})
+	}
 
 	cur, err := coll.Find(ctx, filter, opts)
 	if err != nil {

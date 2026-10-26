@@ -86,11 +86,10 @@ func GetAllQuestionList(ctx context.Context, req *model.GetAllQuestionListReq) (
 	return result, nil
 }
 
-// ListQuestions 分页查询题目列表。目前还没有登录，所有请求都按游客处理。
-func ListQuestions(ctx context.Context, req *model.ListQuestionReq) (model.ListQuestionData, error) {
-	// ① 把请求参数转成 data 层的查询条件
-	//    req.UserTag 不往下传：游客传了这个参数也要忽略（接口文档要求）
-	filter := data.QuestionFilter{
+// buildQuestionFilter 把题目列表请求转成 data 层的查询条件，list 和 meta/list 共用。
+// req.UserTag 不往下传：游客传了这个参数也要忽略（接口文档要求）
+func buildQuestionFilter(req *model.ListQuestionReq) data.QuestionFilter {
+	return data.QuestionFilter{
 		BankID:     req.BankID,
 		Keyword:    req.Keyword,
 		Difficulty: req.Difficulty,
@@ -101,9 +100,12 @@ func ListQuestions(ctx context.Context, req *model.ListQuestionReq) (model.ListQ
 		Page:       req.Page,
 		PageSize:   req.PageSize,
 	}
+}
 
-	// 调用 data.FilterQuestions(ctx, filter)，接收 list, total, err
-	//         出错时返回 model.ListQuestionData{}, err
+// ListQuestions 分页查询题目列表。目前还没有登录，所有请求都按游客处理。
+func ListQuestions(ctx context.Context, req *model.ListQuestionReq) (model.ListQuestionData, error) {
+	// ① 把请求参数转成 data 层的查询条件，查出当前页和总数
+	filter := buildQuestionFilter(req)
 	list, total, err := data.FilterQuestions(ctx, filter)
 	if err != nil {
 		return model.ListQuestionData{}, err
@@ -133,6 +135,27 @@ func ListQuestions(ctx context.Context, req *model.ListQuestionReq) (model.ListQ
 		})
 	}
 
-	// 返回 model.ListQuestionData{Total: ..., List: ...}, nil
 	return model.ListQuestionData{Total: total, List: result}, nil
+}
+
+// ListQuestionsMeta 分页查询题目元数据（只有 ID 和标题），过滤和排序与 ListQuestions 完全一致。
+func ListQuestionsMeta(ctx context.Context, req *model.ListQuestionMetaReq) (model.ListQuestionMetaData, error) {
+	// ① 和 ListQuestions 走同一套过滤条件和查询
+	filter := buildQuestionFilter(req)
+	filter.MetaOnly = true // 侧边栏只要 ID 和标题，不从库里取 content
+	list, total, err := data.FilterQuestions(ctx, filter)
+	if err != nil {
+		return model.ListQuestionMetaData{}, err
+	}
+
+	// ② 逐条转换，只取 ID 和标题，没有 content 所以也不用截断
+	questionMetaList := make([]model.QuestionMeta, 0, len(list)) // 用 make：没数据时返回 [] 而不是 null
+	for _, q := range list {
+		questionMetaList = append(questionMetaList, model.QuestionMeta{
+			QuestionID: q.QuestionID,
+			Title:      q.Title,
+		})
+	}
+
+	return model.ListQuestionMetaData{Total: total, List: questionMetaList}, nil
 }

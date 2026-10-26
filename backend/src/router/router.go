@@ -13,5 +13,6 @@ func RegisterRouter(r *gin.Engine) {
 
 	question := v1.Group("/question")
 	question.GET("/all/list", questionCtrl.GetAllQuestionList)
-	question.GET("list", questionCtrl.ListQuestions)
+	question.GET("/list", questionCtrl.ListQuestions)
+	question.GET("/meta/list", questionCtrl.ListQuestionsMeta)
 }

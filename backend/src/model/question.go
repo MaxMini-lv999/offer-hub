@@ -1,8 +1,5 @@
 package model
 
-// 复用ListQusetionReq
-type ListQuestionMetaReq = ListQuestionReq
-
 // ListQuestionReq GET /api/v1/question/list 题目列表请求
 type ListQuestionReq struct {
 	BankID     string   `json:"bank_id" form:"bank_id"`
@@ -51,7 +48,26 @@ type ListQuestionResp struct {
 	Data ListQuestionData `json:"data"`
 }
 
+// ListQuestionMetaReq GET /api/v1/question/meta/list 题目元数据列表请求，参数与题目列表相同
+type ListQuestionMetaReq = ListQuestionReq
+
+// QuestionMeta 题目元数据，只有 ID 和标题，用于题目导航侧边栏
 type QuestionMeta struct {
+	QuestionID string `json:"question_id"`
+	Title      string `json:"title"`
+}
+
+// ListQuestionMetaData 题目元数据列表响应 data
+type ListQuestionMetaData struct {
+	Total int64          `json:"total"`
+	List  []QuestionMeta `json:"list"`
+}
+
+// ListQuestionMetaResp GET /api/v1/question/meta/list 题目元数据列表响应
+type ListQuestionMetaResp struct {
+	Code int                  `json:"code"`
+	Msg  string               `json:"msg"`
+	Data ListQuestionMetaData `json:"data"`
 }
 
 // GetQuestionDetailReq GET /api/v1/question/detail 题目详情请求
