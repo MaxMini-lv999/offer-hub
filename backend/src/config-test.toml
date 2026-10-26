@@ -1,0 +1,32 @@
+[COMMON]
+port = 8180
+open_tls = false
+
+[MySQL]
+url = "127.0.0.1:3307"
+user = "root"
+pwd = "1234"
+db_name = "offer_hub"
+
+[MongoDB]
+url = "mongodb://127.0.0.1:27017"
+user = ""
+pwd = ""
+database = "offer_hub"
+max_pool = 100
+min_pool = 5
+
+[Redis]
+url = "127.0.0.1:6379"
+pwd = ""
+db = 0
+
+[JWT]
+secret = "change-me-in-test"
+expire = 24 # 小时
+enable = true
+
+[RateLimit]
+enable = true
+window_seconds = 60
+max_requests = 20
