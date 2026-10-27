@@ -4,7 +4,7 @@ import { QueryProvider } from '@/components/provider/query-provider'
 import { HomePage } from '@/pages/home'
 import { NotFoundPage } from '@/pages/not-found'
 import { QuestionCollectionsPage } from '@/pages/QuestionCollections'
-import { QuestionDetailPage } from '@/pages/question-detail'
+import { QuestionDetailPage } from '@/pages/QuestionDetail'
 import { QuestionsPage } from '@/pages/Questions'
 
 export default function App() {

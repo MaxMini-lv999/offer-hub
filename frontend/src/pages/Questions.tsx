@@ -1,20 +1,15 @@
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { createSearchParams, Link, useSearchParams } from 'react-router-dom'
 import { AlertCircle, ArrowLeft, ChevronLeft, ChevronRight, Eye, Search } from 'reicon-react'
 import { HotContent } from '@/components/HotContent'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DIFFICULTY_OPTIONS } from '@/constants/question'
 import { useQuestionBanks, useQuestionList } from '@/hooks/useQuestionQueries'
 import { cn } from '@/lib/utils'
 import type { Difficulty, Question, QuestionFilters } from '@/types/question'
 
 const PAGE_SIZE = 20
-
-const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; className: string }[] = [
-  { value: 1, label: '简单', className: 'text-green-600' },
-  { value: 2, label: '中等', className: 'text-amber-600' },
-  { value: 3, label: '困难', className: 'text-red-600' },
-]
 
 /** URL 里的 difficulty 只认 1/2/3，其他值当作不过滤 */
 function parseDifficulty(raw: string | null): Difficulty | undefined {
@@ -188,7 +183,7 @@ export function QuestionsPage() {
             {/* 翻页时先保留上一页数据，变淡提示正在加载 */}
             <ul className={cn('divide-y border transition-opacity', isPlaceholderData && 'opacity-60')}>
               {data.list.map((q) => (
-                <QuestionItem key={q.question_id} question={q} />
+                <QuestionItem key={q.question_id} question={q} bankId={bankId} />
               ))}
             </ul>
 
@@ -233,13 +228,17 @@ function KeywordSearch({ defaultValue, onSearch }: { defaultValue: string; onSea
   )
 }
 
-function QuestionItem({ question }: { question: Question }) {
+function QuestionItem({ question, bankId }: { question: Question; bankId?: string }) {
   const level = DIFFICULTY_OPTIONS.find((opt) => opt.value === question.difficulty)
 
   return (
     <li>
       <Link
-        to={`/questions/${question.question_id}`}
+        // 带上 bank_id，详情页侧边栏才能停在当前题库（一道题可能属于多个题库）
+        to={{
+          pathname: `/questions/${question.question_id}`,
+          search: bankId ? createSearchParams({ bank_id: bankId }).toString() : '',
+        }}
         className="block space-y-2 p-4 transition-colors hover:bg-accent"
       >
         <div className="flex items-start justify-between gap-4">
