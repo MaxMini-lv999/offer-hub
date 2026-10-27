@@ -11,5 +11,7 @@ backend/src/config-online.toml
 #系统文件
 .DS_Store
 
+CLAUDE.md
+
 #种子脚本依赖
 backend/testdata/node_modules/
