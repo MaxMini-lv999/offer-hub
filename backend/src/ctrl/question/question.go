@@ -1,6 +1,7 @@
 package question
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
@@ -23,7 +24,7 @@ func GetAllQuestionList(c *gin.Context) {
 	list, err := service.GetAllQuestionList(c.Request.Context(), &req)
 	if err != nil {
 		log.Printf("service.GetAllQuestionList: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{ // 此处具体情况具体分析，所以不用http.StatusOK
+		c.JSON(http.StatusInternalServerError, gin.H{ // 规范：code 为 500 时 HTTP 状态码也是 500，其余情况都是 200
 			"code": 500,
 			"msg":  "服务器内部错误",
 			"data": nil,
@@ -140,5 +141,43 @@ func ListQuestionsMeta(c *gin.Context) {
 		Code: 0,
 		Msg:  "success",
 		Data: list,
+	})
+}
+
+// GetQuestionDetail GET /api/v1/question/detail
+func GetQuestionDetail(c *gin.Context) {
+	var req model.GetQuestionDetailReq
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 400,
+			"msg":  "参数错误",
+			"data": nil,
+		})
+		return
+	}
+
+	detail, err := service.GetQuestionDetail(c.Request.Context(), &req)
+	if err != nil {
+		if errors.Is(err, service.ErrQuestionNotFound) {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 400,
+				"msg":  "题目不存在",
+				"data": nil,
+			})
+			return
+		}
+		log.Printf("service.GetQuestionDetail: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "服务器内部错误",
+			"data": nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.GetQuestionDetailResp{
+		Code: 0,
+		Msg:  "success",
+		Data: detail,
 	})
 }

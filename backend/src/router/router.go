@@ -15,4 +15,5 @@ func RegisterRouter(r *gin.Engine) {
 	question.GET("/all/list", questionCtrl.GetAllQuestionList)
 	question.GET("/list", questionCtrl.ListQuestions)
 	question.GET("/meta/list", questionCtrl.ListQuestionsMeta)
+	question.GET("/detail", questionCtrl.GetQuestionDetail)
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"offer-hub/data"
@@ -102,6 +103,27 @@ func buildQuestionFilter(req *model.ListQuestionReq) data.QuestionFilter {
 	}
 }
 
+// toOneQuestion 转换成响应需要的question数据
+func toOneQuestion(q *data.Question) model.OneQuestion {
+	return model.OneQuestion{
+		QuestionID:    q.QuestionID,
+		Title:         q.Title,
+		Content:       q.Content,
+		Vip:           q.VIP,
+		BankList:      q.BankList,
+		Difficulty:    q.Difficulty,
+		Tags:          q.Tags,
+		Status:        q.Status,
+		HotDegree:     q.HotDegree,
+		ViewCount:     q.ViewCount,
+		ThumbsUpCount: q.ThumbsUpCount,
+		DislikeCount:  q.DislikeCount,
+		Order:         q.Order,
+		CreateTime:    q.CreateTime.Local().Format(time.DateTime),
+		UpdateTime:    q.UpdateTime.Local().Format(time.DateTime),
+	}
+}
+
 // ListQuestions 分页查询题目列表。目前还没有登录，所有请求都按游客处理。
 func ListQuestions(ctx context.Context, req *model.ListQuestionReq) (model.ListQuestionData, error) {
 	// ① 把请求参数转成 data 层的查询条件，查出当前页和总数
@@ -114,25 +136,11 @@ func ListQuestions(ctx context.Context, req *model.ListQuestionReq) (model.ListQ
 	// ② 逐条转换
 	result := make([]model.OneQuestion, 0, len(list)) // 用 make：没数据时返回 [] 而不是 null
 	for _, q := range list {
-		result = append(result, model.OneQuestion{
-			QuestionID:    q.QuestionID,
-			Title:         q.Title,
-			Content:       truncate(q.Content, guestContentLimit), // 游客截断
-			Vip:           q.VIP,
-			BankList:      q.BankList,
-			Difficulty:    q.Difficulty,
-			Tags:          q.Tags,
-			Status:        q.Status,
-			HotDegree:     q.HotDegree,
-			ViewCount:     q.ViewCount,
-			ThumbsUpCount: q.ThumbsUpCount,
-			DislikeCount:  q.DislikeCount,
-			Order:         q.Order,
-			CreateTime:    q.CreateTime.Local().Format(time.DateTime),
-			UpdateTime:    q.UpdateTime.Local().Format(time.DateTime),
-			UserTag:       0,     // 游客：零值
-			UserLiked:     false, // 游客：零值
-		})
+		oneQuestion := toOneQuestion(&q)
+		oneQuestion.Content = truncate(oneQuestion.Content, guestContentLimit)
+		// oneQuestion.UserTag = 0
+		// oneQuestion.UserLiked = false 游客：零值
+		result = append(result, oneQuestion)
 	}
 
 	return model.ListQuestionData{Total: total, List: result}, nil
@@ -158,4 +166,24 @@ func ListQuestionsMeta(ctx context.Context, req *model.ListQuestionMetaReq) (mod
 	}
 
 	return model.ListQuestionMetaData{Total: total, List: questionMetaList}, nil
+}
+
+// ErrQuestionNotFound 题目不存在，ctrl 据此返回"题目不存在"
+var ErrQuestionNotFound = errors.New("question not found")
+
+// GetQuestionDetail 查询题目详情。目前还没有登录，所有请求都按游客处理：
+// user_tag / user_liked 返回零值；content 暂不截断，等鉴权模块完成后再加
+func GetQuestionDetail(ctx context.Context, req *model.GetQuestionDetailReq) (model.OneQuestion, error) {
+	detail, err := data.GetQuestionByID(ctx, req.QuestionID)
+	if err != nil {
+		if errors.Is(err, data.ErrQuestionNotFound) {
+			return model.OneQuestion{}, ErrQuestionNotFound
+		}
+		return model.OneQuestion{}, err
+	}
+	question := toOneQuestion(detail)
+	// question.UserLiked = false
+	// question.UserTag = 0 游客：零值
+
+	return question, nil
 }

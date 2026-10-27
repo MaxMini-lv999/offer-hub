@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"time"
@@ -208,4 +209,22 @@ func FilterQuestions(ctx context.Context, f QuestionFilter) ([]Question, int64, 
 		return nil, 0, fmt.Errorf("decode FilterQuestions : %w", err)
 	}
 	return list, total, nil
+}
+
+// ErrQuestionNotFound 题目不存在（包括已隐藏、已删除的题）
+var ErrQuestionNotFound = errors.New("question not found")
+
+// GetQuestionByID 按 question_id 查询一道正常状态的题目，查不到时返回 ErrQuestionNotFound
+func GetQuestionByID(ctx context.Context, questionID string) (*Question, error) {
+	coll := GetData().MongoDB.Collection("question")
+	filter := bson.M{"question_id": questionID, "status": QuestionStatusNormal}
+
+	var detail Question
+	if err := coll.FindOne(ctx, filter).Decode(&detail); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, ErrQuestionNotFound
+		}
+		return nil, fmt.Errorf("find question %s GetQuestionByID: %w", questionID, err)
+	}
+	return &detail, nil
 }
