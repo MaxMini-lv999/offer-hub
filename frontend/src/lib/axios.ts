@@ -6,6 +6,8 @@ const http = axios.create({
   // 空字符串：请求发到当前域名，开发时由 Vite 把 /api 代理到后端
   baseURL: '',
   timeout: 10_000,
+  // 数组参数序列化成 tags=a&tags=b；axios 默认的 tags[]=a 绑定不到 Gin 的 form:"tags"
+  paramsSerializer: { indexes: null },
 })
 
 http.interceptors.request.use((config) => {

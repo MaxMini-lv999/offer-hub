@@ -3,8 +3,9 @@ import { Layout } from '@/components/layout'
 import { QueryProvider } from '@/components/provider/query-provider'
 import { HomePage } from '@/pages/home'
 import { NotFoundPage } from '@/pages/not-found'
+import { QuestionCollectionsPage } from '@/pages/QuestionCollections'
 import { QuestionDetailPage } from '@/pages/question-detail'
-import { QuestionsPage } from '@/pages/questions'
+import { QuestionsPage } from '@/pages/Questions'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
+            <Route path="/collections" element={<QuestionCollectionsPage />} />
             <Route path="/questions" element={<QuestionsPage />} />
             <Route path="/questions/:id" element={<QuestionDetailPage />} />
             <Route path="*" element={<NotFoundPage />} />

@@ -23,8 +23,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    /* Path alias */
-    "baseUrl": ".",
+    /* Path alias（paths 相对本文件解析，不需要 baseUrl，TS 6 起 baseUrl 已弃用） */
     "paths": {
       "@/*": ["./src/*"]
     }
