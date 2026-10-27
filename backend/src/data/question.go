@@ -228,3 +228,34 @@ func GetQuestionByID(ctx context.Context, questionID string) (*Question, error) 
 	}
 	return &detail, nil
 }
+
+// ListHotQuestions 按 hot_degree 降序查询前 limit 道正常状态的题目，jobName 为空时不按职位过滤，
+// 只取 question_id / bank_list / title / view_count。调用方保证 limit > 0（MongoDB 里 limit 为 0 表示不限制）
+func ListHotQuestions(ctx context.Context, jobName string, limit int64) ([]Question, error) {
+	coll := GetData().MongoDB.Collection("question")
+	filter := bson.M{"status": QuestionStatusNormal}
+	if jobName != "" {
+		filter["job_name"] = jobName
+	}
+	opts := options.Find().
+		SetSort(bson.D{{Key: "hot_degree", Value: -1}, {Key: "_id", Value: 1}}).
+		SetLimit(limit).
+		SetProjection(bson.M{
+			"question_id": 1,
+			"bank_list":   1,
+			"title":       1,
+			"view_count":  1,
+			"_id":         0,
+		})
+
+	cur, err := coll.Find(ctx, filter, opts)
+	if err != nil {
+		return []Question{}, fmt.Errorf("find ListHotQuestions %s热门题目查询error: %w", jobName, err)
+	}
+
+	var list []Question
+	if err := cur.All(ctx, &list); err != nil {
+		return []Question{}, fmt.Errorf("decode ListHotQuestions: %w", err)
+	}
+	return list, nil
+}

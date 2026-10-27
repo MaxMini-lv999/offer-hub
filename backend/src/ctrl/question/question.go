@@ -144,7 +144,7 @@ func ListQuestionsMeta(c *gin.Context) {
 	})
 }
 
-// GetQuestionDetail GET /api/v1/question/detail
+// GetQuestionDetail GET /api/v1/question/detail 题目详情
 func GetQuestionDetail(c *gin.Context) {
 	var req model.GetQuestionDetailReq
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -179,5 +179,42 @@ func GetQuestionDetail(c *gin.Context) {
 		Code: 0,
 		Msg:  "success",
 		Data: detail,
+	})
+}
+
+// GetHotQuestions GET /api/v1/question/hot/list 热门题目列表
+func GetHotQuestions(c *gin.Context) {
+	var req model.GetHotQuestionListReq
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 400,
+			"msg":  "参数错误",
+			"data": nil,
+		})
+		return
+	}
+
+	// 补默认值；上限 50，防止公开接口一次拉走全部题目
+	if req.Limit <= 0 {
+		req.Limit = 10
+	}
+	if req.Limit > 50 {
+		req.Limit = 50
+	}
+
+	list, err := service.GetHotQuestions(c.Request.Context(), &req)
+	if err != nil {
+		log.Printf("service.GetHotQuestions: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "服务器内部错误",
+			"data": nil,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, model.GetHotQuestionListResp{
+		Code: 0,
+		Msg:  "success",
+		Data: list,
 	})
 }

@@ -82,6 +82,12 @@ type GetQuestionDetailResp struct {
 	Data OneQuestion `json:"data"`
 }
 
+// GetHotQuestionListReq GET /api/v1/question/hot/list 热门题目列表请求
+type GetHotQuestionListReq struct {
+	Limit   int64  `json:"limit" form:"limit"`       // 默认 10，最大 50
+	JobName string `json:"job_name" form:"job_name"` // 职位方向，不传则不过滤
+}
+
 // HotQuestionInfo 热门题目信息
 type HotQuestionInfo struct {
 	QuestionID string   `json:"question_id"`

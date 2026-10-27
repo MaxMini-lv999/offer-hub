@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"offer-hub/data"
@@ -103,7 +104,8 @@ func buildQuestionFilter(req *model.ListQuestionReq) data.QuestionFilter {
 	}
 }
 
-// toOneQuestion 转换成响应需要的question数据
+// toOneQuestion 把 data 层的题目转成响应里的 OneQuestion，list 和 detail 共用。
+// 只做字段搬运和时间格式化；content 截断、UserTag / UserLiked 由调用方按登录状态处理
 func toOneQuestion(q *data.Question) model.OneQuestion {
 	return model.OneQuestion{
 		QuestionID:    q.QuestionID,
@@ -138,8 +140,7 @@ func ListQuestions(ctx context.Context, req *model.ListQuestionReq) (model.ListQ
 	for _, q := range list {
 		oneQuestion := toOneQuestion(&q)
 		oneQuestion.Content = truncate(oneQuestion.Content, guestContentLimit)
-		// oneQuestion.UserTag = 0
-		// oneQuestion.UserLiked = false 游客：零值
+		// 游客：UserTag / UserLiked 保持零值
 		result = append(result, oneQuestion)
 	}
 
@@ -182,8 +183,27 @@ func GetQuestionDetail(ctx context.Context, req *model.GetQuestionDetailReq) (mo
 		return model.OneQuestion{}, err
 	}
 	question := toOneQuestion(detail)
-	// question.UserLiked = false
-	// question.UserTag = 0 游客：零值
+	// 游客：UserTag / UserLiked 保持零值
 
 	return question, nil
+}
+
+// GetHotQuestions 查询热门题目列表（按 hot_degree 降序），可按职位方向过滤
+func GetHotQuestions(ctx context.Context, req *model.GetHotQuestionListReq) (model.GetHotQuestionListData, error) {
+	questionList, err := data.ListHotQuestions(ctx, req.JobName, req.Limit)
+	if err != nil {
+		return model.GetHotQuestionListData{}, fmt.Errorf("find GetHotQuestions: %w", err)
+	}
+
+	result := make([]model.HotQuestionInfo, 0, len(questionList))
+	for _, q := range questionList {
+		result = append(result, model.HotQuestionInfo{
+			QuestionID: q.QuestionID,
+			BankList:   q.BankList,
+			Title:      q.Title,
+			ViewCount:  q.ViewCount,
+		})
+	}
+
+	return model.GetHotQuestionListData{List: result}, nil
 }
