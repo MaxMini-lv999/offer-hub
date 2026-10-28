@@ -2,15 +2,20 @@ import { useEffect, useState } from 'react'
 import { Search } from 'reicon-react'
 import { Input } from '@/components/ui/input'
 
-/** 搜索框：停止输入 300ms 后自动搜索，回车立即搜索。value 是已生效的关键词（URL 或父组件里的） */
+/**
+ * 搜索框：停止输入 300ms 后自动搜索，回车立即搜索。value 是已生效的关键词（URL 或父组件里的）。
+ * auto 为 false 时只在回车时搜索，用于搜索会跳页的地方（首页），免得输入到一半就被跳走
+ */
 export function SearchBox({
   value,
   onSearch,
   placeholder,
+  auto = true,
 }: {
   value: string
   onSearch: (keyword: string) => void
   placeholder: string
+  auto?: boolean
 }) {
   const [text, setText] = useState(value)
   const [syncedValue, setSyncedValue] = useState(value)
@@ -24,10 +29,10 @@ export function SearchBox({
 
   useEffect(() => {
     const keyword = text.trim()
-    if (keyword === value) return
+    if (!auto || keyword === value) return
     const timer = setTimeout(() => onSearch(keyword), 300)
     return () => clearTimeout(timer)
-  }, [text, value, onSearch])
+  }, [text, value, onSearch, auto])
 
   return (
     <form

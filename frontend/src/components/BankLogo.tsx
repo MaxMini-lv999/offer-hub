@@ -19,20 +19,21 @@ const BANK_ICONS: ({ pattern: RegExp } & ({ brand: BrandName } | { icon: typeof 
   { pattern: /prompt|提示词/i, icon: Magicpen },
 ]
 
-/** 品牌 logo 渲染成单色：主体用前景色，soft 用次级灰，cut 用方框底色当镂空 */
+/** 品牌 logo 用品牌色：主体用 color，soft 用 softColor，cut 用方框底色当镂空。没有品牌的图标仍是前景色 */
 function BrandSvg({ name }: { name: BrandName }) {
   const icon: BrandIcon = BRAND_ICONS[name]
   const size = `${icon.scale ?? 50}%`
 
   return (
-    <svg viewBox={icon.viewBox} width={size} height={size} fill="currentColor" aria-hidden>
+    <svg viewBox={icon.viewBox} width={size} height={size} fill={icon.color} aria-hidden>
       {icon.paths.map((path, i) => (
         <path
           key={i}
           d={path.d}
           transform={path.transform}
           fillRule={path.evenOdd ? 'evenodd' : undefined}
-          className={cn(path.tone === 'soft' && 'fill-muted-foreground', path.tone === 'cut' && 'fill-muted')}
+          fill={path.tone === 'soft' ? (icon.softColor ?? icon.color) : undefined}
+          className={cn(path.tone === 'cut' && 'fill-muted')}
         />
       ))}
     </svg>
