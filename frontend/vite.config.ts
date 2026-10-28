@@ -12,6 +12,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // 基础库单独打包：体积大、很少变，业务代码改了也能继续用浏览器缓存
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
+        },
+      },
+    },
+  },
   server: {
     port: 3001,
     // 开发时把后端接口转发到 Go 后端，避免跨域

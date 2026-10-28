@@ -1,67 +1,81 @@
 import { Link } from 'react-router-dom'
-import { AlertCircle, Eye, Fire } from 'reicon-react'
+import { Fire } from 'reicon-react'
+import { EmptyState, ErrorState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useHotQuestions } from '@/hooks/useQuestionQueries'
 import { cn } from '@/lib/utils'
+import { questionPath } from '@/utils/route'
 
-/** 热门题目模块，首页和题目列表页共用，点击题目进入详情 */
-export function HotContent({ limit = 10 }: { limit?: number }) {
-  const { data, isPending, isError, error, refetch } = useHotQuestions({ limit })
+const HOT_LIMIT = 10
+
+/**
+ * 热门题目前 10 条，题库页和全部题目页的侧栏共用，点击进入详情。
+ * jobName 为空时取全站热门；enabled 为 false 时（职位方向还没查出来）先显示骨架。
+ * bankId 是当前题库：热门题目也属于它时，链接带上它，详情页左侧就停在这个题库
+ */
+export function HotContent({ jobName, bankId, enabled = true }: { jobName?: string; bankId?: string; enabled?: boolean }) {
+  const { data, isPending, isError, error, refetch } = useHotQuestions({ limit: HOT_LIMIT, job_name: jobName }, enabled)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Fire size={20} className="text-orange-500" />
-          热门题目
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isPending && <p className="text-sm text-muted-foreground">加载中...</p>}
+    <section aria-labelledby="hot-title" className="border">
+      <h2 id="hot-title" className="flex items-center gap-2 border-b px-4 py-3 text-heading font-semibold">
+        <Fire size={20} />
+        热门题目
+      </h2>
 
-        {isError && (
-          <div className="flex flex-wrap items-center gap-3 text-sm text-destructive">
-            <AlertCircle size={18} />
-            <span>{error.message}</span>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              重试
+      {isPending && <HotSkeleton />}
+
+      {isError && <ErrorState message={error.message} onRetry={() => refetch()} className="border-0" />}
+
+      {data && data.list.length === 0 && (
+        <EmptyState
+          icon={<Fire size={32} />}
+          title="暂无热门题目"
+          className="border-0"
+          action={
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/questions">浏览全部题目</Link>
             </Button>
-          </div>
-        )}
+          }
+        />
+      )}
 
-        {data && data.list.length === 0 && (
-          <p className="text-sm text-muted-foreground">暂无热门题目</p>
-        )}
-
-        {data && data.list.length > 0 && (
-          <ol className="divide-y">
-            {data.list.map((q, index) => (
-              <li key={q.question_id}>
-                <Link
-                  to={`/questions/${q.question_id}`}
-                  className="flex items-center gap-3 py-3 text-sm transition-colors hover:text-primary"
+      {data && data.list.length > 0 && (
+        <ol className="divide-y">
+          {data.list.map((q, index) => (
+            <li key={q.question_id}>
+              <Link
+                to={questionPath(q.question_id, bankId && q.bank_list.includes(bankId) ? bankId : q.bank_list[0])}
+                className="flex gap-3 px-4 py-3 transition-colors hover:bg-muted"
+              >
+                {/* 前三名加粗 */}
+                <span
+                  className={cn(
+                    'w-5 shrink-0 text-right tabular-nums',
+                    index < 3 ? 'font-bold text-foreground' : 'text-muted-foreground',
+                  )}
                 >
-                  {/* 前三名高亮 */}
-                  <span
-                    className={cn(
-                      'w-5 shrink-0 text-center font-semibold',
-                      index < 3 ? 'text-orange-500' : 'text-muted-foreground',
-                    )}
-                  >
-                    {index + 1}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate">{q.title}</span>
-                  <span className="flex shrink-0 items-center gap-1 text-muted-foreground">
-                    <Eye size={14} />
-                    {q.view_count}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ol>
-        )}
-      </CardContent>
-    </Card>
+                  {index + 1}
+                </span>
+                <span className="line-clamp-2 min-w-0 flex-1">{q.title}</span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  )
+}
+
+function HotSkeleton() {
+  return (
+    <div className="animate-pulse divide-y" aria-hidden>
+      {Array.from({ length: HOT_LIMIT }, (_, i) => (
+        <div key={i} className="flex gap-3 px-4 py-3">
+          <div className="h-6 w-5 shrink-0 bg-muted" />
+          <div className={cn('h-6 bg-muted', i % 3 === 0 ? 'w-full' : i % 3 === 1 ? 'w-4/5' : 'w-3/5')} />
+        </div>
+      ))}
+    </div>
   )
 }

@@ -1,6 +1,11 @@
 import axios, { type AxiosError } from 'axios'
 
-const TOKEN_KEY = 'token'
+export const TOKEN_KEY = 'token'
+
+/** 本地有 token 就当作已登录；token 是否过期由后端判断，失效时响应拦截器会清掉它 */
+export function hasToken() {
+  return !!localStorage.getItem(TOKEN_KEY)
+}
 
 const http = axios.create({
   // 空字符串：请求发到当前域名，开发时由 Vite 把 /api 代理到后端

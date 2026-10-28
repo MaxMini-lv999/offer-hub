@@ -4,6 +4,16 @@ export default {
     content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'system-ui', 'sans-serif']
+  		},
+  		// 全站只用这四级字号：页面标题 / 区块标题 / 正文 / 辅助信息
+  		fontSize: {
+  			title: ['28px', { lineHeight: '1.3' }],
+  			heading: ['20px', { lineHeight: '1.4' }],
+  			body: ['15px', { lineHeight: '1.7' }],
+  			meta: ['13px', { lineHeight: '1.5' }]
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

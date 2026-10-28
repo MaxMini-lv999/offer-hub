@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import {
   getAllQuestionList,
   getHotQuestionList,
@@ -6,7 +6,10 @@ import {
   getQuestionList,
   getQuestionMetaList,
 } from '@/services/question'
-import type { HotQuestionListParams, QuestionFilters } from '@/types/question'
+import type { HotQuestionListParams, JobQuestionGroup, QuestionBank, QuestionFilters } from '@/types/question'
+
+/** 题目导航列表每页条数，等于后端 page_size 上限 */
+const NAV_PAGE_SIZE = 100
 
 /** 题目模块的 query key，按层级组织，invalidateQueries 传前缀即可批量失效（如 lists() 失效所有分页） */
 export const queryKeys = {
@@ -25,6 +28,26 @@ export function useQuestionBanks(jobName?: string) {
   return useQuery({
     queryKey: queryKeys.banks(jobName),
     queryFn: () => getAllQuestionList({ job_name: jobName }),
+  })
+}
+
+/** 在全量列表里按 bankId 找题库，连同它所属的职位方向一起返回；找不到时为 null */
+function findBank(groups: JobQuestionGroup[], bankId: string): { bank: QuestionBank; jobName: string } | null {
+  for (const group of groups) {
+    for (const series of group.series_list) {
+      const bank = series.bank_list.find((b) => b.bank_id === bankId)
+      if (bank) return { bank, jobName: group.job_name }
+    }
+  }
+  return null
+}
+
+/** 单个题库的信息和职位方向。和首页的 useQuestionBanks() 共用同一份缓存，从首页进来不会多发请求 */
+export function useBankInfo(bankId: string) {
+  return useQuery({
+    queryKey: queryKeys.banks(undefined),
+    queryFn: () => getAllQuestionList({ job_name: undefined }),
+    select: (groups) => findBank(groups, bankId),
   })
 }
 
@@ -47,20 +70,26 @@ export function useQuestionDetail(questionId: string, enabled: boolean = true) {
   })
 }
 
-/** 题库下的题目导航列表（只有 ID 和标题），bankId 为空时不发请求 */
+/** 题库下的题目导航列表（只有 ID 和标题），一页 100 条，滚动到底再取下一页；bankId 为空时不发请求 */
 export function useBankQuestionList(bankId: string, keyword?: string, enabled: boolean = true) {
-  return useQuery({
-    queryKey: queryKeys.bankList(bankId, keyword),
-    // 侧边栏要展示整个题库，按后端上限 100 一次取完
-    queryFn: () => getQuestionMetaList({ bank_id: bankId, keyword, page_size: 100 }),
+  // 空字符串和 undefined 归一，侧边栏没搜索时和「上一题 / 下一题」共用同一份缓存
+  const kw = keyword || undefined
+  return useInfiniteQuery({
+    queryKey: queryKeys.bankList(bankId, kw),
+    queryFn: ({ pageParam }) =>
+      getQuestionMetaList({ bank_id: bankId, keyword: kw, page: pageParam, page_size: NAV_PAGE_SIZE }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) =>
+      allPages.length * NAV_PAGE_SIZE < lastPage.total ? allPages.length + 1 : undefined,
     enabled: enabled && !!bankId,
   })
 }
 
 /** 热门题目列表 */
-export function useHotQuestions(params?: HotQuestionListParams) {
+export function useHotQuestions(params?: HotQuestionListParams, enabled: boolean = true) {
   return useQuery({
     queryKey: queryKeys.hot(params),
     queryFn: () => getHotQuestionList(params),
+    enabled,
   })
 }
