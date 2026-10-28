@@ -1,27 +1,33 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Clock, Eye, FileText, Menu, ThumbsUp } from 'reicon-react'
+import { ChevronLeft, ChevronRight, Clock, Eye, FileText, Menu, Teacher, ThumbsUp } from 'reicon-react'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
+import { InterviewMode } from '@/components/InterviewMode'
 import { Markdown } from '@/components/Markdown'
 import { QuestionNav, QuestionNavSkeleton } from '@/components/QuestionNav'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { GUEST_CONTENT_LIMIT } from '@/constants/question'
-import { useBankQuestionList, useQuestionDetail } from '@/hooks/useQuestionQueries'
+import { useNeighbors } from '@/hooks/useNeighbors'
+import { useQuestionDetail } from '@/hooks/useQuestionQueries'
 import { hasToken } from '@/lib/axios'
+import { MASTERY_LABELS, recordVisit, useProgress } from '@/lib/progress'
 import { ApiError } from '@/lib/request'
 import { cn } from '@/lib/utils'
 import type { Question } from '@/types/question'
 import { bankPath, questionPath } from '@/utils/route'
 
 /**
- * 题目详情：左侧题目栏（桌面端固定 280px，手机端收进抽屉）+ 右侧正文。
+ * 题目详情，两种模式，用 URL 的 mode 参数切换：
+ * 阅读模式（默认）是左侧题目栏（桌面端固定 280px，手机端收进抽屉）+ 右侧正文；
+ * 模拟面试模式（mode=interview）是 VN 舞台，面试官念题、逐段讲解析。
  * 切题只改 URL 里的 questionId，这个组件和左侧题目栏都不重新挂载
  */
 export function QuestionDetailPage() {
   const { questionId = '' } = useParams<{ questionId: string }>()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const interview = searchParams.get('mode') === 'interview'
   const { data: question, isPending, isError, error, refetch } = useQuestionDetail(questionId)
 
   // 左侧题目栏的搜索词放在这里：手机端抽屉关掉再打开，搜索词还在
@@ -34,6 +40,57 @@ export function QuestionDetailPage() {
 
   // 后端题目不存在（含隐藏、删除）时返回 HTTP 200 + code 400
   const notFound = isError && error instanceof ApiError && error.code === 400
+  // 游客拿到的 content 被后端截断到 150 字；满 150 字说明后面还有内容
+  const truncated = !!question && !hasToken() && [...question.content].length >= GUEST_CONTENT_LIMIT
+
+  // 记进本机的「最近浏览」，首页「继续上次」用
+  useEffect(() => {
+    if (question) recordVisit({ id: question.question_id, title: question.title, bankId: bankId || undefined })
+  }, [question, bankId])
+
+  function setInterview(on: boolean) {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        if (on) next.set('mode', 'interview')
+        else next.delete('mode')
+        return next
+      },
+      { preventScrollReset: true },
+    )
+  }
+
+  const notFoundState = notFound && (
+    <EmptyState
+      icon={<FileText size={32} />}
+      title="题目不存在或已下线"
+      action={
+        <Button variant="outline" size="sm" asChild>
+          <Link to={bankId ? bankPath(bankId) : '/'}>{bankId ? '返回题库' : '返回首页'}</Link>
+        </Button>
+      }
+    />
+  )
+  const errorState = isError && !notFound && <ErrorState message={error.message} onRetry={() => refetch()} />
+
+  if (interview) {
+    return (
+      <>
+        {isPending && <div aria-hidden className="h-[calc(100dvh-13rem)] min-h-[460px] animate-pulse border bg-muted" />}
+        {notFoundState}
+        {errorState}
+        {question && (
+          <InterviewMode
+            key={question.question_id}
+            question={question}
+            bankId={bankId}
+            truncated={truncated}
+            onExit={() => setInterview(false)}
+          />
+        )}
+      </>
+    )
+  }
 
   function renderNav(className?: string, onNavigate?: () => void) {
     if (bankId) {
@@ -87,36 +144,50 @@ export function QuestionDetailPage() {
 
         {isPending && <DetailSkeleton />}
 
-        {notFound && (
-          <EmptyState
-            icon={<FileText size={32} />}
-            title="题目不存在或已下线"
-            action={
-              <Button variant="outline" size="sm" asChild>
-                <Link to={bankId ? bankPath(bankId) : '/'}>{bankId ? '返回题库' : '返回首页'}</Link>
-              </Button>
-            }
+        {notFoundState}
+        {errorState}
+
+        {question && (
+          <QuestionArticle
+            question={question}
+            bankId={bankId}
+            truncated={truncated}
+            onInterview={() => setInterview(true)}
           />
         )}
-
-        {isError && !notFound && <ErrorState message={error.message} onRetry={() => refetch()} />}
-
-        {question && <QuestionArticle question={question} bankId={bankId} />}
       </div>
     </div>
   )
 }
 
-function QuestionArticle({ question, bankId }: { question: Question; bankId: string }) {
-  // 游客拿到的 content 被后端截断到 150 字；满 150 字说明后面还有内容，加渐隐遮罩和登录入口
-  const truncated = !hasToken() && [...question.content].length >= GUEST_CONTENT_LIMIT
+function QuestionArticle({
+  question,
+  bankId,
+  truncated,
+  onInterview,
+}: {
+  question: Question
+  bankId: string
+  /** 内容被截断时加渐隐遮罩和登录入口 */
+  truncated: boolean
+  onInterview: () => void
+}) {
+  const { mastery } = useProgress()
+  const mark = mastery[question.question_id]
 
   return (
     <article className="max-w-[72ch]">
       <header className="border-b pb-4">
-        <h1 className="text-title font-semibold">{question.title}</h1>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+          <h1 className="font-title text-title font-semibold">{question.title}</h1>
+          <Button variant="outline" onClick={onInterview} className="shrink-0 self-start">
+            <Teacher />
+            模拟面试
+          </Button>
+        </div>
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-meta text-muted-foreground">
           <DifficultyLabel difficulty={question.difficulty} />
+          {mark && <span className="border border-brand px-2 text-brand">本机标记：{MASTERY_LABELS[mark]}</span>}
           {question.tags.length > 0 && (
             <span className="flex flex-wrap gap-2">
               {question.tags.map((tag) => (
@@ -165,20 +236,10 @@ function QuestionArticle({ question, bankId }: { question: Question; bankId: str
   )
 }
 
-/** 上一题 / 下一题，按题库内的默认顺序；和左侧题目栏（未搜索时）共用同一份数据 */
+/** 上一题 / 下一题，按题库内的默认顺序 */
 function PrevNextNav({ bankId, currentId }: { bankId: string; currentId: string }) {
-  const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useBankQuestionList(bankId)
-  const list = data?.pages.flatMap((page) => page.list) ?? []
-  const index = list.findIndex((q) => q.question_id === currentId)
-
-  // 当前题目排在已加载的页之后（题库超过 100 题）时，接着取下一页直到找到它
-  useEffect(() => {
-    if (data && index === -1 && hasNextPage && !isFetchingNextPage) fetchNextPage()
-  }, [data, index, hasNextPage, isFetchingNextPage, fetchNextPage])
-
-  if (index === -1) return null
-  const prev = list[index - 1]
-  const next = list[index + 1]
+  const { found, prev, next } = useNeighbors(bankId, currentId)
+  if (!found) return null
 
   return (
     <nav aria-label="上一题和下一题" className="mt-12 grid grid-cols-2 gap-4 border-t pt-6">

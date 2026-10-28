@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { Layout } from '@/components/layout'
 import { QueryProvider } from '@/components/provider/query-provider'
+import { RouteLoading } from '@/components/RouteLoading'
 import { ErrorPage } from '@/pages/ErrorPage'
 import { HomePage } from '@/pages/home'
 import { NotFoundPage } from '@/pages/not-found'
@@ -23,8 +24,8 @@ const router = createBrowserRouter(
         {
           // 页面出错时在布局里显示出错页，导航栏和页脚保留
           errorElement: <ErrorPage />,
-          // 直接打开按需加载的页面时，代码下载完之前内容区先留空，导航栏和页脚照常显示
-          hydrateFallbackElement: <div aria-busy className="min-h-[60vh]" />,
+          // 直接打开按需加载的页面时，代码下载完之前内容区显示加载插画（300ms 后才淡入），导航栏和页脚照常显示
+          hydrateFallbackElement: <RouteLoading />,
           children: [
             { index: true, element: <HomePage /> },
             { path: 'bank/:bankId', element: <QuestionBankPage /> },

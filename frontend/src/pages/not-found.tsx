@@ -1,16 +1,19 @@
-import { Link } from 'react-router-dom'
-import { SearchStatus } from 'reicon-react'
-import { Button } from '@/components/ui/button'
+import { useNavigate } from 'react-router-dom'
+import { StageNotice } from '@/components/vn/StageNotice'
 
 export function NotFoundPage() {
+  const navigate = useNavigate()
+
   return (
-    <div className="flex flex-col items-center gap-4 py-24 text-center">
-      <SearchStatus size={40} className="text-muted-foreground" />
-      <h1 className="text-title font-semibold">404</h1>
-      <p className="text-muted-foreground">页面不存在，可能链接有误或内容已下线。</p>
-      <Button asChild>
-        <Link to="/">返回首页</Link>
-      </Button>
-    </div>
+    <StageNotice
+      code="404"
+      title="页面不存在"
+      line="唔……这一页不在档案里。可能是链接写错了，或者内容已经下线了。"
+      choices={[
+        { label: '返回首页', onSelect: () => navigate('/') },
+        { label: '浏览全部题目', onSelect: () => navigate('/questions') },
+        { label: '回到上一页', onSelect: () => navigate(-1) },
+      ]}
+    />
   )
 }

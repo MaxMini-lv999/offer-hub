@@ -17,8 +17,8 @@ export function HotContent({ jobName, bankId, enabled = true }: { jobName?: stri
   const { data, isPending, isError, error, refetch } = useHotQuestions({ limit: HOT_LIMIT, job_name: jobName }, enabled)
 
   return (
-    <section aria-labelledby="hot-title" className="border">
-      <h2 id="hot-title" className="flex items-center gap-2 border-b px-4 py-3 text-heading font-semibold">
+    <section aria-labelledby="hot-title" className="border border-foreground">
+      <h2 id="hot-title" className="flex items-center gap-2 border-b px-4 py-3 font-title text-heading font-semibold">
         <Fire size={20} />
         热门题目
       </h2>

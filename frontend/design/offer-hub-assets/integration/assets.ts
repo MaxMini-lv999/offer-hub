@@ -1,0 +1,1106 @@
+// Generated asset registry. Put the package under public/offer-hub-assets/.
+export const assets = [
+  {
+    "id": "deepseek",
+    "title": "澜汐 · 算法面试官",
+    "category": "characters",
+    "description": "蓝鲸、深海蓝与银色天文仪，算法与推理面试官",
+    "transparent": true,
+    "original": {
+      "src": "originals/deepseek.png",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2678880
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/lanxi.webp",
+        "width": 672,
+        "height": 1008,
+        "bytes": 141480,
+        "quality": 72,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/lanxi.webp",
+        "width": 400,
+        "height": 600,
+        "bytes": 69780,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "gpt",
+    "title": "绫序 · 系统设计面试官",
+    "category": "characters",
+    "description": "银白编发、编织环结与象牙黑礼装，系统设计面试官",
+    "transparent": true,
+    "original": {
+      "src": "originals/gpt.png",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2757269
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/lingxu.webp",
+        "width": 672,
+        "height": 1008,
+        "bytes": 146444,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/lingxu.webp",
+        "width": 400,
+        "height": 600,
+        "bytes": 65094,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "claude",
+    "title": "曦文 · 工程表达面试官",
+    "category": "characters",
+    "description": "暖铜长发、放射纹与书卷，表达与工程讨论面试官",
+    "transparent": true,
+    "original": {
+      "src": "originals/claude.png",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2772657
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/xiwen.webp",
+        "width": 672,
+        "height": 1008,
+        "bytes": 139120,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/xiwen.webp",
+        "width": 400,
+        "height": 600,
+        "bytes": 62104,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "gemini",
+    "title": "星澈 · 创意面试官",
+    "category": "characters",
+    "description": "蓝紫渐变、四芒星与星图，多模态与创意面试官",
+    "transparent": true,
+    "original": {
+      "src": "originals/gemini.png",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 3062292
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/xingche.webp",
+        "width": 588,
+        "height": 882,
+        "bytes": 145988,
+        "quality": 72,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/xingche.webp",
+        "width": 400,
+        "height": 600,
+        "bytes": 87774,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "deepseek_expressions",
+    "title": "澜汐 · 六表情",
+    "category": "atlases",
+    "description": "倾听 / 讲解 / 思考 / 鼓励 / 疑惑 / 庆祝",
+    "transparent": true,
+    "original": {
+      "src": "originals/deepseek-expressions.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3275679
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/lanxi-expressions.webp",
+        "width": 768,
+        "height": 512,
+        "bytes": 140678,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/lanxi-expressions.webp",
+        "width": 576,
+        "height": 384,
+        "bytes": 90004,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    },
+    "atlas": {
+      "columns": 3,
+      "rows": 2,
+      "frames": [
+        {
+          "name": "neutral",
+          "index": 0,
+          "column": 0,
+          "row": 0,
+          "backgroundPosition": "0% 0%",
+          "originalRect": {
+            "x": 0,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "speaking",
+          "index": 1,
+          "column": 1,
+          "row": 0,
+          "backgroundPosition": "50% 0%",
+          "originalRect": {
+            "x": 512,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "thinking",
+          "index": 2,
+          "column": 2,
+          "row": 0,
+          "backgroundPosition": "100% 0%",
+          "originalRect": {
+            "x": 1024,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "encouraging",
+          "index": 3,
+          "column": 0,
+          "row": 1,
+          "backgroundPosition": "0% 100%",
+          "originalRect": {
+            "x": 0,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "puzzled",
+          "index": 4,
+          "column": 1,
+          "row": 1,
+          "backgroundPosition": "50% 100%",
+          "originalRect": {
+            "x": 512,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "celebrating",
+          "index": 5,
+          "column": 2,
+          "row": 1,
+          "backgroundPosition": "100% 100%",
+          "originalRect": {
+            "x": 1024,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "gpt_expressions",
+    "title": "绫序 · 六表情",
+    "category": "atlases",
+    "description": "倾听 / 讲解 / 思考 / 鼓励 / 疑惑 / 庆祝",
+    "transparent": true,
+    "original": {
+      "src": "originals/gpt-expressions.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3098257
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/lingxu-expressions.webp",
+        "width": 768,
+        "height": 512,
+        "bytes": 116776,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/lingxu-expressions.webp",
+        "width": 576,
+        "height": 384,
+        "bytes": 74158,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    },
+    "atlas": {
+      "columns": 3,
+      "rows": 2,
+      "frames": [
+        {
+          "name": "neutral",
+          "index": 0,
+          "column": 0,
+          "row": 0,
+          "backgroundPosition": "0% 0%",
+          "originalRect": {
+            "x": 0,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "speaking",
+          "index": 1,
+          "column": 1,
+          "row": 0,
+          "backgroundPosition": "50% 0%",
+          "originalRect": {
+            "x": 512,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "thinking",
+          "index": 2,
+          "column": 2,
+          "row": 0,
+          "backgroundPosition": "100% 0%",
+          "originalRect": {
+            "x": 1024,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "encouraging",
+          "index": 3,
+          "column": 0,
+          "row": 1,
+          "backgroundPosition": "0% 100%",
+          "originalRect": {
+            "x": 0,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "puzzled",
+          "index": 4,
+          "column": 1,
+          "row": 1,
+          "backgroundPosition": "50% 100%",
+          "originalRect": {
+            "x": 512,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "celebrating",
+          "index": 5,
+          "column": 2,
+          "row": 1,
+          "backgroundPosition": "100% 100%",
+          "originalRect": {
+            "x": 1024,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "claude_expressions",
+    "title": "曦文 · 六表情",
+    "category": "atlases",
+    "description": "倾听 / 讲解 / 思考 / 鼓励 / 疑惑 / 庆祝",
+    "transparent": true,
+    "original": {
+      "src": "originals/claude-expressions.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3368382
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/xiwen-expressions.webp",
+        "width": 768,
+        "height": 512,
+        "bytes": 137182,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/xiwen-expressions.webp",
+        "width": 576,
+        "height": 384,
+        "bytes": 85558,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    },
+    "atlas": {
+      "columns": 3,
+      "rows": 2,
+      "frames": [
+        {
+          "name": "neutral",
+          "index": 0,
+          "column": 0,
+          "row": 0,
+          "backgroundPosition": "0% 0%",
+          "originalRect": {
+            "x": 0,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "speaking",
+          "index": 1,
+          "column": 1,
+          "row": 0,
+          "backgroundPosition": "50% 0%",
+          "originalRect": {
+            "x": 512,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "thinking",
+          "index": 2,
+          "column": 2,
+          "row": 0,
+          "backgroundPosition": "100% 0%",
+          "originalRect": {
+            "x": 1024,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "encouraging",
+          "index": 3,
+          "column": 0,
+          "row": 1,
+          "backgroundPosition": "0% 100%",
+          "originalRect": {
+            "x": 0,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "puzzled",
+          "index": 4,
+          "column": 1,
+          "row": 1,
+          "backgroundPosition": "50% 100%",
+          "originalRect": {
+            "x": 512,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "celebrating",
+          "index": 5,
+          "column": 2,
+          "row": 1,
+          "backgroundPosition": "100% 100%",
+          "originalRect": {
+            "x": 1024,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "gemini_expressions",
+    "title": "星澈 · 六表情",
+    "category": "atlases",
+    "description": "倾听 / 讲解 / 思考 / 鼓励 / 疑惑 / 庆祝",
+    "transparent": true,
+    "original": {
+      "src": "originals/gemini-expressions.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3334808
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/xingche-expressions.webp",
+        "width": 768,
+        "height": 512,
+        "bytes": 135934,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/xingche-expressions.webp",
+        "width": 576,
+        "height": 384,
+        "bytes": 84304,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    },
+    "atlas": {
+      "columns": 3,
+      "rows": 2,
+      "frames": [
+        {
+          "name": "neutral",
+          "index": 0,
+          "column": 0,
+          "row": 0,
+          "backgroundPosition": "0% 0%",
+          "originalRect": {
+            "x": 0,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "speaking",
+          "index": 1,
+          "column": 1,
+          "row": 0,
+          "backgroundPosition": "50% 0%",
+          "originalRect": {
+            "x": 512,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "thinking",
+          "index": 2,
+          "column": 2,
+          "row": 0,
+          "backgroundPosition": "100% 0%",
+          "originalRect": {
+            "x": 1024,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "encouraging",
+          "index": 3,
+          "column": 0,
+          "row": 1,
+          "backgroundPosition": "0% 100%",
+          "originalRect": {
+            "x": 0,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "puzzled",
+          "index": 4,
+          "column": 1,
+          "row": 1,
+          "backgroundPosition": "50% 100%",
+          "originalRect": {
+            "x": 512,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "celebrating",
+          "index": 5,
+          "column": 2,
+          "row": 1,
+          "backgroundPosition": "100% 100%",
+          "originalRect": {
+            "x": 1024,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "scene_interview_day",
+    "title": "日间 · 面试书房",
+    "category": "scenes",
+    "description": "亮色 VN 面试舞台；角色放中右部；底部留对话区",
+    "transparent": false,
+    "original": {
+      "src": "originals/scene-interview-day.png",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2271570
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/scene-interview-day.webp",
+        "width": 1600,
+        "height": 900,
+        "bytes": 129094,
+        "quality": 72,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/scene-interview-day.webp",
+        "width": 800,
+        "height": 450,
+        "bytes": 54264,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "scene_interview_night",
+    "title": "夜间 · 星穹研究室",
+    "category": "scenes",
+    "description": "暗色 VN 面试舞台；适合蓝白及暖橙角色",
+    "transparent": false,
+    "original": {
+      "src": "originals/scene-interview-night.png",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2353568
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/scene-interview-night.webp",
+        "width": 1600,
+        "height": 900,
+        "bytes": 126742,
+        "quality": 72,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/scene-interview-night.webp",
+        "width": 800,
+        "height": 450,
+        "bytes": 49652,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "scene_login",
+    "title": "登录 · 知识学院入口",
+    "category": "scenes",
+    "description": "登录及新手引导；表单必须使用独立遮罩底",
+    "transparent": false,
+    "original": {
+      "src": "originals/scene-login.png",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2121469
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/scene-login.webp",
+        "width": 1600,
+        "height": 900,
+        "bytes": 114420,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/scene-login.webp",
+        "width": 800,
+        "height": 450,
+        "bytes": 41282,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "scene_error",
+    "title": "错误 · 迷路档案馆",
+    "category": "scenes",
+    "description": "404 / 错误场景；使用真实 HTML 错误标题和返回按钮",
+    "transparent": false,
+    "original": {
+      "src": "originals/scene-error.png",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2123966
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/scene-error.webp",
+        "width": 1600,
+        "height": 900,
+        "bytes": 101608,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/scene-error.webp",
+        "width": 800,
+        "height": 450,
+        "bytes": 36376,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "host_moying",
+    "title": "墨樱 · Offer Hub 引导员",
+    "category": "characters",
+    "description": "墨色短发、樱色书签与钢笔，站点原创引导角色",
+    "transparent": true,
+    "original": {
+      "src": "originals/host-moying.png",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 1801856
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/host-moying.webp",
+        "width": 672,
+        "height": 1008,
+        "bytes": 61798,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/host-moying.webp",
+        "width": 400,
+        "height": 600,
+        "bytes": 29634,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "state_empty_search",
+    "title": "搜索 · 无结果",
+    "category": "states",
+    "description": "书本与放大镜；搭配清空筛选操作",
+    "transparent": true,
+    "original": {
+      "src": "originals/state-empty-search.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1567168
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/state-empty-search.webp",
+        "width": 640,
+        "height": 640,
+        "bytes": 42404,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/state-empty-search.webp",
+        "width": 320,
+        "height": 320,
+        "bytes": 15426,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "state_empty_bookmarks",
+    "title": "收藏 · 空状态",
+    "category": "states",
+    "description": "空白封面与书架；搭配去题库看看",
+    "transparent": true,
+    "original": {
+      "src": "originals/state-empty-bookmarks.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1273190
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/state-empty-bookmarks.webp",
+        "width": 640,
+        "height": 640,
+        "bytes": 45982,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/state-empty-bookmarks.webp",
+        "width": 320,
+        "height": 320,
+        "bytes": 16994,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "state_loading",
+    "title": "加载 · 知识整理中",
+    "category": "states",
+    "description": "沙漏与书页；静态图，不是动画序列",
+    "transparent": true,
+    "original": {
+      "src": "originals/state-loading.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1677983
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/state-loading.webp",
+        "width": 640,
+        "height": 640,
+        "bytes": 68300,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/state-loading.webp",
+        "width": 320,
+        "height": 320,
+        "bytes": 23784,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "state_network_error",
+    "title": "网络 · 连接中断",
+    "category": "states",
+    "description": "断开的连接器；蓝色仅作为系统提示",
+    "transparent": true,
+    "original": {
+      "src": "originals/state-network-error.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1086900
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/state-network-error.webp",
+        "width": 640,
+        "height": 640,
+        "bytes": 40782,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/state-network-error.webp",
+        "width": 320,
+        "height": 320,
+        "bytes": 14290,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "state_onboarding",
+    "title": "引导 · 学习路线",
+    "category": "states",
+    "description": "地图与钢笔；适合首次访问引导",
+    "transparent": true,
+    "original": {
+      "src": "originals/state-onboarding.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1752585
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/state-onboarding.webp",
+        "width": 640,
+        "height": 640,
+        "bytes": 55300,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/state-onboarding.webp",
+        "width": 320,
+        "height": 320,
+        "bytes": 18490,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "state_mastery",
+    "title": "进度 · 掌握里程碑",
+    "category": "states",
+    "description": "樱色水晶奖杯；用于掌握进度达成",
+    "transparent": true,
+    "original": {
+      "src": "originals/state-mastery.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1963532
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/state-mastery.webp",
+        "width": 640,
+        "height": 640,
+        "bytes": 89492,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/state-mastery.webp",
+        "width": 320,
+        "height": 320,
+        "bytes": 30572,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "hero_cover",
+    "title": "首页 · 纸白封面",
+    "category": "heroes",
+    "description": "明亮桌面主卡；安全文案区建议左侧 0–40%",
+    "transparent": false,
+    "original": {
+      "src": "originals/hero-cover.png",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2107478
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/hero-cover.webp",
+        "width": 1600,
+        "height": 900,
+        "bytes": 113316,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/hero-cover.webp",
+        "width": 800,
+        "height": 450,
+        "bytes": 40786,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  },
+  {
+    "id": "host_chibi_states",
+    "title": "墨樱 · 六个 Q 版状态",
+    "category": "atlases",
+    "description": "欢迎 / 思考 / 编程 / 搜索 / 达成 / 迷路",
+    "transparent": true,
+    "original": {
+      "src": "originals/host-chibi-states.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2666793
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/host-chibi-states.webp",
+        "width": 768,
+        "height": 512,
+        "bytes": 95764,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/host-chibi-states.webp",
+        "width": 576,
+        "height": 384,
+        "bytes": 62358,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    },
+    "atlas": {
+      "columns": 3,
+      "rows": 2,
+      "frames": [
+        {
+          "name": "welcome",
+          "index": 0,
+          "column": 0,
+          "row": 0,
+          "backgroundPosition": "0% 0%",
+          "originalRect": {
+            "x": 0,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "thinking",
+          "index": 1,
+          "column": 1,
+          "row": 0,
+          "backgroundPosition": "50% 0%",
+          "originalRect": {
+            "x": 512,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "coding",
+          "index": 2,
+          "column": 2,
+          "row": 0,
+          "backgroundPosition": "100% 0%",
+          "originalRect": {
+            "x": 1024,
+            "y": 0,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "searching",
+          "index": 3,
+          "column": 0,
+          "row": 1,
+          "backgroundPosition": "0% 100%",
+          "originalRect": {
+            "x": 0,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "celebrating",
+          "index": 4,
+          "column": 1,
+          "row": 1,
+          "backgroundPosition": "50% 100%",
+          "originalRect": {
+            "x": 512,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        },
+        {
+          "name": "lost",
+          "index": 5,
+          "column": 2,
+          "row": 1,
+          "backgroundPosition": "100% 100%",
+          "originalRect": {
+            "x": 1024,
+            "y": 512,
+            "width": 512,
+            "height": 512
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "hero_cover_dark",
+    "title": "首页 · 夜色封面",
+    "category": "heroes",
+    "description": "暗色桌面主卡；与纸白版本成对切换",
+    "transparent": false,
+    "original": {
+      "src": "originals/hero-cover-dark.png",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2178364
+    },
+    "variants": {
+      "desktop": {
+        "src": "web/desktop/hero-cover-dark.webp",
+        "width": 1600,
+        "height": 900,
+        "bytes": 117382,
+        "quality": 78,
+        "alphaQuality": 75
+      },
+      "mobile": {
+        "src": "web/mobile/hero-cover-dark.webp",
+        "width": 800,
+        "height": 450,
+        "bytes": 44644,
+        "quality": 78,
+        "alphaQuality": 75
+      }
+    }
+  }
+] as const;
+export type AssetId = typeof assets[number]["id"];

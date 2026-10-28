@@ -5,10 +5,14 @@ export default {
   theme: {
   	extend: {
   		fontFamily: {
-  			sans: ['"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'system-ui', 'sans-serif']
+  			sans: ['"PingFang SC"', '"Hiragino Sans GB"', '"Noto Sans SC"', '"Microsoft YaHei"', 'system-ui', 'sans-serif'],
+  			// 标题和 VN 台词用思源宋体（自托管，按 unicode-range 分片加载）
+  			title: ['"Noto Serif SC"', '"Songti SC"', '"STSong"', '"SimSun"', 'serif'],
+  			mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
   		},
-  		// 全站只用这四级字号：页面标题 / 区块标题 / 正文 / 辅助信息
+  		// 全站字号：Bento 主卡大标题 / 页面标题 / 区块标题 / 正文 / 辅助信息；display 只给 Bento 主卡用
   		fontSize: {
+  			display: ['40px', { lineHeight: '1.2' }],
   			title: ['28px', { lineHeight: '1.3' }],
   			heading: ['20px', { lineHeight: '1.4' }],
   			body: ['15px', { lineHeight: '1.7' }],
@@ -18,6 +22,13 @@ export default {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
+  		},
+  		transitionDuration: {
+  			micro: '120ms',
+  			panel: '240ms'
+  		},
+  		transitionTimingFunction: {
+  			standard: 'cubic-bezier(0.2, 0, 0, 1)'
   		},
   		colors: {
   			background: 'oklch(var(--background) / <alpha-value>)',
@@ -50,26 +61,47 @@ export default {
   			border: 'oklch(var(--border) / <alpha-value>)',
   			input: 'oklch(var(--input) / <alpha-value>)',
   			ring: 'oklch(var(--ring) / <alpha-value>)',
-  			chart: {
-  				'1': 'oklch(var(--chart-1) / <alpha-value>)',
-  				'2': 'oklch(var(--chart-2) / <alpha-value>)',
-  				'3': 'oklch(var(--chart-3) / <alpha-value>)',
-  				'4': 'oklch(var(--chart-4) / <alpha-value>)',
-  				'5': 'oklch(var(--chart-5) / <alpha-value>)'
+  			// 樱红：品牌标识、VN 姓名牌、推进提示、掌握进度；按钮和交互强调仍用墨色
+  			brand: {
+  				DEFAULT: 'oklch(var(--brand) / <alpha-value>)',
+  				soft: 'oklch(var(--brand-soft) / <alpha-value>)',
+  				foreground: 'oklch(var(--brand-foreground) / <alpha-value>)'
   			},
-  			sidebar: {
-  				DEFAULT: 'oklch(var(--sidebar) / <alpha-value>)',
-  				foreground: 'oklch(var(--sidebar-foreground) / <alpha-value>)',
-  				primary: 'oklch(var(--sidebar-primary) / <alpha-value>)',
-  				'primary-foreground': 'oklch(var(--sidebar-primary-foreground) / <alpha-value>)',
-  				accent: 'oklch(var(--sidebar-accent) / <alpha-value>)',
-  				'accent-foreground': 'oklch(var(--sidebar-accent-foreground) / <alpha-value>)',
-  				border: 'oklch(var(--sidebar-border) / <alpha-value>)',
-  				ring: 'oklch(var(--sidebar-ring) / <alpha-value>)'
+  			// 天青：VN 选项高亮和系统提示
+  			system: 'oklch(var(--system) / <alpha-value>)',
+  			easy: 'oklch(var(--easy) / <alpha-value>)',
+  			medium: 'oklch(var(--medium) / <alpha-value>)',
+  			hard: 'oklch(var(--hard) / <alpha-value>)',
+  			dialogue: {
+  				DEFAULT: 'oklch(var(--dialogue) / <alpha-value>)',
+  				foreground: 'oklch(var(--dialogue-foreground) / <alpha-value>)'
+  			}
+  		},
+  		// 正文排版跟随主题 token，暗色下不用再写 prose-invert
+  		typography: {
+  			DEFAULT: {
+  				css: {
+  					'--tw-prose-body': 'oklch(var(--foreground))',
+  					'--tw-prose-headings': 'oklch(var(--foreground))',
+  					'--tw-prose-lead': 'oklch(var(--muted-foreground))',
+  					'--tw-prose-links': 'oklch(var(--foreground))',
+  					'--tw-prose-bold': 'oklch(var(--foreground))',
+  					'--tw-prose-counters': 'oklch(var(--muted-foreground))',
+  					'--tw-prose-bullets': 'oklch(var(--muted-foreground))',
+  					'--tw-prose-hr': 'oklch(var(--border))',
+  					'--tw-prose-quotes': 'oklch(var(--foreground))',
+  					'--tw-prose-quote-borders': 'oklch(var(--foreground))',
+  					'--tw-prose-captions': 'oklch(var(--muted-foreground))',
+  					'--tw-prose-kbd': 'oklch(var(--foreground))',
+  					'--tw-prose-code': 'oklch(var(--foreground))',
+  					'--tw-prose-pre-code': 'oklch(var(--foreground))',
+  					'--tw-prose-pre-bg': 'oklch(var(--muted))',
+  					'--tw-prose-th-borders': 'oklch(var(--border))',
+  					'--tw-prose-td-borders': 'oklch(var(--border))'
+  				}
   			}
   		}
   	}
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 }
-

@@ -71,7 +71,7 @@ export function QuestionNav({
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   return (
-    <nav aria-label="题目列表" className={cn('flex h-full min-h-0 flex-col border', className)}>
+    <nav aria-label="题目列表" className={cn('flex h-full min-h-0 flex-col border border-foreground', className)}>
       <div className="space-y-3 border-b p-4">
         <div className="flex items-baseline justify-between gap-2">
           <Link

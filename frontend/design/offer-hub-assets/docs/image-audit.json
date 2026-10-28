@@ -1,0 +1,16 @@
+{
+  "originalImages": 22,
+  "webImages": 44,
+  "transparentImages": 16,
+  "expressionFrames": 24,
+  "chibiStates": 6,
+  "maxWebBytes": 146444,
+  "totalWebBytes": 3403314,
+  "allWebImagesWithin150KB": true,
+  "galleryJavaScriptSyntax": "passed",
+  "galleryFileReferences": "passed",
+  "allExportDimensions": "passed",
+  "allTransparentExportsHaveAlpha": "passed",
+  "browserScreenshotQA": "not run: browser executable unavailable",
+  "note": "Asset QA only; no whole-site LCP, CLS or accessibility audit."
+}

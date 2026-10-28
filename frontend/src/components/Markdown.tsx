@@ -3,7 +3,6 @@ import ReactMarkdown, { type Components } from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
 import { Check, Copy } from 'reicon-react'
-import 'highlight.js/styles/github.css'
 import { cn } from '@/lib/utils'
 
 /** 代码块：方角、muted 底色，右上角是语言名和复制按钮，长代码横向滚动 */
@@ -78,14 +77,25 @@ const components: Components = {
 
 /**
  * 题目正文。react-markdown 默认不渲染原始 HTML，内容里的 <script> 等标签会被当成文本，没有 XSS 风险。
- * 正文最大宽度约 72 个字符
+ * 正文最大宽度约 72 个字符；代码高亮配色在 index.css，跟随亮暗主题。
+ * plain 时不套文章排版，字体颜色都继承外层，给 VN 对话框里的台词用
  */
-export function Markdown({ content, className }: { content: string; className?: string }) {
+export function Markdown({ content, plain = false, className }: { content: string; plain?: boolean; className?: string }) {
+  if (plain) {
+    return (
+      <div className={className}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+          {content}
+        </ReactMarkdown>
+      </div>
+    )
+  }
+
   return (
     <div
       className={cn(
-        'prose prose-zinc max-w-[72ch] text-body',
-        'prose-headings:font-semibold prose-a:underline-offset-4',
+        'prose max-w-[72ch] text-body',
+        'prose-headings:font-title prose-headings:font-semibold prose-a:underline-offset-4',
         'prose-code:bg-muted prose-code:px-1 prose-code:font-normal prose-code:before:content-none prose-code:after:content-none',
         'prose-table:border prose-th:whitespace-nowrap prose-th:border prose-th:bg-muted prose-th:px-3 prose-th:py-2 prose-td:border prose-td:px-3 prose-td:py-2',
         'prose-img:rounded-none',

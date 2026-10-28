@@ -1,88 +1,202 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * 设计 token，值是 OKLCH 三元组，Tailwind 里用 oklch(var(--x) / <alpha-value>) 取色。
+ * 亮色：纸白底 + 墨色字；暗色：夜色底 + 纸白字。对比度都按 WCAG AA 校验过：
+ * 正文 16.6:1、次要文字 5.8:1、樱红文字 4.6:1、天青文字 4.8:1，暗色所有文字组合不低于 6.0:1
+ */
 @layer base {
   :root {
-    --background: 1 0 0;
-    --foreground: 0.141 0.005 285.823;
-    --card: 1 0 0;
-    --card-foreground: 0.141 0.005 285.823;
-    --popover: 1 0 0;
-    --popover-foreground: 0.141 0.005 285.823;
-    --primary: 0.21 0.006 285.885;
-    --primary-foreground: 0.985 0 0;
-    --secondary: 0.967 0.001 286.375;
-    --secondary-foreground: 0.21 0.006 285.885;
-    --muted: 0.967 0.001 286.375;
-    --muted-foreground: 0.552 0.016 285.938;
-    --accent: 0.967 0.001 286.375;
-    --accent-foreground: 0.21 0.006 285.885;
-    --destructive: 0.577 0.245 27.325;
-    --border: 0.92 0.004 286.32;
-    --input: 0.92 0.004 286.32;
-    --ring: 0.705 0.015 286.067;
-    --chart-1: 0.871 0.006 286.286;
-    --chart-2: 0.552 0.016 285.938;
-    --chart-3: 0.442 0.017 285.786;
-    --chart-4: 0.37 0.013 285.805;
-    --chart-5: 0.274 0.006 286.033;
+    --background: 0.985 0.008 85;
+    --foreground: 0.22 0.025 275;
+    --card: 0.985 0.008 85;
+    --card-foreground: 0.22 0.025 275;
+    --popover: 0.985 0.008 85;
+    --popover-foreground: 0.22 0.025 275;
+    --primary: 0.22 0.025 275;
+    --primary-foreground: 0.985 0.008 85;
+    --secondary: 0.955 0.01 85;
+    --secondary-foreground: 0.22 0.025 275;
+    --muted: 0.955 0.01 85;
+    --muted-foreground: 0.5 0.02 275;
+    --accent: 0.955 0.01 85;
+    --accent-foreground: 0.22 0.025 275;
+    --destructive: 0.52 0.18 27;
+    /* border 只用于列表行和表单分隔；输入框边框单独加深到 3:1 以上，让输入框轮廓看得清 */
+    --border: 0.9 0.008 85;
+    --input: 0.6 0.015 275;
+    --ring: 0.22 0.025 275;
     --radius: 0rem;
-    --sidebar: 0.985 0 0;
-    --sidebar-foreground: 0.141 0.005 285.823;
-    --sidebar-primary: 0.21 0.006 285.885;
-    --sidebar-primary-foreground: 0.985 0 0;
-    --sidebar-accent: 0.967 0.001 286.375;
-    --sidebar-accent-foreground: 0.21 0.006 285.885;
-    --sidebar-border: 0.92 0.004 286.32;
-    --sidebar-ring: 0.705 0.015 286.067
+
+    /* 限定用途色：樱红只给品牌标识、VN 姓名牌、推进提示和掌握进度，天青只给 VN 选项高亮和系统提示 */
+    --brand: 0.58 0.2 8;
+    --brand-soft: 0.95 0.025 8;
+    --brand-foreground: 1 0 0;
+    --system: 0.54 0.12 245;
+
+    /* 难度色：在纸白底和 muted 底上都不低于 4.9:1 */
+    --easy: 0.5 0.13 150;
+    --medium: 0.52 0.11 65;
+    --hard: 0.52 0.18 27;
+
+    /* 代码高亮：在代码块的 muted 底上都不低于 4.6:1 */
+    --code-keyword: 0.47 0.15 295;
+    --code-string: 0.47 0.11 150;
+    --code-number: 0.5 0.12 55;
+    --code-title: 0.48 0.12 245;
+    --code-meta: 0.5 0.15 10;
+    --code-comment: 0.53 0.02 275;
+
+    /* VN 对话框：88% 不透明墨色 + 12px 背景模糊，亮暗主题都用这一套 */
+    --dialogue: 0.18 0.03 275;
+    --dialogue-foreground: 0.95 0.008 85;
+
+    --duration-micro: 120ms;
+    --duration-panel: 240ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   }
+
   .dark {
-    --background: 0.141 0.005 285.823;
-    --foreground: 0.985 0 0;
-    --card: 0.21 0.006 285.885;
-    --card-foreground: 0.985 0 0;
-    --popover: 0.21 0.006 285.885;
-    --popover-foreground: 0.985 0 0;
-    --primary: 0.92 0.004 286.32;
-    --primary-foreground: 0.21 0.006 285.885;
-    --secondary: 0.274 0.006 286.033;
-    --secondary-foreground: 0.985 0 0;
-    --muted: 0.274 0.006 286.033;
-    --muted-foreground: 0.705 0.015 286.067;
-    --accent: 0.274 0.006 286.033;
-    --accent-foreground: 0.985 0 0;
-    --destructive: 0.704 0.191 22.216;
-    --border: 0.251 0.004 286.199;
-    --input: 0.302 0.003 286.269;
-    --ring: 0.552 0.016 285.938;
-    --chart-1: 0.871 0.006 286.286;
-    --chart-2: 0.552 0.016 285.938;
-    --chart-3: 0.442 0.017 285.786;
-    --chart-4: 0.37 0.013 285.805;
-    --chart-5: 0.274 0.006 286.033;
-    --sidebar: 0.21 0.006 285.885;
-    --sidebar-foreground: 0.985 0 0;
-    --sidebar-primary: 0.488 0.243 264.376;
-    --sidebar-primary-foreground: 0.985 0 0;
-    --sidebar-accent: 0.274 0.006 286.033;
-    --sidebar-accent-foreground: 0.985 0 0;
-    --sidebar-border: 0.251 0.004 286.199;
-    --sidebar-ring: 0.552 0.016 285.938
+    --background: 0.17 0.02 275;
+    --foreground: 0.95 0.008 85;
+    --card: 0.22 0.022 275;
+    --card-foreground: 0.95 0.008 85;
+    --popover: 0.22 0.022 275;
+    --popover-foreground: 0.95 0.008 85;
+    --primary: 0.95 0.008 85;
+    --primary-foreground: 0.17 0.02 275;
+    --secondary: 0.25 0.022 275;
+    --secondary-foreground: 0.95 0.008 85;
+    --muted: 0.25 0.022 275;
+    --muted-foreground: 0.72 0.02 275;
+    --accent: 0.25 0.022 275;
+    --accent-foreground: 0.95 0.008 85;
+    --destructive: 0.74 0.15 25;
+    --border: 0.32 0.02 275;
+    --input: 0.52 0.02 275;
+    --ring: 0.95 0.008 85;
+
+    --brand: 0.74 0.15 8;
+    --brand-soft: 0.28 0.06 8;
+    --brand-foreground: 0.17 0.02 275;
+    --system: 0.75 0.11 235;
+
+    --easy: 0.8 0.15 150;
+    --medium: 0.83 0.13 80;
+    --hard: 0.74 0.15 25;
+
+    --code-keyword: 0.78 0.12 295;
+    --code-string: 0.8 0.12 150;
+    --code-number: 0.82 0.11 70;
+    --code-title: 0.79 0.1 235;
+    --code-meta: 0.78 0.12 10;
+    --code-comment: 0.68 0.02 275;
   }
 }
+
 @layer base {
   * {
     @apply border-border;
   }
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
   body {
     @apply bg-background text-body text-foreground antialiased;
   }
+  /* 焦点环：2px 前景色描边，外移 2px，亮暗主题都清楚 */
+  :focus-visible {
+    outline: 2px solid oklch(var(--ring));
+    outline-offset: 2px;
+  }
 }
+
+/* 代码高亮，配色取上面的 --code-* token，跟随亮暗主题 */
+@layer components {
+  .hljs {
+    color: inherit;
+    background: transparent;
+  }
+  .hljs-comment,
+  .hljs-quote {
+    color: oklch(var(--code-comment));
+    font-style: italic;
+  }
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-literal,
+  .hljs-doctag,
+  .hljs-template-tag {
+    color: oklch(var(--code-keyword));
+  }
+  .hljs-string,
+  .hljs-regexp,
+  .hljs-addition,
+  .hljs-char.escape_ {
+    color: oklch(var(--code-string));
+  }
+  .hljs-number,
+  .hljs-symbol,
+  .hljs-bullet,
+  .hljs-link,
+  .hljs-variable.constant_ {
+    color: oklch(var(--code-number));
+  }
+  .hljs-title,
+  .hljs-section,
+  .hljs-built_in,
+  .hljs-type {
+    color: oklch(var(--code-title));
+  }
+  .hljs-meta,
+  .hljs-attr,
+  .hljs-attribute,
+  .hljs-property,
+  .hljs-name,
+  .hljs-selector-id,
+  .hljs-selector-class,
+  .hljs-template-variable {
+    color: oklch(var(--code-meta));
+  }
+  .hljs-deletion {
+    color: oklch(var(--hard));
+  }
+  .hljs-emphasis {
+    font-style: italic;
+  }
+  .hljs-strong {
+    font-weight: 600;
+  }
+}
+
+/* VN 逐字显示：还没「打」出来的文字设成透明，范围由 useTypewriter 维护 */
+::highlight(typewriter-pending) {
+  color: transparent;
+  text-decoration-color: transparent;
+}
+
 @layer utilities {
   .scrollbar-none {
     scrollbar-width: none;
   }
   .scrollbar-none::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* 用户开启「减少动态效果」时关掉所有动画和过渡；逐字显示在 useTypewriter 里单独关 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

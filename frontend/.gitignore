@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# 插画母图约 50MB，不进普通 git 历史；网页用的 WebP 在 public/offer-hub-assets/
+design/offer-hub-assets/originals/
