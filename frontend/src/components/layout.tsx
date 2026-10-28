@@ -1,5 +1,6 @@
-import { Link, Outlet, ScrollRestoration, useLocation } from 'react-router-dom'
+import { Link, Outlet, ScrollRestoration, useLocation, useNavigation } from 'react-router-dom'
 import { Link2, Moon, Sun } from 'reicon-react'
+import { LoadingBar } from '@/components/LoadingBar'
 import { ART_BASE } from '@/constants/art'
 import { setTheme, useTheme } from '@/lib/theme'
 import { cn } from '@/lib/utils'
@@ -12,10 +13,12 @@ const NAV_ITEMS = [
   { to: '/questions', label: '全部题目', isActive: (path: string) => path === '/questions' },
 ]
 
-/** 全站布局：56px 吸顶导航 + 1200px 内容区（和 Bento 的 12 栏对齐）+ 一行页脚 */
+/** 全站布局：56px 吸顶导航 + 1200px 内容区 + 一行页脚 */
 export function Layout() {
   const { pathname } = useLocation()
   const theme = useTheme()
+  // 进入按需加载的页面（题目详情、登录）要先下载代码，这段时间旧页面还留在屏幕上，导航栏底边出加载条
+  const navigating = useNavigation().state !== 'idle'
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -75,6 +78,7 @@ export function Layout() {
             </Link>
           </div>
         </div>
+        {navigating && <LoadingBar label="页面加载中" />}
       </header>
 
       <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-6 md:py-8">

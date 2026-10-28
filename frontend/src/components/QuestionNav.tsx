@@ -158,12 +158,12 @@ export function QuestionNav({
 export function QuestionNavSkeleton({ className }: { className?: string }) {
   return (
     <div aria-hidden className={cn('flex h-full min-h-0 flex-col border', className)}>
-      <div className="animate-pulse space-y-3 border-b p-4">
+      <div className="skeleton space-y-3 border-b p-4">
         <div className="flex justify-between">
-          <div className="h-6 w-28 bg-muted" />
-          <div className="h-5 w-12 bg-muted" />
+          <div className="h-6 w-28 bg-skeleton" />
+          <div className="h-5 w-12 bg-skeleton" />
         </div>
-        <div className="h-9 bg-muted" />
+        <div className="h-9 bg-skeleton" />
       </div>
       <NavListSkeleton />
     </div>
@@ -172,11 +172,11 @@ export function QuestionNavSkeleton({ className }: { className?: string }) {
 
 function NavListSkeleton() {
   return (
-    <div aria-hidden className="animate-pulse py-2">
+    <div aria-hidden className="skeleton py-2">
       {Array.from({ length: 12 }, (_, i) => (
         <div key={i} className="flex gap-3 px-4 py-2">
-          <div className="h-6 w-6 shrink-0 bg-muted" />
-          <div className={cn('h-6 bg-muted', i % 3 === 0 ? 'w-full' : i % 3 === 1 ? 'w-4/5' : 'w-3/5')} />
+          <div className="h-6 w-6 shrink-0 bg-skeleton" />
+          <div className={cn('h-6 bg-skeleton', i % 3 === 0 ? 'w-full' : i % 3 === 1 ? 'w-4/5' : 'w-3/5')} />
         </div>
       ))}
     </div>

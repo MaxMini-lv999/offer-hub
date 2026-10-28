@@ -13,6 +13,15 @@ async function loadLoginPage(mode: 'login' | 'register') {
   return { element: <LoginPage mode={mode} /> }
 }
 
+// 详情页带着 markdown 渲染和代码高亮，体积大，按需加载；它又是最常去的页面，
+// 所以首屏渲染完、浏览器空闲时先把代码下载好，点题目时不用再等（Safari 没有 requestIdleCallback，延后 2 秒）
+const loadQuestionDetail = () => import('@/pages/QuestionDetail')
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(() => loadQuestionDetail())
+} else {
+  setTimeout(loadQuestionDetail, 2000)
+}
+
 // 注意：页面路由不要以 /api、/auth、/home 开头，开发时这几个前缀会被 Vite 代理到后端
 const router = createBrowserRouter(
   [
@@ -32,8 +41,7 @@ const router = createBrowserRouter(
             { path: 'questions', element: <QuestionsPage /> },
             {
               path: 'question/:questionId',
-              // 详情页带着 markdown 渲染和代码高亮，体积大，进入时再加载
-              lazy: async () => ({ Component: (await import('@/pages/QuestionDetail')).QuestionDetailPage }),
+              lazy: async () => ({ Component: (await loadQuestionDetail()).QuestionDetailPage }),
             },
             // 旧的题库分类页已并入首页
             { path: 'collections', element: <Navigate to="/" replace /> },

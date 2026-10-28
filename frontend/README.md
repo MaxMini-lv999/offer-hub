@@ -46,7 +46,10 @@ src/
 
 在原来的直角编辑风上增量演进：保留直角、无投影、墨色强调、反色和下划线交互态，只新增宋体标题与 display 字号、樱红和天青两种限定用途色、插画立绘层和 VN 模式。
 
-- **Bento**（首页、题库页、全部题目页的页头）：`components/bento.tsx`。手机单列、平板 6 栏、桌面 12 栏，平板以上行高 160px，卡片尺寸 1×1 / 2×1 / 2×2，1px 墨线分格。
+- **布局按页面类型区分，视觉风格全站统一**：
+  - 入口页（首页）是「封面 + 目录」：一个墨线分镜格（`components/bento.tsx` 的 `BentoCard`）里依次是封面（标题、搜索、插画）、今日一题头条、一行学习进度和继续上次；下面是题库目录，职位方向桌面端竖排、手机端横排，题库按系列分组成索引行，点线引到题数。
+  - 检索页（全部题目、题库页）是「检索工作台」：一行标题，主栏是吸顶筛选栏 + 紧凑题目列表（`components/QuestionList.tsx` 的 `QuestionWorkbench`，≥1280px 一行一题），右侧热门题目桌面端吸顶、往下滚收起、往上滚展开（`HotContent` 的 `sticky`），手机端排在列表下面。
+  - 阅读页（题目详情）是左侧题目栏 + 正文；VN 见下一条。
 - **VN**（题目详情的模拟面试、登录、404 和出错页）：`components/vn/`（`VNStage`、`DialogueBox`、`NameTag`、`ChoiceList`、`Backlog`、`StageNotice`）和 `components/InterviewMode.tsx`。逐字显示在 `hooks/useTypewriter.ts`，键盘操作在 `hooks/useVNKeys.ts`，解析分段在 `utils/segments.ts`。
 - **Token**：颜色、难度色、代码高亮、动效都在 `src/index.css` 的 CSS 变量里，亮暗两套，对比度按 WCAG AA 校验过；Tailwind 的映射在 `tailwind.config.js`。樱红只用于品牌标识、VN 姓名牌、推进提示和掌握进度，天青只用于 VN 选项高亮和系统提示，按钮和交互强调仍用墨色。
 - **字体**：标题和台词用思源宋体 600、代码用 JetBrains Mono 400，都通过 `@fontsource` 自托管（宋体按 unicode-range 分片，只下载用到的字）；正文用系统黑体。

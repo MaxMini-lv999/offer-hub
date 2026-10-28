@@ -10,7 +10,7 @@ export default {
   			title: ['"Noto Serif SC"', '"Songti SC"', '"STSong"', '"SimSun"', 'serif'],
   			mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
   		},
-  		// 全站字号：Bento 主卡大标题 / 页面标题 / 区块标题 / 正文 / 辅助信息；display 只给 Bento 主卡用
+  		// 全站字号：首页封面大标题 / 页面标题 / 区块标题 / 正文 / 辅助信息；display 只给首页封面用
   		fontSize: {
   			display: ['40px', { lineHeight: '1.2' }],
   			title: ['28px', { lineHeight: '1.3' }],
@@ -69,6 +69,8 @@ export default {
   			},
   			// 天青：VN 选项高亮和系统提示
   			system: 'oklch(var(--system) / <alpha-value>)',
+  			// 骨架屏色块，配合 index.css 里的 .skeleton 扫光
+  			skeleton: 'oklch(var(--skeleton) / <alpha-value>)',
   			easy: 'oklch(var(--easy) / <alpha-value>)',
   			medium: 'oklch(var(--medium) / <alpha-value>)',
   			hard: 'oklch(var(--hard) / <alpha-value>)',

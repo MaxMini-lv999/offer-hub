@@ -76,7 +76,7 @@ export function QuestionDetailPage() {
   if (interview) {
     return (
       <>
-        {isPending && <div aria-hidden className="h-[calc(100dvh-13rem)] min-h-[460px] animate-pulse border bg-muted" />}
+        {isPending && <div aria-hidden className="h-[calc(100dvh-13rem)] min-h-[460px] skeleton border bg-skeleton" />}
         {notFoundState}
         {errorState}
         {question && (
@@ -291,18 +291,18 @@ function NeighborLink({
 /** 骨架和正文同形：标题 + 一行元信息 + 几行正文 */
 function DetailSkeleton() {
   return (
-    <div aria-hidden className="max-w-[72ch] animate-pulse">
+    <div aria-hidden className="max-w-[72ch] skeleton">
       <div className="border-b pb-4">
-        <div className="h-9 w-2/3 bg-muted" />
+        <div className="h-9 w-2/3 bg-skeleton" />
         <div className="mt-3 flex gap-4">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-5 w-16 bg-muted" />
+            <div key={i} className="h-5 w-16 bg-skeleton" />
           ))}
         </div>
       </div>
       <div className="mt-6 space-y-3">
         {['w-full', 'w-full', 'w-5/6', 'w-full', 'w-2/3', 'w-full', 'w-3/4'].map((width, i) => (
-          <div key={i} className={cn('h-4 bg-muted', width)} />
+          <div key={i} className={cn('h-4 bg-skeleton', width)} />
         ))}
       </div>
     </div>

@@ -36,6 +36,9 @@
     --brand-foreground: 1 0 0;
     --system: 0.54 0.12 245;
 
+    /* 骨架屏色块：对纸白底 1.33:1，比 muted（1.09:1）明显；占位块不承载信息、读屏软件跳过，不适用 3:1 的非文字对比度 */
+    --skeleton: 0.89 0.012 85;
+
     /* 难度色：在纸白底和 muted 底上都不低于 4.9:1 */
     --easy: 0.5 0.13 150;
     --medium: 0.52 0.11 65;
@@ -82,6 +85,9 @@
     --brand-soft: 0.28 0.06 8;
     --brand-foreground: 0.17 0.02 275;
     --system: 0.75 0.11 235;
+
+    /* 对夜色底 1.62:1，对卡片底 1.47:1 */
+    --skeleton: 0.34 0.022 275;
 
     --easy: 0.8 0.15 150;
     --medium: 0.83 0.13 80;
@@ -171,6 +177,72 @@
   }
   .hljs-strong {
     font-weight: 600;
+  }
+}
+
+/*
+ * 骨架屏：容器加 .skeleton，里面的色块用 bg-skeleton。一道和页面底色相同的光带每 1.5s 从左扫到右，
+ * 扫过色块时色块变浅（暗色主题变深），一眼能看出「正在加载」；只动 transform，不触发重排
+ */
+@layer components {
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, oklch(var(--background) / 0.75), transparent);
+    transform: translateX(-100%);
+    animation: skeleton-sweep 1.5s var(--ease-standard) infinite;
+  }
+
+  /* 加载条：盖在容器底边线上的 2px 轨道（底色遮住原来的线），一段墨色从左滑到右；挂载 150ms 后才显示，请求很快时不闪 */
+  .loading-bar {
+    background: oklch(var(--background));
+    opacity: 0;
+    animation: loading-bar-show 0s linear 150ms forwards;
+  }
+  .loading-bar::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: 40%;
+    background: oklch(var(--foreground));
+    animation: loading-bar-slide 1.1s var(--ease-standard) infinite;
+  }
+
+  /* 系统开了「减少动态效果」：骨架不扫光，加载条变成静止的整条墨线 */
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after {
+      display: none;
+    }
+    .loading-bar::before {
+      width: 100%;
+      animation: none;
+    }
+  }
+}
+
+@keyframes skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes loading-bar-show {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes loading-bar-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
   }
 }
 

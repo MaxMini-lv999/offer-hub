@@ -1,8 +1,9 @@
-import { useRef } from 'react'
+import { forwardRef, useEffect, useLayoutEffect, useRef, type FocusEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Eye, FileText, SearchStatus, Xmark } from 'reicon-react'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
+import { LoadingBar } from '@/components/LoadingBar'
 import { SearchBox } from '@/components/SearchBox'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -14,56 +15,79 @@ import { cn } from '@/lib/utils'
 import type { Difficulty, Question } from '@/types/question'
 import { questionPath } from '@/utils/route'
 
-/** 筛选栏：搜索框一行，难度和排序一行；题库页和全部题目页放在页头的 Bento 卡片里 */
-export function QuestionFilterBar({ filters }: { filters: QuestionFilterState }) {
+/** 吸顶导航栏的高度（layout.tsx 里的 h-14） */
+const NAV_HEIGHT = 56
+
+/**
+ * 题库页和全部题目页的主栏：吸顶筛选栏 + 题目列表。筛选栏的墨线底边同时是列表的顶边，像表格的表头。
+ * 筛选栏高度会变（手机端两行、选了标签多一行），用 ResizeObserver 量出来，把「导航栏 + 筛选栏」的高度写进 --list-offset，
+ * 列表靠它决定翻页、改条件、Tab 聚焦时滚到哪里，保证内容不被吸顶的两条栏挡住
+ */
+export function QuestionWorkbench({ bankId, filters }: { bankId?: string; filters: QuestionFilterState }) {
+  const rootRef = useRef<HTMLDivElement>(null)
+  const barRef = useRef<HTMLElement>(null)
+  // 和列表组件同一个查询：改条件或翻页后、新数据回来前，旧列表还在，筛选栏底边出加载条
+  const { isPlaceholderData } = useQuestionList(filters.query)
+
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    const bar = barRef.current
+    if (!root || !bar) return
+    const observer = new ResizeObserver(() => {
+      root.style.setProperty('--list-offset', `${NAV_HEIGHT + bar.offsetHeight}px`)
+    })
+    observer.observe(bar)
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div className="flex flex-col gap-3">
-      <SearchBox value={filters.keyword} onSearch={filters.setKeyword} placeholder="搜索题目标题或内容" />
-      <div className="flex gap-3">
-        <DifficultyToggle value={filters.difficulty} onChange={filters.setDifficulty} />
-        <Select value={filters.sort.value} onValueChange={filters.setSort}>
-          <SelectTrigger aria-label="排序" className="w-32 shrink-0">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+    <div ref={rootRef} className="min-w-0">
+      <QuestionFilterBar ref={barRef} filters={filters} loading={isPlaceholderData} />
+      <QuestionResults bankId={bankId} filters={filters} />
     </div>
   )
 }
 
 /**
- * 题目列表：已选标签 + 列表 + 分页，题库页和全部题目页共用。bankId 为空时列出全部题目。
- * 筛选条件来自页面上的 useQuestionFilters，和筛选栏是同一份
+ * 筛选栏：吸顶在导航栏下面，滚到列表中间也能改条件。平板以上搜索框、难度、排序排一行，手机端搜索框单独一行；
+ * 选了标签时多一行已选标签，可以单个移除或全部清除。loading 时墨线底边变成加载条
  */
-export function QuestionResults({ bankId, filters }: { bankId?: string; filters: QuestionFilterState }) {
-  const { data, isPending, isError, error, refetch, isPlaceholderData } = useQuestionList(filters.query)
-  const { tags, page, hasFilter } = filters
-
-  const topRef = useRef<HTMLDivElement>(null)
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1
-
-  function goToPage(target: number) {
-    filters.setPage(target)
-    // 列表顶部已经滚出屏幕（被吸顶导航挡住）时，翻页后回到列表顶部
-    const top = topRef.current?.getBoundingClientRect().top
-    if (top !== undefined && top < 64) {
-      topRef.current?.scrollIntoView({ block: 'start' })
-    }
-  }
-
+export const QuestionFilterBar = forwardRef<HTMLElement, { filters: QuestionFilterState; loading?: boolean }>(function QuestionFilterBar(
+  { filters, loading = false },
+  ref,
+) {
   return (
-    <div ref={topRef} className="min-w-0 scroll-mt-20 space-y-4">
-      {tags.length > 0 && (
+    // 吸顶位置比导航栏底边高 1px、藏在导航栏下面：题目行高是半像素，滚到某些位置时两条栏之间会漏出列表的墨线边框
+    <section
+      ref={ref}
+      aria-label="筛选题目"
+      className="sticky top-[55px] z-30 space-y-2 border-b border-foreground bg-background py-3"
+    >
+      <div className="flex flex-col gap-3 md:flex-row">
+        <div className="min-w-0 md:flex-1">
+          <SearchBox value={filters.keyword} onSearch={filters.setKeyword} placeholder="搜索题目标题或内容" />
+        </div>
+        <div className="flex gap-3">
+          <DifficultyToggle value={filters.difficulty} onChange={filters.setDifficulty} />
+          <Select value={filters.sort.value} onValueChange={filters.setSort}>
+            <SelectTrigger aria-label="排序" className="w-32 shrink-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SORT_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {filters.tags.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 text-meta">
           <span className="text-muted-foreground">标签</span>
-          {tags.map((tag) => (
+          {filters.tags.map((tag) => (
             <button
               key={tag}
               type="button"
@@ -85,13 +109,66 @@ export function QuestionResults({ bankId, filters }: { bankId?: string; filters:
         </div>
       )}
 
+      {loading && <LoadingBar label="正在更新题目列表" />}
+    </section>
+  )
+})
+
+/** 读 QuestionWorkbench 写进去的 --list-offset；单独使用列表、没有吸顶筛选栏时按导航栏高度算 */
+function listOffset(el: HTMLElement) {
+  return parseFloat(getComputedStyle(el).getPropertyValue('--list-offset')) || NAV_HEIGHT
+}
+
+/** 列表顶部已经滚到吸顶的导航栏和筛选栏下面时，滚回筛选栏正下方 */
+function revealListTop(el: HTMLElement | null) {
+  if (!el) return
+  const offset = listOffset(el)
+  const top = el.getBoundingClientRect().top
+  if (top < offset) window.scrollBy({ top: top - offset })
+}
+
+/**
+ * 题目列表 + 分页，题库页和全部题目页共用。bankId 为空时列出全部题目。
+ * 筛选条件来自页面上的 useQuestionFilters，和筛选栏是同一份
+ */
+export function QuestionResults({ bankId, filters }: { bankId?: string; filters: QuestionFilterState }) {
+  const { data, isPending, isError, error, refetch, isPlaceholderData } = useQuestionList(filters.query)
+  const { tags, page, hasFilter } = filters
+
+  const topRef = useRef<HTMLDivElement>(null)
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1
+
+  // 筛选栏吸顶后，滚到列表中间也能改条件；条件变了就回到列表顶部，从第一条开始看。首次渲染（含从详情页返回）不滚
+  const filterKey = JSON.stringify([filters.keyword, filters.difficulty, tags, filters.sort.value])
+  const prevFilterKey = useRef(filterKey)
+  useEffect(() => {
+    if (prevFilterKey.current === filterKey) return
+    prevFilterKey.current = filterKey
+    revealListTop(topRef.current)
+  }, [filterKey])
+
+  function goToPage(target: number) {
+    filters.setPage(target)
+    revealListTop(topRef.current)
+  }
+
+  // Tab 到被吸顶筛选栏挡住的题目时往下让出位置，焦点始终看得见
+  function handleFocus(e: FocusEvent<HTMLDivElement>) {
+    const offset = listOffset(e.currentTarget)
+    const top = e.target.getBoundingClientRect().top
+    if (top < offset) window.scrollBy({ top: top - offset })
+  }
+
+  return (
+    <div ref={topRef} onFocus={handleFocus} className="min-w-0 space-y-4">
       {isPending && <ListSkeleton />}
 
-      {isError && <ErrorState message={error.message} onRetry={() => refetch()} withArt />}
+      {isError && <ErrorState message={error.message} onRetry={() => refetch()} withArt className="border-t-0" />}
 
       {data && data.list.length === 0 && (
         // total > 0 却没数据，说明 URL 里的页码超出范围
         <EmptyState
+          className="border-t-0"
           icon={data.total > 0 ? <SearchStatus size={32} /> : <FileText size={32} />}
           art={data.total > 0 ? undefined : hasFilter ? ART.stateEmptySearch : ART.stateEmptyBookmarks}
           title={data.total > 0 ? '这一页没有题目' : hasFilter ? '没有找到符合条件的题目' : '这里还没有题目'}
@@ -118,7 +195,7 @@ export function QuestionResults({ bankId, filters }: { bankId?: string; filters:
           {/* 筛选或翻页时先保留旧列表，变淡提示正在加载，加载完再恢复 */}
           <ul
             aria-busy={isPlaceholderData}
-            className={cn('divide-y border border-foreground transition-opacity', isPlaceholderData && 'opacity-60')}
+            className={cn('divide-y border border-t-0 border-foreground transition-opacity', isPlaceholderData && 'opacity-60')}
           >
             {data.list.map((q) => (
               <QuestionItem key={q.question_id} question={q} bankId={bankId} selectedTags={tags} onTagClick={filters.addTag} />
@@ -163,6 +240,10 @@ function DifficultyToggle({ value, onChange }: { value?: Difficulty; onChange: (
   )
 }
 
+/**
+ * 题目行。≥1280px 一行一题：标题在左，标签、难度、浏览量靠右，难度和浏览量定宽，上下对齐好扫读；
+ * 更窄时标题一行，难度、标签、浏览量另起一行
+ */
 function QuestionItem({
   question,
   bankId,
@@ -175,40 +256,47 @@ function QuestionItem({
   onTagClick: (tag: string) => void
 }) {
   return (
-    // 整行可点：标题链接用 after 伪元素铺满整行，标签按钮用 z-10 浮在上面，避免把按钮嵌进链接里
-    <li className="relative px-4 py-4 transition-colors hover:bg-muted">
-      <h3 className="text-body font-medium">
+    // 整行可点：标题链接用 after 伪元素铺满整行，标签按钮用 z-10 浮在上面，避免把按钮嵌进链接里；
+    // 聚焦时伪元素画一圈内描边，整行都是焦点框
+    <li className="relative px-4 py-3 transition-colors hover:bg-muted xl:flex xl:items-center xl:gap-4">
+      <h3 className="text-body font-medium xl:min-w-0 xl:flex-1">
         <Link
           // 全部题目页没有 bankId 时，用题目所属的第一个题库
           to={questionPath(question.question_id, bankId ?? question.bank_list[0])}
-          className="after:absolute after:inset-0 focus-visible:underline focus-visible:outline-none"
+          className="after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-ring"
         >
           {question.title}
         </Link>
       </h3>
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-meta text-muted-foreground">
-        <DifficultyLabel difficulty={question.difficulty} />
-        {question.tags.map((tag) => {
-          const selected = selectedTags.includes(tag)
-          return (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => onTagClick(tag)}
-              aria-pressed={selected}
-              title={selected ? '已在筛选中' : `按「${tag}」筛选`}
-              className={cn(
-                'relative z-10 border px-2 transition-colors',
-                selected
-                  ? 'border-foreground bg-foreground text-background'
-                  : 'hover:border-foreground hover:bg-foreground hover:text-background',
-              )}
-            >
-              {tag}
-            </button>
-          )
-        })}
-        <span className="ml-auto inline-flex items-center gap-1 tabular-nums">
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-2 text-meta text-muted-foreground xl:mt-0 xl:shrink-0 xl:flex-nowrap">
+        <span className="xl:order-2 xl:w-12">
+          <DifficultyLabel difficulty={question.difficulty} />
+        </span>
+        {question.tags.length > 0 && (
+          <span className="flex flex-wrap gap-2 xl:order-1">
+            {question.tags.map((tag) => {
+              const selected = selectedTags.includes(tag)
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => onTagClick(tag)}
+                  aria-pressed={selected}
+                  title={selected ? '已在筛选中' : `按「${tag}」筛选`}
+                  className={cn(
+                    'relative z-10 border px-2 transition-colors',
+                    selected
+                      ? 'border-foreground bg-foreground text-background'
+                      : 'hover:border-foreground hover:bg-foreground hover:text-background',
+                  )}
+                >
+                  {tag}
+                </button>
+              )
+            })}
+          </span>
+        )}
+        <span className="ml-auto inline-flex items-center justify-end gap-1 tabular-nums xl:order-3 xl:ml-0 xl:w-16">
           <Eye size={14} />
           {question.view_count}
         </span>
@@ -298,24 +386,25 @@ function Pagination({
   )
 }
 
-/** 骨架和真实列表项同高：标题一行 + 难度 / 标签 / 浏览量一行 */
+/** 骨架和真实题目行同形同高：类名和 QuestionItem 一一对应，色块高度按行高（正文 1.7em、meta 1.5em + 标签边框）算 */
 function ListSkeleton() {
   return (
     <div className="space-y-4" aria-hidden>
-      <div className="animate-pulse divide-y border">
-        {Array.from({ length: 8 }, (_, i) => (
-          <div key={i} className="px-4 py-4">
-            <div className={cn('h-6 bg-muted', i % 2 === 0 ? 'w-2/3' : 'w-1/2')} />
-            <div className="mt-2 flex gap-3">
-              <div className="h-5 w-10 bg-muted" />
-              <div className="h-5 w-12 bg-muted" />
-              <div className="h-5 w-16 bg-muted" />
-              <div className="ml-auto h-5 w-12 bg-muted" />
+      <div className="skeleton divide-y border border-t-0">
+        {Array.from({ length: 12 }, (_, i) => (
+          <div key={i} className="px-4 py-3 xl:flex xl:items-center xl:gap-4">
+            <div className="text-body xl:min-w-0 xl:flex-1">
+              <div className={cn('h-[1.7em] bg-skeleton', i % 2 === 0 ? 'w-2/3' : 'w-1/2')} />
+            </div>
+            <div className="mt-1 flex items-center gap-3 text-meta xl:mt-0 xl:shrink-0">
+              <div className="h-[calc(1.5em+2px)] w-10 bg-skeleton xl:order-2 xl:w-12" />
+              <div className="h-[calc(1.5em+2px)] w-24 bg-skeleton xl:order-1" />
+              <div className="ml-auto h-[calc(1.5em+2px)] w-12 bg-skeleton xl:order-3 xl:ml-0 xl:w-16" />
             </div>
           </div>
         ))}
       </div>
-      <div className="h-8 w-40 animate-pulse bg-muted" />
+      <div className="h-8 w-40 skeleton bg-skeleton" />
     </div>
   )
 }
