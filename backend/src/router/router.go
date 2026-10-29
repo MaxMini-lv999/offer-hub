@@ -1,6 +1,7 @@
 package router
 
 import (
+	authCtrl "offer-hub/ctrl/auth"
 	questionCtrl "offer-hub/ctrl/question"
 
 	"github.com/gin-gonic/gin"
@@ -17,4 +18,8 @@ func RegisterRouter(r *gin.Engine) {
 	question.GET("/meta/list", questionCtrl.ListQuestionsMeta)
 	question.GET("/detail", questionCtrl.GetQuestionDetail)
 	question.GET("/hot/list", questionCtrl.GetHotQuestions)
+
+	auth := r.Group("/auth")
+	auth.POST("/register", authCtrl.Register)
+	auth.POST("/login", authCtrl.Login)
 }

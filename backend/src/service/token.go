@@ -1,0 +1,35 @@
+package service
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+
+	"offer-hub/config"
+)
+
+// Claims JWT 的 payload：user_id 加上标准字段（exp 过期时间、iat 签发时间）
+type Claims struct {
+	UserID string `json:"user_id"`
+	jwt.RegisteredClaims
+}
+
+// GenerateToken 为 userID 签发 HS256 token，有效期取配置 [JWT] expire（单位：小时）
+func GenerateToken(userID string) (string, error) {
+	now := time.Now()
+	claims := Claims{
+		UserID: userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(config.Conf.JWT.Expire) * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(now),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	s, err := token.SignedString([]byte(config.Conf.JWT.Secret))
+	if err != nil {
+		return "", fmt.Errorf("sign token GenerateToken: %w", err)
+	}
+
+	return s, nil
+}
