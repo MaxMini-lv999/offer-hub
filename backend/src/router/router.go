@@ -4,6 +4,7 @@ import (
 	authCtrl "offer-hub/ctrl/auth"
 	"offer-hub/ctrl/middleware"
 	questionCtrl "offer-hub/ctrl/question"
+	userCtrl "offer-hub/ctrl/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,6 +20,9 @@ func RegisterRouter(r *gin.Engine) {
 	question.GET("/meta/list", questionCtrl.ListQuestionsMeta)
 	question.GET("/detail", questionCtrl.GetQuestionDetail)
 	question.GET("/hot/list", questionCtrl.GetHotQuestions)
+
+	userInfo := v1.Group("/user_info")
+	userInfo.GET("/get_user_info", middleware.JWTAuth(), userCtrl.GetUserInfo)
 
 	auth := r.Group("/auth")
 	auth.POST("/register", authCtrl.Register)

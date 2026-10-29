@@ -52,7 +52,7 @@ func CreateUser(ctx context.Context, u *UserInfo) error {
 	return nil
 }
 
-// ErrUserNotFound 用户名不存在
+// ErrUserNotFound 按用户名或 user_id 都查不到用户
 var ErrUserNotFound = errors.New("user not found")
 
 // GetUserByUsername 按用户名查询一个用户，查不到时返回 ErrUserNotFound
@@ -64,6 +64,19 @@ func GetUserByUsername(ctx context.Context, username string) (*UserInfo, error) 
 			return nil, ErrUserNotFound
 		}
 		return nil, fmt.Errorf("first GetUserByUsername %s: %w", username, err)
+	}
+	return &u, nil
+}
+
+// GetUserByUserID 按 user_id 查询一个用户，查不到时返回 ErrUserNotFound
+func GetUserByUserID(ctx context.Context, userID string) (*UserInfo, error) {
+	db := GetData().MySQL.WithContext(ctx)
+	var u UserInfo
+	if err := db.Where("user_id=?", userID).First(&u).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotFound
+		}
+		return nil, fmt.Errorf("first GetUserByUserID %s: %w", userID, err)
 	}
 	return &u, nil
 }
