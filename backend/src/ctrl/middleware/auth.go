@@ -1,0 +1,57 @@
+package middleware
+
+import (
+	"errors"
+	"log"
+	"net/http"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+
+	"offer-hub/service"
+)
+
+// context 里的 key，handler 用 c.GetString / c.GetTime 读取
+const (
+	CtxKeyUserID   = "user_id"   // string
+	CtxKeyToken    = "token"     // string，原始 token
+	CtxKeyTokenExp = "token_exp" // time.Time，token 过期时间
+)
+
+// JWTAuth 强制鉴权：没有有效 token 返回 401，通过后把 user_id、token、过期时间存进 context
+func JWTAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token, found := strings.CutPrefix(c.GetHeader("Authorization"), "Bearer ")
+		if !found || token == "" {
+			c.AbortWithStatusJSON(http.StatusOK, gin.H{
+				"code": 401,
+				"msg":  "未登录或登录已过期",
+				"data": nil,
+			})
+			return
+		}
+		claims, err := service.AuthenticateToken(c.Request.Context(), token)
+		if err != nil {
+			if errors.Is(err, service.ErrInvalidToken) {
+				c.AbortWithStatusJSON(http.StatusOK, gin.H{
+					"code": 401,
+					"msg":  "未登录或登录已过期",
+					"data": nil,
+				})
+				return
+			}
+			log.Printf("service.AuthenticateToken: %v", err)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"code": 500,
+				"msg":  "服务器内部错误",
+				"data": nil,
+			})
+			return
+		}
+		c.Set(CtxKeyUserID, claims.UserID)
+		c.Set(CtxKeyToken, token)
+		c.Set(CtxKeyTokenExp, claims.ExpiresAt.Time)
+
+		c.Next()
+	}
+}

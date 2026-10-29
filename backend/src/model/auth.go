@@ -45,3 +45,15 @@ type PasswordLoginResp struct {
 	Msg  string            `json:"msg"`
 	Data PasswordLoginData `json:"data"`
 }
+
+// LogoutData 登出响应 data
+type LogoutData struct {
+	Message string `json:"message"`
+}
+
+// LogoutResp POST /auth/logout 登出响应
+type LogoutResp struct {
+	Code int        `json:"code"`
+	Msg  string     `json:"msg"`
+	Data LogoutData `json:"data"`
+}

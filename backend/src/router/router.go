@@ -2,6 +2,7 @@ package router
 
 import (
 	authCtrl "offer-hub/ctrl/auth"
+	"offer-hub/ctrl/middleware"
 	questionCtrl "offer-hub/ctrl/question"
 
 	"github.com/gin-gonic/gin"
@@ -22,4 +23,5 @@ func RegisterRouter(r *gin.Engine) {
 	auth := r.Group("/auth")
 	auth.POST("/register", authCtrl.Register)
 	auth.POST("/login", authCtrl.Login)
+	auth.POST("/logout", middleware.JWTAuth(), authCtrl.Logout)
 }

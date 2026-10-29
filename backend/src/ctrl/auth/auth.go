@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"offer-hub/ctrl/middleware"
 	"offer-hub/model"
 	"offer-hub/service"
 )
@@ -35,7 +36,7 @@ func Register(c *gin.Context) {
 			})
 			return
 		}
-		log.Printf("service.Register:%v", err)
+		log.Printf("service.Register: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 500,
 			"msg":  "服务器内部错误",
@@ -83,7 +84,7 @@ func Login(c *gin.Context) {
 			})
 			return
 		}
-		log.Printf("[ctrl] service.Login:%v", err)
+		log.Printf("service.Login: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 500,
 			"msg":  "服务器内部错误",
@@ -97,6 +98,31 @@ func Login(c *gin.Context) {
 		Code: 0,
 		Msg:  "登录成功",
 		Data: *data,
+	})
+
+}
+
+// Logout POST /auth/logout 登出
+func Logout(c *gin.Context) {
+	token := c.GetString(middleware.CtxKeyToken)
+	expireTime := c.GetTime(middleware.CtxKeyTokenExp)
+
+	if err := service.Logout(c.Request.Context(), token, expireTime); err != nil {
+		log.Printf("service.Logout: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "服务器内部错误",
+			"data": nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.LogoutResp{
+		Code: 0,
+		Msg:  "success",
+		Data: model.LogoutData{
+			Message: "登出成功",
+		},
 	})
 
 }

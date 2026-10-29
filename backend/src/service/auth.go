@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -88,4 +89,36 @@ func Login(ctx context.Context, req *model.PasswordLoginReq) (*model.PasswordLog
 		UserType:   userInfo.UserType,
 	}}, nil
 
+}
+
+// ErrInvalidToken token 无效、过期或已登出，ctrl 据此返回 401
+var ErrInvalidToken = errors.New("invalid token")
+
+// AuthenticateToken 先校验 token 本身，再查黑名单，都通过才返回 claims；
+// Redis 出错时返回包装后的错误，不放行
+func AuthenticateToken(ctx context.Context, tokenStr string) (*Claims, error) {
+	claims, err := ParseToken(tokenStr)
+	if err != nil {
+		return nil, ErrInvalidToken
+	}
+	if res, err := data.IsTokenInBlacklist(ctx, tokenStr); err != nil {
+		return nil, fmt.Errorf("check blacklist AuthenticateToken: %w", err)
+	} else if res {
+		return nil, ErrInvalidToken
+	}
+
+	return claims, nil
+}
+
+// Logout 登出：把 token 写入黑名单，TTL 等于剩余有效期
+func Logout(ctx context.Context, tokenStr string, expiresAt time.Time) error {
+	ttl := time.Until(expiresAt)
+	// ttl <= 0 时 go-redis 的 Set 会写成永不过期的 key；token 已过期本来就会被拒，不用进黑名单
+	if ttl <= 0 {
+		return nil
+	}
+	if err := data.AddTokenToBlacklist(ctx, tokenStr, ttl); err != nil {
+		return fmt.Errorf("add blacklist Logout: %w", err)
+	}
+	return nil
 }

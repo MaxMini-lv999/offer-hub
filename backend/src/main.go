@@ -35,11 +35,22 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("init data: %w", err)
 	}
+
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer cancel()
 		if err := d.Close(ctx); err != nil {
 			log.Printf("close data: %v", err)
+		}
+	}()
+
+	rdb, err := data.InitRedis(config.Conf)
+	if err != nil {
+		return fmt.Errorf("init redis: %w", err)
+	}
+	defer func() {
+		if err := rdb.Close(); err != nil {
+			log.Printf("close redis: %v", err)
 		}
 	}()
 

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -32,4 +33,24 @@ func GenerateToken(userID string) (string, error) {
 	}
 
 	return s, nil
+}
+
+// ParseToken 校验并解析 token：签名、算法（只认 HS256）、过期时间都通过才返回 claims，
+// 返回的 claims.ExpiresAt 一定不为 nil
+func ParseToken(tokenStr string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr,
+		&Claims{},
+		func(t *jwt.Token) (any, error) { return []byte(config.Conf.JWT.Secret), nil },
+		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
+		jwt.WithExpirationRequired(),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("parse ParseToken: %w", err)
+	}
+	claims, ok := token.Claims.(*Claims)
+	if !ok {
+		return nil, errors.New("assert claims ParseToken: unexpected claims type")
+	}
+
+	return claims, nil
 }
