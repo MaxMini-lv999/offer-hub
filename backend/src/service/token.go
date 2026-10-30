@@ -43,6 +43,9 @@ func ParseToken(tokenStr string) (*Claims, error) {
 		func(t *jwt.Token) (any, error) { return []byte(config.Conf.JWT.Secret), nil },
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
 		jwt.WithExpirationRequired(),
+		// 严格 base64 解码：签名末位字符含 2 个填充位，非严格时同一 token 有 4 种写法都能验签，
+		// 黑名单按原始字符串存，会被换写法绕过
+		jwt.WithStrictDecoding(),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("parse ParseToken: %w", err)
