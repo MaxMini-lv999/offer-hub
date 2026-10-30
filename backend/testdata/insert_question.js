@@ -21,6 +21,7 @@
 //   - 时区：q121 创建于北京时间 2025-01-01 00:30，按 UTC 或美东时间格式化会显示成 2024-12-31
 //   - 分页：后端开发下正常状态的题共 21 道，默认 page_size=20 时第 2 页有 1 道
 //   - 空题库：b004 没有任何题目
+//   - 题目解析：只有 q101、q102 有 analysis_content，游客详情里应为空串
 
 import { Long } from 'mongodb';
 import { assertRefsExist, bj, run, seedCollection } from './common.js';
@@ -34,6 +35,7 @@ const QUESTIONS = [
   {
     question_id: 'q101', title: 'Redis 的持久化机制有哪些？',
     content: 'Redis 提供了 RDB 和 AOF 两种持久化方式。',
+    analysis_content: 'RDB 是定时快照，恢复快但可能丢最后一次快照之后的数据；AOF 记录每条写命令，数据更完整但文件更大。生产上一般两者同时开启。',
     bank_list: ['b002'], job_name: '后端开发', difficulty: 2, tags: ['Redis', '数据库'],
     hot_degree: 85, view_count: 1024, thumbs_up_count: 256, dislike_count: 12,
     create_time: '2024-01-01 12:00:00',
@@ -41,6 +43,7 @@ const QUESTIONS = [
   {
     question_id: 'q102', title: 'MySQL 索引为什么用 B+ 树？',
     content: 'MySQL 的 InnoDB 存储引擎选择 B+ 树作为索引结构，主要有以下几个原因。第一，B+ 树是多路平衡查找树，每个节点可以存放大量的键，树的高度通常只有三到四层，一次查询只需要很少的磁盘 IO。第二，B+ 树的非叶子节点只存放键不存放数据，同样大小的页能容纳更多的键，进一步降低树高。第三，所有数据都存放在叶子节点，并且叶子节点之间用双向链表相连，范围查询和排序只需要顺序遍历链表即可，这是哈希索引和普通 B 树都做不到的。第四，查询任何一条记录都要走到叶子节点，查询性能稳定，不会忽快忽慢。【这句话在第一百五十个字之后，游客看不到】',
+    analysis_content: '答题时按"树高 → 非叶子节点不存数据 → 叶子链表支持范围查询 → 查询性能稳定"的顺序说，最后可以对比哈希索引和 B 树。',
     bank_list: ['b001'], job_name: '后端开发', difficulty: 3, tags: ['MySQL', '数据库'],
     hot_degree: 90, view_count: 2048, thumbs_up_count: 512, dislike_count: 3,
     create_time: '2024-02-01 12:00:00',
@@ -281,13 +284,14 @@ const QUESTIONS = [
 ];
 
 // toDoc 补全默认值并转换类型，字段顺序与 data.Question 一致：
-// status 默认正常、vip 默认 false、update_time 默认等于 create_time
+// analysis_content 默认空串、status 默认正常、vip 默认 false、update_time 默认等于 create_time
 function toDoc(q, i) {
   const createTime = bj(q.create_time);
   return {
     question_id: q.question_id,
     title: q.title,
     content: q.content,
+    analysis_content: q.analysis_content ?? '',
     bank_list: q.bank_list,
     job_name: q.job_name,
     difficulty: q.difficulty,

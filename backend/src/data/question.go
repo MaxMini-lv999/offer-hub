@@ -17,22 +17,23 @@ const QuestionStatusNormal = 1
 
 // Question 对应 MongoDB question 集合
 type Question struct {
-	QuestionID    string    `bson:"question_id"`
-	Title         string    `bson:"title"`
-	Content       string    `bson:"content"`
-	BankList      []string  `bson:"bank_list"`
-	JobName       string    `bson:"job_name"`
-	Difficulty    int       `bson:"difficulty"`
-	Tags          []string  `bson:"tags"`
-	Status        int       `bson:"status"`
-	VIP           bool      `bson:"vip"`
-	HotDegree     int       `bson:"hot_degree"`
-	ViewCount     int       `bson:"view_count"`
-	ThumbsUpCount int       `bson:"thumbs_up_count"`
-	DislikeCount  int       `bson:"dislike_count"`
-	Order         int64     `bson:"order"`
-	CreateTime    time.Time `bson:"create_time"`
-	UpdateTime    time.Time `bson:"update_time"`
+	QuestionID      string    `bson:"question_id"`
+	Title           string    `bson:"title"`
+	Content         string    `bson:"content"`
+	AnalysisContent string    `bson:"analysis_content"` // 题目解析，只返回给登录用户
+	BankList        []string  `bson:"bank_list"`
+	JobName         string    `bson:"job_name"`
+	Difficulty      int       `bson:"difficulty"`
+	Tags            []string  `bson:"tags"`
+	Status          int       `bson:"status"`
+	VIP             bool      `bson:"vip"`
+	HotDegree       int       `bson:"hot_degree"`
+	ViewCount       int       `bson:"view_count"`
+	ThumbsUpCount   int       `bson:"thumbs_up_count"`
+	DislikeCount    int       `bson:"dislike_count"`
+	Order           int64     `bson:"order"`
+	CreateTime      time.Time `bson:"create_time"`
+	UpdateTime      time.Time `bson:"update_time"`
 }
 
 // QuestionFilter FilterQuestions 的查询条件，字段为零值表示不按该条件过滤

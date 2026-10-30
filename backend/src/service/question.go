@@ -172,20 +172,39 @@ func ListQuestionsMeta(ctx context.Context, req *model.ListQuestionMetaReq) (mod
 // ErrQuestionNotFound 题目不存在，ctrl 据此返回"题目不存在"
 var ErrQuestionNotFound = errors.New("question not found")
 
-// GetQuestionDetail 查询题目详情。目前还没有登录，所有请求都按游客处理：
-// user_tag / user_liked 返回零值；content 暂不截断，等鉴权模块完成后再加
-func GetQuestionDetail(ctx context.Context, req *model.GetQuestionDetailReq) (model.OneQuestion, error) {
-	detail, err := data.GetQuestionByID(ctx, req.QuestionID)
+// GetQuestionDetail 查询题目详情，userID 为空表示游客。
+// 游客：content 截断到前 150 字，analysis_content 为空，user_tag / user_liked 为零值；
+// 登录用户：返回完整 content 和 analysis_content，并查出自己的点赞和掌握状态
+func GetQuestionDetail(ctx context.Context, req *model.GetQuestionDetailReq, userID string) (model.QuestionDetail, error) {
+	q, err := data.GetQuestionByID(ctx, req.QuestionID)
 	if err != nil {
 		if errors.Is(err, data.ErrQuestionNotFound) {
-			return model.OneQuestion{}, ErrQuestionNotFound
+			return model.QuestionDetail{}, ErrQuestionNotFound
 		}
-		return model.OneQuestion{}, err
+		return model.QuestionDetail{}, err
 	}
-	question := toOneQuestion(detail)
-	// 游客：UserTag / UserLiked 保持零值
+	detail := model.QuestionDetail{OneQuestion: toOneQuestion(q)}
 
-	return question, nil
+	// ① 游客：截断 content，其余保持零值
+	if userID == "" {
+		detail.Content = truncate(detail.Content, guestContentLimit)
+		return detail, nil
+	}
+
+	// ② 登录用户：补上解析，再查点赞和掌握状态
+	detail.AnalysisContent = q.AnalysisContent
+	liked, err := data.IsQuestionLiked(ctx, userID, q.QuestionID)
+	if err != nil {
+		return model.QuestionDetail{}, fmt.Errorf("check liked GetQuestionDetail: %w", err)
+	}
+	tag, err := data.GetUserQuestionTag(ctx, userID, q.QuestionID)
+	if err != nil {
+		return model.QuestionDetail{}, fmt.Errorf("get tag GetQuestionDetail: %w", err)
+	}
+	detail.UserLiked = liked
+	detail.UserTag = tag
+
+	return detail, nil
 }
 
 // GetHotQuestions 查询热门题目列表（按 hot_degree 降序），可按职位方向过滤

@@ -26,7 +26,8 @@
 #
 # 游客 / 登录场景的拆分：
 #   本脚本只测游客：所有请求都不带 token，覆盖题目查询接口（软鉴权）的游客分支——
-#   列表 content 截断到 150 字、user_tag / user_liked 为零值、user_tag 过滤参数被忽略。
+#   列表和详情的 content 截断到 150 字、详情的 analysis_content 为空串、user_tag / user_liked 为零值、
+#   user_tag 过滤参数被忽略。
 #   鉴权模块完成后，复制本文件为 question_user.sh，按下面改：
 #     1. 预检之后先 POST /api/v1/auth/login 拿到 token（或从环境变量 TOKEN 传入），
 #        在 request() 的 curl 参数里加上 -H "Authorization: Bearer $TOKEN"
@@ -399,12 +400,18 @@ export QID
 request detail "$API/detail" question_id="$QID"
 expect_ok
 check "data.question_id == $QID" 'd["data"]["question_id"] == E["QID"]' 'd["data"]["question_id"]'
-check '字段齐全' 'set(d["data"]) == QUESTION_FIELDS' 'sorted(set(d["data"]) ^ QUESTION_FIELDS)'
-check '除 content 外的字段与列表里的同一道题完全相同' \
-  'all(d["data"][k] == by_id("list_default")[E["QID"]][k] for k in QUESTION_FIELDS - {"content"})' \
-  '[k for k in QUESTION_FIELDS - {"content"} if d["data"][k] != by_id("list_default")[E["QID"]][k]]'
+check '字段齐全：列表的字段 + analysis_content' 'set(d["data"]) == QUESTION_FIELDS | {"analysis_content"}' \
+  'sorted(set(d["data"]) ^ (QUESTION_FIELDS | {"analysis_content"}))'
+check '列表里有的字段与同一道题完全相同（游客的 content 两边都截断到 150 字）' \
+  'all(d["data"][k] == by_id("list_default")[E["QID"]][k] for k in QUESTION_FIELDS)' \
+  '[k for k in QUESTION_FIELDS if d["data"][k] != by_id("list_default")[E["QID"]][k]]'
 check '游客：user_tag=0、user_liked=false' 'd["data"]["user_tag"] == 0 and d["data"]["user_liked"] is False'
-skip '游客详情 content 截断到 150 字：接口文档要求，service.GetQuestionDetail 注释写明等鉴权模块完成后再加'
+check '游客：analysis_content 为空串' 'd["data"]["analysis_content"] == ""' 'd["data"]["analysis_content"]'
+request detail_q102 "$API/detail" question_id=q102
+expect_ok
+check '种子：q102 正文超过 150 字，游客只拿到前 150 字，看不到尾句' \
+  'len(d["data"]["content"]) == 150 and "游客看不到" not in d["data"]["content"]' 'len(d["data"]["content"])'
+check '种子：q102 有解析，游客拿到的 analysis_content 仍为空串' 'd["data"]["analysis_content"] == ""' 'd["data"]["analysis_content"]'
 
 step '4.2 题目详情：/list 里的每一道题都能查到，且与列表一致'
 CUR="$TMP_DIR/all_q.json"
@@ -416,13 +423,13 @@ fi
 for qid in $all_ids; do
   export QID=$qid
   QUIET=1 request detail_each "$API/detail" question_id="$qid"
-  ok=$(py 'd["code"] == 0 and all(d["data"][k] == by_id("all_q")[E["QID"]][k] for k in QUESTION_FIELDS - {"content"}) and d["data"]["content"].startswith(by_id("all_q")[E["QID"]]["content"])') || ok=false
+  ok=$(py 'd["code"] == 0 and all(d["data"][k] == by_id("all_q")[E["QID"]][k] for k in QUESTION_FIELDS) and d["data"]["analysis_content"] == ""') || ok=false
   if [[ $ok != true ]]; then
     bad+=("$qid")
   fi
 done
 if ((${#bad[@]} == 0)); then
-  pass "$(wc -w <<<"$all_ids" | tr -d ' ') 道题详情全部一致（列表里的 content 是详情 content 的前缀）"
+  pass "$(wc -w <<<"$all_ids" | tr -d ' ') 道题详情全部与列表一致，analysis_content 都为空串"
 else
   fail '有题目详情与列表不一致' "${bad[*]}"
 fi

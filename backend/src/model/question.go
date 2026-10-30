@@ -75,11 +75,17 @@ type GetQuestionDetailReq struct {
 	QuestionID string `json:"question_id" form:"question_id" binding:"required"`
 }
 
+// QuestionDetail 题目详情，比列表里的 OneQuestion 多一个题目解析
+type QuestionDetail struct {
+	OneQuestion
+	AnalysisContent string `json:"analysis_content"` // 游客为空字符串
+}
+
 // GetQuestionDetailResp GET /api/v1/question/detail 题目详情响应
 type GetQuestionDetailResp struct {
-	Code int         `json:"code"`
-	Msg  string      `json:"msg"`
-	Data OneQuestion `json:"data"`
+	Code int            `json:"code"`
+	Msg  string         `json:"msg"`
+	Data QuestionDetail `json:"data"`
 }
 
 // GetHotQuestionListReq GET /api/v1/question/hot/list 热门题目列表请求

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"offer-hub/ctrl/middleware"
 	"offer-hub/model"
 	"offer-hub/service"
 )
@@ -156,7 +157,10 @@ func GetQuestionDetail(c *gin.Context) {
 		return
 	}
 
-	detail, err := service.GetQuestionDetail(c.Request.Context(), &req)
+	// user_id 由 SoftJWTAuth 写入 context，空串表示游客；不能从请求头读，否则客户端可以伪造
+	userID := c.GetString(middleware.CtxKeyUserID)
+
+	detail, err := service.GetQuestionDetail(c.Request.Context(), &req, userID)
 	if err != nil {
 		if errors.Is(err, service.ErrQuestionNotFound) {
 			c.JSON(http.StatusOK, gin.H{
