@@ -221,22 +221,18 @@ function QuestionArticle({
         </div>
       </header>
 
-      <div className="relative mt-6">
+      {/* 游客遮罩高 200px，绝对定位叠在正文底部：下面 120px 是给按钮留的空白，
+          渐变在上面 80px 内从透明变到背景色，只盖住正文最后约 3 行，不然游客能看的 150 字会被淡掉一大半 */}
+      <div className={cn('relative mt-6', truncated && 'pb-[120px]')}>
         <Markdown content={question.content} />
-        {/* 遮住最后三行：3 × 行高 1.7em */}
         {truncated && (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-[5.1em] bg-gradient-to-b from-background/0 to-background"
-          />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-[200px] max-h-full items-end justify-center bg-gradient-to-b from-background/0 to-background to-40% pb-10">
+            <Button className="pointer-events-auto" onClick={() => setShowLoginDialog(true)}>
+              登录后查看完整内容
+            </Button>
+          </div>
         )}
       </div>
-
-      {truncated && (
-        <div className="mt-6 flex justify-center">
-          <Button onClick={() => setShowLoginDialog(true)}>登录后查看完整内容</Button>
-        </div>
-      )}
 
       {bankId && <PrevNextNav bankId={bankId} currentId={question.question_id} />}
     </article>
