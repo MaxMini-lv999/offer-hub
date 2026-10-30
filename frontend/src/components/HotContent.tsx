@@ -1,6 +1,7 @@
 import { useId, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronDown, Fire } from 'reicon-react'
+import IconChevronDown from '~icons/solar/alt-arrow-down-linear'
+import IconFire from '~icons/solar/fire-linear'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/button'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -62,17 +63,15 @@ export function HotContent({
             onClick={() => setCollapsed(open)}
             className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors duration-micro ease-standard hover:bg-muted focus-visible:outline-offset-[-2px]"
           >
-            <Fire size={20} />
+            <IconFire className="size-5" />
             热门题目
-            <ChevronDown
-              size={16}
-              aria-hidden
-              className={cn('ml-auto transition-transform duration-panel ease-standard', open && 'rotate-180')}
+            <IconChevronDown
+              className={cn('ml-auto size-4 transition-transform duration-panel ease-standard', open && 'rotate-180')}
             />
           </button>
         ) : (
           <span className="flex items-center gap-2 px-4 py-3">
-            <Fire size={20} />
+            <IconFire className="size-5" />
             热门题目
           </span>
         )}
@@ -93,7 +92,7 @@ export function HotContent({
 
           {data && data.list.length === 0 && (
             <EmptyState
-              icon={<Fire size={32} />}
+              icon={<IconFire className="size-8" />}
               title="暂无热门题目"
               className="border-0"
               action={

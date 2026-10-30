@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { forwardRef, useId, useRef, useState, type ComponentProps, type FormEvent, type KeyboardEvent } from 'react'
 import { useForm } from 'react-hook-form'
-import { Eye, EyeSlash } from 'reicon-react'
+import IconEye from '~icons/solar/eye-linear'
+import IconEyeClosed from '~icons/solar/eye-closed-linear'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -252,7 +253,7 @@ const PasswordInput = forwardRef<HTMLInputElement, Omit<ComponentProps<'input'>,
           aria-pressed={visible}
           className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors duration-micro ease-standard hover:text-foreground"
         >
-          {visible ? <EyeSlash size={16} /> : <Eye size={16} />}
+          {visible ? <IconEyeClosed className="size-4" /> : <IconEye className="size-4" />}
         </button>
       </div>
     )

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Teacher } from 'reicon-react'
+import IconAcademicCap from '~icons/solar/square-academic-cap-linear'
 import { cn } from '@/lib/utils'
 
 /**
@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 export function InterviewEntryLink({ to, label }: { to?: string; label: string }) {
   const content = (
     <>
-      <Teacher size={16} className="self-center" />
+      <IconAcademicCap className="size-4 self-center" />
       模拟面试
       <span className="hidden sm:inline">· {label}</span>→
     </>

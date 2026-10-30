@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Xmark } from "reicon-react"
+import IconClose from "~icons/solar/close-linear"
 
 import { cn } from "@/lib/utils"
 
@@ -65,7 +65,7 @@ const SheetContent = React.forwardRef<
       {...props}
     >
       <SheetPrimitive.Close className="absolute right-4 top-4 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus-visible:outline-1 focus-visible:outline-foreground disabled:pointer-events-none">
-        <Xmark size={16} />
+        <IconClose className="size-4" />
         <span className="sr-only">关闭</span>
       </SheetPrimitive.Close>
       {children}

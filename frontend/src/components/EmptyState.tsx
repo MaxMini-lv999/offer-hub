@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { AlertCircle, Refresh } from 'reicon-react'
+import IconAlertCircle from '~icons/solar/danger-circle-linear'
+import IconRefresh from '~icons/solar/refresh-linear'
 import { CharacterSprite } from '@/components/art'
 import { Button } from '@/components/ui/button'
 import type { MotionName } from '@/constants/art'
@@ -63,14 +64,14 @@ export function ErrorState({
 }) {
   return (
     <EmptyState
-      icon={<AlertCircle size={32} />}
+      icon={<IconAlertCircle className="size-8" />}
       pose={withArt ? 'repair' : undefined}
       title={`加载失败：${message}`}
       hint={withArt && <span className="text-system">请检查网络连接后重试</span>}
       className={className}
       action={
         <Button variant="outline" size="sm" onClick={onRetry}>
-          <Refresh size={16} />
+          <IconRefresh className="size-4" />
           重试
         </Button>
       }

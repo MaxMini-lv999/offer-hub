@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react'
 import { Link, useLocation, useNavigation } from 'react-router-dom'
-import { ChevronDown, Logout, Moon, Sun } from 'reicon-react'
+import IconChevronDown from '~icons/solar/alt-arrow-down-linear'
+import IconLogout from '~icons/solar/logout-linear'
+import IconMoon from '~icons/solar/moon-linear'
+import IconSun from '~icons/solar/sun-linear'
 import { LoadingBar } from '@/components/LoadingBar'
 import {
   DropdownMenu,
@@ -84,7 +87,7 @@ export function Header() {
             title={theme === 'dark' ? '切换到亮色主题' : '切换到暗色主题'}
             className="flex h-9 w-9 shrink-0 items-center justify-center transition-colors duration-micro ease-standard hover:bg-muted"
           >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === 'dark' ? <IconSun className="size-[18px]" /> : <IconMoon className="size-[18px]" />}
           </button>
           <AccountEntry />
         </div>
@@ -156,7 +159,7 @@ function UserMenu({ userInfo, onLogout }: { userInfo: UserInfo; onLogout: () => 
         <UserAvatar src={userInfo.avatar} name={name} />
         {/* 手机上导航栏挤，昵称最多显示 4 个字左右 */}
         <span className="max-w-[4.5em] truncate font-medium sm:max-w-[8em]">{name}</span>
-        <ChevronDown size={14} aria-hidden className="hidden shrink-0 text-muted-foreground sm:block" />
+        <IconChevronDown className="hidden size-3.5 shrink-0 text-muted-foreground sm:block" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={8} className="w-56">
         <DropdownMenuLabel className="space-y-0.5 py-2 font-normal">
@@ -176,7 +179,7 @@ function UserMenu({ userInfo, onLogout }: { userInfo: UserInfo; onLogout: () => 
             void onLogout()
           }}
         >
-          <Logout />
+          <IconLogout />
           {leaving ? '退出中…' : '退出登录'}
         </DropdownMenuItem>
       </DropdownMenuContent>

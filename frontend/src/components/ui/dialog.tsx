@@ -1,6 +1,6 @@
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { Xmark } from "reicon-react"
+import IconClose from "~icons/solar/close-linear"
 
 import { cn } from "@/lib/utils"
 
@@ -49,7 +49,7 @@ const DialogContent = React.forwardRef<
         {children}
         {/* 44px 触控区 */}
         <DialogPrimitive.Close className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center text-muted-foreground transition-colors duration-micro ease-standard hover:bg-muted hover:text-foreground">
-          <Xmark size={18} />
+          <IconClose className="size-[18px]" />
           <span className="sr-only">关闭</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>

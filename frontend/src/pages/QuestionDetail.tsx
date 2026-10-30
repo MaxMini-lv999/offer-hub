@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Clock, Eye, FileText, Menu, Teacher, ThumbsUp } from 'reicon-react'
+import IconChevronLeft from '~icons/solar/alt-arrow-left-linear'
+import IconChevronRight from '~icons/solar/alt-arrow-right-linear'
+import IconClock from '~icons/solar/clock-circle-linear'
+import IconEye from '~icons/solar/eye-linear'
+import IconFileText from '~icons/solar/file-text-linear'
+import IconMenu from '~icons/solar/hamburger-menu-linear'
+import IconAcademicCap from '~icons/solar/square-academic-cap-linear'
+import IconThumbsUp from '~icons/solar/like-linear'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
 import { InterviewMode } from '@/components/InterviewMode'
@@ -63,7 +70,7 @@ export function QuestionDetailPage() {
 
   const notFoundState = notFound && (
     <EmptyState
-      icon={<FileText size={32} />}
+      icon={<IconFileText className="size-8" />}
       title="题目不存在或已下线"
       action={
         <Button variant="outline" size="sm" asChild>
@@ -110,7 +117,7 @@ export function QuestionDetailPage() {
     if (isPending) return <QuestionNavSkeleton className={className} />
     return (
       <EmptyState
-        icon={<FileText size={32} />}
+        icon={<IconFileText className="size-8" />}
         title="没有可显示的题目列表"
         className={cn('h-full justify-center', className)}
         action={
@@ -132,7 +139,7 @@ export function QuestionDetailPage() {
           <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
             <SheetTrigger asChild>
               <Button variant="outline">
-                <Menu size={16} />
+                <IconMenu className="size-4" />
                 题目列表
               </Button>
             </SheetTrigger>
@@ -183,7 +190,7 @@ function QuestionArticle({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
           <h1 className="font-title text-title font-semibold">{question.title}</h1>
           <Button variant="outline" onClick={onInterview} className="shrink-0 self-start">
-            <Teacher />
+            <IconAcademicCap />
             模拟面试
           </Button>
         </div>
@@ -200,15 +207,15 @@ function QuestionArticle({
             </span>
           )}
           <span className="inline-flex items-center gap-1">
-            <Eye size={14} />
+            <IconEye className="size-3.5" />
             {question.view_count} 浏览
           </span>
           <span className="inline-flex items-center gap-1">
-            <ThumbsUp size={14} />
+            <IconThumbsUp className="size-3.5" />
             {question.thumbs_up_count} 点赞
           </span>
           <span className="inline-flex items-center gap-1">
-            <Clock size={14} />
+            <IconClock className="size-3.5" />
             {question.create_time}
           </span>
         </div>
@@ -263,9 +270,9 @@ function NeighborLink({
   const align = direction === 'next' && 'items-end text-right'
   const caption = (
     <span className="inline-flex items-center gap-1 text-meta text-muted-foreground">
-      {direction === 'prev' && <ChevronLeft size={14} />}
+      {direction === 'prev' && <IconChevronLeft className="size-3.5" />}
       {label}
-      {direction === 'next' && <ChevronRight size={14} />}
+      {direction === 'next' && <IconChevronRight className="size-3.5" />}
     </span>
   )
 

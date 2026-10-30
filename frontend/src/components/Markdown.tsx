@@ -2,7 +2,8 @@ import { isValidElement, useEffect, useRef, useState, type ReactNode } from 'rea
 import ReactMarkdown, { type Components } from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
-import { Check, Copy } from 'reicon-react'
+import IconCheck from '~icons/solar/check-linear'
+import IconCopy from '~icons/solar/copy-linear'
 import { cn } from '@/lib/utils'
 
 /** 代码块：方角、muted 底色，右上角是语言名和复制按钮，长代码横向滚动 */
@@ -38,7 +39,7 @@ function CodeBlock({ children }: { children?: ReactNode }) {
           onClick={copy}
           className="inline-flex items-center gap-1 decoration-2 underline-offset-4 hover:text-foreground hover:underline"
         >
-          {copied ? <Check size={14} /> : <Copy size={14} />}
+          {copied ? <IconCheck className="size-3.5" /> : <IconCopy className="size-3.5" />}
           {copied ? '已复制' : '复制'}
         </button>
       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { FileText, SearchStatus } from 'reicon-react'
+import IconFileText from '~icons/solar/file-text-linear'
+import IconMagnifierClose from '~icons/solar/magnifier-close-linear'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
 import { SearchBox } from '@/components/SearchBox'
 import { Button } from '@/components/ui/button'
@@ -97,7 +98,7 @@ export function QuestionNav({
 
         {data && list.length === 0 && (
           <EmptyState
-            icon={keyword ? <SearchStatus size={32} /> : <FileText size={32} />}
+            icon={keyword ? <IconMagnifierClose className="size-8" /> : <IconFileText className="size-8" />}
             title={keyword ? '没有匹配的题目' : '这个题库还没有题目'}
             className="border-0"
             action={

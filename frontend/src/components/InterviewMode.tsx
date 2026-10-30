@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { DocumentText, History } from 'reicon-react'
+import IconDocumentText from '~icons/solar/document-text-linear'
+import IconHistory from '~icons/solar/history-linear'
 import { CharacterSprite } from '@/components/art'
 import { PanelCaption } from '@/components/bento'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
@@ -261,11 +262,11 @@ export function InterviewMode({
           </Select>
           {/* 手机上只留图标，工具栏保持一行 */}
           <Button variant="outline" onClick={() => setBacklogOpen(true)} aria-label="回看" className="px-2.5 sm:px-4">
-            <History />
+            <IconHistory />
             <span className="hidden sm:inline">回看</span>
           </Button>
           <Button variant="outline" onClick={onExit} aria-label="阅读模式" className="px-2.5 sm:px-4">
-            <DocumentText />
+            <IconDocumentText />
             <span className="hidden sm:inline">阅读模式</span>
           </Button>
         </div>

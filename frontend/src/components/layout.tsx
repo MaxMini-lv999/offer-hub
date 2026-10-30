@@ -1,5 +1,5 @@
 import { Outlet, ScrollRestoration } from 'react-router-dom'
-import { Link2 } from 'reicon-react'
+import IconLink from '~icons/solar/link-minimalistic-linear'
 import { LoginDialog } from '@/components/auth/LoginDialog'
 import { Header } from '@/components/Header'
 
@@ -24,7 +24,7 @@ export function Layout() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 decoration-2 underline-offset-4 hover:text-foreground hover:underline"
           >
-            <Link2 size={14} />
+            <IconLink className="size-3.5" />
             GitHub 仓库
           </a>
         </div>

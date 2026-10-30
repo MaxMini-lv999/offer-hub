@@ -1,6 +1,6 @@
 # offer-hub 前端
 
-React 18 + TypeScript + Vite 6 + Tailwind CSS 3 + shadcn/ui + React Router v6 + React Query + axios + React Hook Form + Zod，图标用 [Reicon](https://reicon.dev)（`reicon-react`）。
+React 18 + TypeScript + Vite 6 + Tailwind CSS 3 + shadcn/ui + React Router v6 + React Query + axios + React Hook Form + Zod，图标用 [Iconify](https://iconify.design)（`unplugin-icons` 构建时编译，见下面「图标」）。
 
 ## 命令
 
@@ -18,7 +18,27 @@ npm run lint
 - **shadcn 必须用 `npx shadcn@2.3.0 add <组件>`**，不要用 `shadcn@latest`。latest 需要 Node 20+，而且生成的是 React 19 + Tailwind 4 写法（去掉了 `forwardRef`），在 React 18 下 ref 会丢。
 - Tailwind 3（不是 4），对应 `tailwind-merge` 2.x。
 - Vite 6 + `@vitejs/plugin-react` 4（Vite 7 需要 Node 20.19+）。
-- shadcn 的部分组件（Dialog、Select 等）内部用 `lucide-react`，`add` 时会自动装上，组件内部保留即可；业务代码里的图标统一用 `reicon-react`。
+- shadcn 的部分组件（Dialog、Select 等）内部用 `lucide-react`，`add` 时会自动装上；把组件里的图标换成 Iconify 的 Solar 图标，再 `npm uninstall lucide-react`，全站只用一套图标。
+- `unplugin-icons` 锁在 22.2.x：之后的版本依赖 `@iconify/utils` 3.1+，用到 Node 20 才有的 `node:util.styleText`，在 Node 18 上 vite 配置直接加载失败。
+
+## 图标
+
+图标来自 [Iconify](https://icon-sets.iconify.design/)，由 `unplugin-icons` 在构建时从 `@iconify-json/<图标集>` 编译成 React 组件：只打包用到的图标，运行时不请求 api.iconify.design，不会先空白再闪出来。
+
+```tsx
+import IconRefresh from '~icons/solar/refresh-linear'
+
+<IconRefresh className="size-4" />
+```
+
+- **界面图标统一用 Solar 的 linear 款**（`~icons/solar/<名字>-linear`，1.5px 描边、圆角端点），到 [Solar 图标集](https://icon-sets.iconify.design/solar/) 按名字搜。不要混用别的界面图标集。
+- **尺寸**用 Tailwind 的 `size-*` 类（`size-3.5` = 14px、`size-4` = 16px、`size-8` = 32px），不写就是 `1em`，跟随字号。shadcn 的 Button、DropdownMenuItem 里会被 `[&_svg]:size-4` 统一成 16px。
+- **颜色**跟随文字色（`currentColor`），改颜色就改 `text-*`。
+- 图标默认带 `aria-hidden="true"`（`vite.config.ts` 里统一加的），只有图标、没有文字的按钮要自己写 `aria-label`。
+- 组件命名用 `Icon` + 图标含义，如 `IconChevronLeft`（Solar 叫 `alt-arrow-left`）。
+- **题库的技术品牌 logo**（`components/BankLogo.tsx`）用单色品牌图标集：`simple-icons`（MongoDB、Go、React、Vue），MySQL 和 Redis 用 `devicon-plain`（Simple Icons 的 MySQL 带字标、Redis 是新标，40px 方框里看不清）。颜色在 `BankLogo.tsx` 里按品牌色给。
+- 用新的图标集先装对应的 JSON 包：`npm i -D @iconify-json/<图标集>`（`unplugin-icons` 的自动安装没开）。
+- 许可：Solar 是 CC BY 4.0（作者 480 Design），Simple Icons 是 CC0，Devicon 是 MIT。
 
 ## 目录
 

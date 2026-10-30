@@ -1,6 +1,11 @@
 import { forwardRef, useEffect, useLayoutEffect, useRef, type FocusEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Eye, FileText, SearchStatus, Xmark } from 'reicon-react'
+import IconChevronLeft from '~icons/solar/alt-arrow-left-linear'
+import IconChevronRight from '~icons/solar/alt-arrow-right-linear'
+import IconEye from '~icons/solar/eye-linear'
+import IconFileText from '~icons/solar/file-text-linear'
+import IconMagnifierClose from '~icons/solar/magnifier-close-linear'
+import IconClose from '~icons/solar/close-linear'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
 import { LoadingBar } from '@/components/LoadingBar'
@@ -95,7 +100,7 @@ export const QuestionFilterBar = forwardRef<HTMLElement, { filters: QuestionFilt
               className="inline-flex items-center gap-1 border border-foreground bg-foreground px-2 text-background transition-opacity hover:opacity-80"
             >
               {tag}
-              <Xmark size={12} />
+              <IconClose className="size-3" />
             </button>
           ))}
           <button
@@ -168,7 +173,7 @@ export function QuestionResults({ bankId, filters }: { bankId?: string; filters:
         // total > 0 却没数据，说明 URL 里的页码超出范围
         <EmptyState
           className="border-t-0"
-          icon={data.total > 0 ? <SearchStatus size={32} /> : <FileText size={32} />}
+          icon={data.total > 0 ? <IconMagnifierClose className="size-8" /> : <IconFileText className="size-8" />}
           pose={data.total > 0 ? undefined : hasFilter ? 'thinking' : 'explain'}
           title={data.total > 0 ? '这一页没有题目' : hasFilter ? '没有找到符合条件的题目' : '这里还没有题目'}
           action={
@@ -296,7 +301,7 @@ function QuestionItem({
           </span>
         )}
         <span className="ml-auto inline-flex items-center justify-end gap-1 tabular-nums xl:order-3 xl:ml-0 xl:w-16">
-          <Eye size={14} />
+          <IconEye className="size-3.5" />
           {question.view_count}
         </span>
       </div>
@@ -348,7 +353,7 @@ function Pagination({
             onClick={() => onChange(page - 1)}
             className={cn(itemClass, 'hover:border-foreground disabled:pointer-events-none disabled:opacity-40')}
           >
-            <ChevronLeft size={16} />
+            <IconChevronLeft className="size-4" />
           </button>
           {getPageItems(page, totalPages).map((item, i) =>
             item === 'ellipsis' ? (
@@ -377,7 +382,7 @@ function Pagination({
             onClick={() => onChange(page + 1)}
             className={cn(itemClass, 'hover:border-foreground disabled:pointer-events-none disabled:opacity-40')}
           >
-            <ChevronRight size={16} />
+            <IconChevronRight className="size-4" />
           </button>
         </div>
       )}

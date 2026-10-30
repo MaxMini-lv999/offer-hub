@@ -1,5 +1,7 @@
 import { createSearchParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Book, Eye, Teacher } from 'reicon-react'
+import IconBook from '~icons/solar/book-linear'
+import IconEye from '~icons/solar/eye-linear'
+import IconAcademicCap from '~icons/solar/square-academic-cap-linear'
 import { ArtImage, CharacterSprite, MotionVector } from '@/components/art'
 import { BankLogo } from '@/components/BankLogo'
 import { BentoCard, PanelCaption } from '@/components/bento'
@@ -55,7 +57,7 @@ export function HomePage() {
 
           {data && data.length === 0 && (
             <EmptyState
-              icon={<Book size={32} />}
+              icon={<IconBook className="size-8" />}
               title="还没有任何题库"
               action={
                 <Button variant="outline" size="sm" onClick={() => refetch()}>
@@ -162,14 +164,14 @@ function TodayHeadline() {
           </h2>
           <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-meta lg:mt-0 lg:shrink-0 lg:justify-end">
             <span className="inline-flex items-center gap-1 tabular-nums text-muted-foreground">
-              <Eye size={14} />
+              <IconEye className="size-3.5" />
               {today.view_count} 次浏览
             </span>
             <Link
               to={questionPath(today.question_id, today.bank_list[0], 'interview')}
               className="inline-flex items-center gap-1 font-medium decoration-2 underline-offset-4 hover:underline"
             >
-              <Teacher size={14} />
+              <IconAcademicCap className="size-3.5" />
               用模拟面试作答 →
             </Link>
           </div>
@@ -343,7 +345,7 @@ function SeriesIndex({ group }: { group: JobQuestionGroup }) {
   if (group.series_list.length === 0) {
     return (
       <EmptyState
-        icon={<Book size={32} />}
+        icon={<IconBook className="size-8" />}
         title="这个方向还没有题库"
         className="mt-6 lg:mt-0"
         action={

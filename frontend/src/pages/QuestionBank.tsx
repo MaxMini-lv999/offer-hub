@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { Refresh } from 'reicon-react'
+import IconRefresh from '~icons/solar/refresh-linear'
 import { BankLogo } from '@/components/BankLogo'
 import { HotContent } from '@/components/HotContent'
 import { InterviewEntryLink } from '@/components/InterviewEntryLink'
@@ -42,7 +42,7 @@ export function QuestionBankPage() {
           <div className="flex items-center gap-3">
             <p className="text-muted-foreground">题库信息加载失败</p>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
-              <Refresh size={16} />
+              <IconRefresh className="size-4" />
               重试
             </Button>
           </div>
