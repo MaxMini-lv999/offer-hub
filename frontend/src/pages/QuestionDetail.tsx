@@ -9,9 +9,9 @@ import { QuestionNav, QuestionNavSkeleton } from '@/components/QuestionNav'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { GUEST_CONTENT_LIMIT } from '@/constants/question'
+import { useLogin } from '@/hooks/useLogin'
 import { useNeighbors } from '@/hooks/useNeighbors'
 import { useQuestionDetail } from '@/hooks/useQuestionQueries'
-import { hasToken } from '@/lib/axios'
 import { MASTERY_LABELS, recordVisit, useProgress } from '@/lib/progress'
 import { ApiError } from '@/lib/request'
 import { cn } from '@/lib/utils'
@@ -29,6 +29,7 @@ export function QuestionDetailPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const interview = searchParams.get('mode') === 'interview'
   const { data: question, isPending, isError, error, refetch } = useQuestionDetail(questionId)
+  const { isLoggedIn } = useLogin()
 
   // 左侧题目栏的搜索词放在这里：手机端抽屉关掉再打开，搜索词还在
   const [navKeyword, setNavKeyword] = useState('')
@@ -40,8 +41,8 @@ export function QuestionDetailPage() {
 
   // 后端题目不存在（含隐藏、删除）时返回 HTTP 200 + code 400
   const notFound = isError && error instanceof ApiError && error.code === 400
-  // 游客拿到的 content 被后端截断到 150 字；满 150 字说明后面还有内容
-  const truncated = !!question && !hasToken() && [...question.content].length >= GUEST_CONTENT_LIMIT
+  // 游客拿到的 content 被后端截断到 150 字；满 150 字说明后面还有内容。在弹窗里登录后遮罩当场消失
+  const truncated = !!question && !isLoggedIn && [...question.content].length >= GUEST_CONTENT_LIMIT
 
   // 记进本机的「最近浏览」，首页「继续上次」用
   useEffect(() => {
@@ -174,6 +175,7 @@ function QuestionArticle({
 }) {
   const { mastery } = useProgress()
   const mark = mastery[question.question_id]
+  const { setShowLoginDialog } = useLogin()
 
   return (
     <article className="max-w-[72ch]">
@@ -225,9 +227,7 @@ function QuestionArticle({
 
       {truncated && (
         <div className="mt-6 flex justify-center">
-          <Button asChild>
-            <Link to="/login">登录后查看完整内容</Link>
-          </Button>
+          <Button onClick={() => setShowLoginDialog(true)}>登录后查看完整内容</Button>
         </div>
       )}
 

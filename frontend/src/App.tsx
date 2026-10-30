@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { Layout } from '@/components/layout'
+import { LoginProvider } from '@/components/provider/LoginProvider'
 import { QueryProvider } from '@/components/provider/query-provider'
 import { RouteLoading } from '@/components/RouteLoading'
 import { ErrorPage } from '@/pages/ErrorPage'
@@ -69,7 +70,9 @@ const router = createBrowserRouter(
 export default function App() {
   return (
     <QueryProvider>
-      <RouterProvider router={router} future={{ v7_startTransition: true }} />
+      <LoginProvider>
+        <RouterProvider router={router} future={{ v7_startTransition: true }} />
+      </LoginProvider>
     </QueryProvider>
   )
 }

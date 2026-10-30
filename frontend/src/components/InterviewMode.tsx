@@ -12,6 +12,7 @@ import { ChoiceList, type Choice } from '@/components/vn/ChoiceList'
 import { DialogueBox } from '@/components/vn/DialogueBox'
 import { VNStage } from '@/components/vn/VNStage'
 import { ART, GUIDE, preloadArt, type ArtAsset, type MotionName } from '@/constants/art'
+import { useLogin } from '@/hooks/useLogin'
 import { useIsDesktop } from '@/hooks/useMediaQuery'
 import { useNeighbors } from '@/hooks/useNeighbors'
 import { useTypewriter } from '@/hooks/useTypewriter'
@@ -96,6 +97,7 @@ export function InterviewMode({
   onExit: () => void
 }) {
   const navigate = useNavigate()
+  const { showLoginDialog, setShowLoginDialog } = useLogin()
   const theme = useTheme()
   const isDesktop = useIsDesktop()
   const { next } = useNeighbors(bankId, question.question_id)
@@ -123,6 +125,11 @@ export function InterviewMode({
   const typer = useTypewriter<HTMLDivElement>(stepKey, settings.speed)
 
   const afterAnswers = (): Step => (truncated ? { kind: 'truncated' } : { kind: 'rate' })
+
+  // 停在「先讲到这里」时在弹窗里登录了：详情接口目前对游客也返回完整解析，前面已经讲完，直接进入自评
+  useEffect(() => {
+    if (!truncated && step.kind === 'truncated') setStep({ kind: 'rate' })
+  }, [truncated, step.kind])
   const firstAnswer = (): Step => (segments.length > 0 ? { kind: 'answer', index: 0 } : afterAnswers())
   const nextLabel = next ? '下一题' : '回到题库'
 
@@ -175,7 +182,7 @@ export function InterviewMode({
     case 'truncated':
       line = <p>参考答案先讲到这里。登录之后能看完整解析，掌握进度也会同步到账号。</p>
       choices = [
-        { label: '去登录', onSelect: () => navigate('/login') },
+        { label: '去登录', onSelect: () => setShowLoginDialog(true) },
         { label: nextLabel, onSelect: goNext },
         { label: '回到阅读模式', onSelect: onExit },
       ]
@@ -225,7 +232,8 @@ export function InterviewMode({
       onBacklog: () => setBacklogOpen(true),
       onExit,
     },
-    !backlogOpen,
+    // 回看日志或登录弹窗打开时停用，Esc 只关它们，数字键不会点到背后的选项
+    !backlogOpen && !showLoginDialog,
   )
 
   return (

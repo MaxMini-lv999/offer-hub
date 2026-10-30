@@ -61,11 +61,27 @@
   }
 }
 
+/* 表单提交失败：左右各 3px 抖两下 */
+.ohm-retry {
+  animation: ohm-retry var(--duration-panel) var(--ease-standard);
+}
+@keyframes ohm-retry {
+  20%,
+  60% {
+    transform: translateX(-3px);
+  }
+  40%,
+  80% {
+    transform: translateX(3px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ohm-sprite,
   .ohm-character-enter,
   .ohm-breathe,
-  .ohm-continue {
+  .ohm-continue,
+  .ohm-retry {
     animation: none !important;
   }
 }

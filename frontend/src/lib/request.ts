@@ -20,9 +20,14 @@ async function unwrap<T>(req: Promise<AxiosResponse<ApiResponse<T>>>) {
     res = await req
   } catch (err) {
     if (isAxiosError<ApiResponse<unknown>>(err)) {
-      // 500 时后端也会返回 { code, msg }，优先用后端的 msg
+      // 500 时后端也会返回 { code, msg }，优先用后端的 msg；没有 msg（断网、超时、代理连不上后端）时换成中文提示，不显示 axios 的英文报错
       const body = err.response?.data
-      throw new ApiError(body?.code ?? err.response?.status ?? -1, body?.msg ?? err.message)
+      const fallback = err.response
+        ? `服务暂时不可用（HTTP ${err.response.status}），请稍后再试`
+        : err.code === 'ECONNABORTED'
+          ? '请求超时，请稍后再试'
+          : '网络连接失败，请检查网络后重试'
+      throw new ApiError(body?.code ?? err.response?.status ?? -1, body?.msg ?? fallback)
     }
     throw err
   }
