@@ -14,7 +14,8 @@ func RegisterRouter(r *gin.Engine) {
 	api := r.Group("/api")
 	v1 := api.Group("/v1")
 
-	question := v1.Group("/question")
+	// 软鉴权：游客也能访问，登录用户额外带上 user_id
+	question := v1.Group("/question", middleware.SoftJWTAuth())
 	question.GET("/all/list", questionCtrl.GetAllQuestionList)
 	question.GET("/list", questionCtrl.ListQuestions)
 	question.GET("/meta/list", questionCtrl.ListQuestionsMeta)

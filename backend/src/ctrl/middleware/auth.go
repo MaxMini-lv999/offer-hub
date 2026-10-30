@@ -55,3 +55,25 @@ func JWTAuth() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// SoftJWTAuth 软鉴权：token 有效就把 user_id 存进 context，否则按游客放行，任何情况都不返回 401。
+// handler 用 c.GetString(CtxKeyUserID) 读取，空串表示游客
+func SoftJWTAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token, found := strings.CutPrefix(c.GetHeader("Authorization"), "Bearer ")
+		if !found || token == "" {
+			return
+		}
+		claims, err := service.AuthenticateToken(c.Request.Context(), token)
+		if err != nil {
+			// 无效、过期、已登出是正常情况，不打日志；Redis 出错才记录，同样按游客放行
+			if !errors.Is(err, service.ErrInvalidToken) {
+				log.Printf("service.AuthenticateToken: %v", err)
+			}
+			return
+		}
+		c.Set(CtxKeyUserID, claims.UserID)
+
+		c.Next()
+	}
+}
