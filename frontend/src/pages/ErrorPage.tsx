@@ -17,6 +17,7 @@ export function ErrorPage() {
       <StageNotice
         code="出错了"
         title="页面出错了"
+        pose="repair"
         line="页面出了点问题，刷新一下通常就好了。"
         detail={message}
         choices={[

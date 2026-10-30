@@ -23,5 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
-# 插画母图约 50MB，不进普通 git 历史；网页用的 WebP 在 public/offer-hub-assets/
+# 旧插画包（已停用）的母图约 50MB，不进普通 git 历史
 design/offer-hub-assets/originals/
+
+# 动效包的生成原稿和逐帧 PNG 约 31MB，不进普通 git 历史；public/ 是网页文件的原件，已复制到 public/offer-hub-motion/
+design/offer-hub-motion-assets/masters/
+design/offer-hub-motion-assets/frames/
+design/offer-hub-motion-assets/public/

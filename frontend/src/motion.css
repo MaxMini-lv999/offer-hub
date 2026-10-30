@@ -1,0 +1,138 @@
+/*
+ * 动效包 frontend/design/offer-hub-motion-assets/public/assets/offer-hub-motion/ 里 motion.css 用到的部分，缓动改用站点 token；
+ * 下面的 @keyframes ohm-frames-* 是 frames.css 原样复制的（动效包 tools/build-motion.cjs 生成），重新生成后整段替换。
+ * 系统开了「减少动态效果」时全部停在静止状态
+ */
+
+/* 8 帧横排序列图：播放时背景放大 8 倍、按帧跳位置；静止时换成同尺寸的单张封面 */
+.ohm-sprite {
+  display: inline-block;
+  flex-shrink: 0;
+  aspect-ratio: 1;
+  background-repeat: no-repeat;
+  background-size: 800% 100%;
+  background-position: 0 0;
+  animation-timing-function: steps(1, end);
+  animation-fill-mode: both;
+  vertical-align: middle;
+  pointer-events: none;
+  contain: layout paint;
+}
+.ohm-sprite[data-active='false'] {
+  background-size: 100% 100%;
+  animation: none !important;
+}
+
+/* 立绘入场：从右边 12px 淡入 */
+.ohm-character-enter {
+  animation: ohm-character var(--duration-panel) var(--ease-standard) both;
+}
+@keyframes ohm-character {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 静态立绘的呼吸：4.2 秒上下 2px，脚底不动 */
+.ohm-breathe {
+  animation: ohm-breathe 4200ms ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+@keyframes ohm-breathe {
+  50% {
+    transform: translateY(-2px) scaleY(1.003);
+  }
+}
+
+/* VN 推进提示：台词显示完、可以继续时横向轻推 */
+.ohm-continue {
+  display: inline-block;
+  animation: ohm-continue 1400ms ease-in-out infinite;
+}
+@keyframes ohm-continue {
+  50% {
+    transform: translateX(3px);
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ohm-sprite,
+  .ohm-character-enter,
+  .ohm-breathe,
+  .ohm-continue {
+    animation: none !important;
+  }
+}
+
+@keyframes ohm-frames-wave{
+0.00000%{background-position:0.000000% 0}
+23.33333%{background-position:14.285714% 0}
+30.00000%{background-position:28.571429% 0}
+40.00000%{background-position:42.857143% 0}
+50.00000%{background-position:57.142857% 0}
+60.00000%{background-position:71.428571% 0}
+70.00000%{background-position:85.714286% 0}
+80.00000%{background-position:100.000000% 0}
+100%{background-position:100% 0}
+}
+@keyframes ohm-frames-thinking{
+0.00000%{background-position:0.000000% 0}
+20.83333%{background-position:14.285714% 0}
+31.25000%{background-position:28.571429% 0}
+41.66667%{background-position:42.857143% 0}
+54.16667%{background-position:57.142857% 0}
+66.66667%{background-position:71.428571% 0}
+77.08333%{background-position:85.714286% 0}
+87.50000%{background-position:100.000000% 0}
+100%{background-position:100% 0}
+}
+@keyframes ohm-frames-typing{
+0.00000%{background-position:0.000000% 0}
+12.50000%{background-position:14.285714% 0}
+25.00000%{background-position:28.571429% 0}
+37.50000%{background-position:42.857143% 0}
+50.00000%{background-position:57.142857% 0}
+62.50000%{background-position:71.428571% 0}
+75.00000%{background-position:85.714286% 0}
+87.50000%{background-position:100.000000% 0}
+100%{background-position:100% 0}
+}
+@keyframes ohm-frames-explain{
+0.00000%{background-position:0.000000% 0}
+16.30435%{background-position:14.285714% 0}
+26.08696%{background-position:28.571429% 0}
+35.86957%{background-position:42.857143% 0}
+52.17391%{background-position:57.142857% 0}
+65.21739%{background-position:71.428571% 0}
+75.00000%{background-position:85.714286% 0}
+84.78261%{background-position:100.000000% 0}
+100%{background-position:100% 0}
+}
+@keyframes ohm-frames-celebrate{
+0.00000%{background-position:0.000000% 0}
+11.84211%{background-position:14.285714% 0}
+21.05263%{background-position:28.571429% 0}
+31.57895%{background-position:42.857143% 0}
+46.05263%{background-position:57.142857% 0}
+60.52632%{background-position:71.428571% 0}
+71.05263%{background-position:85.714286% 0}
+80.26316%{background-position:100.000000% 0}
+100%{background-position:100% 0}
+}
+@keyframes ohm-frames-repair{
+0.00000%{background-position:0.000000% 0}
+14.28571%{background-position:14.285714% 0}
+23.80952%{background-position:28.571429% 0}
+38.09524%{background-position:42.857143% 0}
+47.61905%{background-position:57.142857% 0}
+61.90476%{background-position:71.428571% 0}
+71.42857%{background-position:85.714286% 0}
+85.71429%{background-position:100.000000% 0}
+100%{background-position:100% 0}
+}

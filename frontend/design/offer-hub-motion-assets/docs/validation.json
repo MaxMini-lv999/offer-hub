@@ -1,0 +1,843 @@
+{
+  "webImageCount": 66,
+  "allDecoded": true,
+  "maxWebImageBytes": 148464,
+  "motion": [
+    {
+      "id": "wave",
+      "pages": 8,
+      "duration": 1500,
+      "loop": 1,
+      "uniqueDecodedFrames": 5
+    },
+    {
+      "id": "thinking",
+      "pages": 8,
+      "duration": 2400,
+      "loop": 0,
+      "uniqueDecodedFrames": 7
+    },
+    {
+      "id": "typing",
+      "pages": 8,
+      "duration": 1280,
+      "loop": 0,
+      "uniqueDecodedFrames": 7
+    },
+    {
+      "id": "explain",
+      "pages": 8,
+      "duration": 1840,
+      "loop": 0,
+      "uniqueDecodedFrames": 7
+    },
+    {
+      "id": "celebrate",
+      "pages": 8,
+      "duration": 1520,
+      "loop": 1,
+      "uniqueDecodedFrames": 7
+    },
+    {
+      "id": "repair",
+      "pages": 8,
+      "duration": 1680,
+      "loop": 0,
+      "uniqueDecodedFrames": 7
+    }
+  ],
+  "files": [
+    {
+      "file": "public/assets/offer-hub-motion/animated/celebrate-192.webp",
+      "bytes": 81780,
+      "width": 192,
+      "height": 192,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 1,
+      "delay": [
+        180,
+        140,
+        160,
+        220,
+        220,
+        160,
+        140,
+        300
+      ],
+      "sha256": "1e9b3e3039d9f01ee31b1f38f5193cccd898fffd83b077f04db006b70b7f2a92"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/celebrate-288.webp",
+      "bytes": 133880,
+      "width": 288,
+      "height": 288,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 1,
+      "delay": [
+        180,
+        140,
+        160,
+        220,
+        220,
+        160,
+        140,
+        300
+      ],
+      "sha256": "65156b81a8ef3c6a5b2d0ea3062a2dfd20e91104ade0b6d9007dd3c7346408f0"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/celebrate-96.webp",
+      "bytes": 31576,
+      "width": 96,
+      "height": 96,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 1,
+      "delay": [
+        180,
+        140,
+        160,
+        220,
+        220,
+        160,
+        140,
+        300
+      ],
+      "sha256": "949f32e1f6d49af0d363b8340564497ba99d061280ebc863d3ef9daf638df536"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/explain-192.webp",
+      "bytes": 85276,
+      "width": 192,
+      "height": 192,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        300,
+        180,
+        180,
+        300,
+        240,
+        180,
+        180,
+        280
+      ],
+      "sha256": "90d59550b8c80b0243acfd7372fb796e18627ad46de8d8cf965729f30de575a1"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/explain-288.webp",
+      "bytes": 140030,
+      "width": 288,
+      "height": 288,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        300,
+        180,
+        180,
+        300,
+        240,
+        180,
+        180,
+        280
+      ],
+      "sha256": "9da359315b7829efc4c8626a6719124e4e331b2d92a2fb12145ec48b0e6a65dd"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/explain-96.webp",
+      "bytes": 32610,
+      "width": 96,
+      "height": 96,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        300,
+        180,
+        180,
+        300,
+        240,
+        180,
+        180,
+        280
+      ],
+      "sha256": "d35497d48426b353124cf872ebf25001a0465d14d668bccb97c015a385fda62f"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/repair-192.webp",
+      "bytes": 83630,
+      "width": 192,
+      "height": 192,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        240,
+        160,
+        240,
+        160,
+        240,
+        160,
+        240,
+        240
+      ],
+      "sha256": "e3985132879e08c82ceb86c2f045cc7912e74289fce2d1fba7eaf537661746d8"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/repair-288.webp",
+      "bytes": 135804,
+      "width": 288,
+      "height": 288,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        240,
+        160,
+        240,
+        160,
+        240,
+        160,
+        240,
+        240
+      ],
+      "sha256": "b458c4207b4ee76f65a9bcbad635d8a46e929d2a8866b970737eab6c72f98c62"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/repair-96.webp",
+      "bytes": 32628,
+      "width": 96,
+      "height": 96,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        240,
+        160,
+        240,
+        160,
+        240,
+        160,
+        240,
+        240
+      ],
+      "sha256": "6d1ec3e7b2e713df86fd1f06f03e9d0a53cbee66c787e39afa58ff271170d760"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/thinking-192.webp",
+      "bytes": 91036,
+      "width": 192,
+      "height": 192,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        500,
+        250,
+        250,
+        300,
+        300,
+        250,
+        250,
+        300
+      ],
+      "sha256": "ce00919a2f74c16289a39d024bc2e42f5001f9d0e701e8615d84712510d1d053"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/thinking-288.webp",
+      "bytes": 148160,
+      "width": 288,
+      "height": 288,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        500,
+        250,
+        250,
+        300,
+        300,
+        250,
+        250,
+        300
+      ],
+      "sha256": "44c15b476234a270426569c6ddd1060a25eeb3b749cc49dae10676e1fa6f7182"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/thinking-96.webp",
+      "bytes": 34222,
+      "width": 96,
+      "height": 96,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        500,
+        250,
+        250,
+        300,
+        300,
+        250,
+        250,
+        300
+      ],
+      "sha256": "ba7028b11b9b5c64570989b5e43fc367d966c7160d05ef5d39d73c9ee118cf5f"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/typing-192.webp",
+      "bytes": 79866,
+      "width": 192,
+      "height": 192,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        160,
+        160,
+        160,
+        160,
+        160,
+        160,
+        160,
+        160
+      ],
+      "sha256": "0368fc671e10ef5beaeb086d7c0b1cdda3294f6a29052ac2f7b452d3f49e54c5"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/typing-288.webp",
+      "bytes": 143944,
+      "width": 288,
+      "height": 288,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        160,
+        160,
+        160,
+        160,
+        160,
+        160,
+        160,
+        160
+      ],
+      "sha256": "f2d90e8aa405f35bf471a2ecdab76a8444ab71ddfc4f34f552a2b535ea2ff3b0"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/typing-96.webp",
+      "bytes": 31400,
+      "width": 96,
+      "height": 96,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 0,
+      "delay": [
+        160,
+        160,
+        160,
+        160,
+        160,
+        160,
+        160,
+        160
+      ],
+      "sha256": "8d6477f94fbf8e78cae0e037794e80adcc4c50ebab4d48471c26043a779ad399"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/wave-192.webp",
+      "bytes": 92300,
+      "width": 192,
+      "height": 192,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 1,
+      "delay": [
+        350,
+        100,
+        150,
+        150,
+        150,
+        150,
+        150,
+        300
+      ],
+      "sha256": "0b59c9639d4a2ec106f31f41795242fe9e1bc2a6ba2a6970eae39ea0832b8050"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/wave-288.webp",
+      "bytes": 143658,
+      "width": 288,
+      "height": 288,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 1,
+      "delay": [
+        350,
+        100,
+        150,
+        150,
+        150,
+        150,
+        150,
+        300
+      ],
+      "sha256": "665f7d7f57baf5e3175833b026671348b6578f80f3e303e5e518aad93d821bc4"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/animated/wave-96.webp",
+      "bytes": 34892,
+      "width": 96,
+      "height": 96,
+      "pages": 8,
+      "hasAlpha": true,
+      "loop": 1,
+      "delay": [
+        350,
+        100,
+        150,
+        150,
+        150,
+        150,
+        150,
+        300
+      ],
+      "sha256": "702e065262f336fedb3adbdec11ac50b2a2d18f8eddc763376942eb3b8cbe77f"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/fallbacks/avatar-smile.webp",
+      "bytes": 4542,
+      "width": 96,
+      "height": 96,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "e67cbcebd2ddbba7bffceb7870349062a6814d01271396a74feb00b6cc535526"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/fallbacks/interview-day.webp",
+      "bytes": 137100,
+      "width": 1536,
+      "height": 864,
+      "pages": 1,
+      "hasAlpha": false,
+      "sha256": "85f44e6b9c3e0d346cdb6843a10ac4890715d6e43fad2032479d255003bbd8c3"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/fallbacks/interview-night.webp",
+      "bytes": 132186,
+      "width": 1536,
+      "height": 864,
+      "pages": 1,
+      "hasAlpha": false,
+      "sha256": "deb7a83729f42f3ff7db0e76e079e85926ba71522200ae25fdb346ae0dda4a3f"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/fallbacks/portrait-explain.webp",
+      "bytes": 83508,
+      "width": 512,
+      "height": 768,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "9dac651051da1cb63e06e910201e25e0286fbdb0e63e8937adc19dbdf6a16f05"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/fallbacks/portrait-thinking.webp",
+      "bytes": 82014,
+      "width": 512,
+      "height": 768,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "5b7a87b8a03662ad0199f234fe0b391f00440a163115e6ebce4c0569e0fcb2dd"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/fallbacks/portrait-welcome.webp",
+      "bytes": 81968,
+      "width": 512,
+      "height": 768,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "d669a1fc4823bdc614f8a42143fd574d682b4028b3ecc31454f37484fc84b578"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/celebrate-192.webp",
+      "bytes": 10188,
+      "width": 192,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "e4dbc1e858f362b9223812b4f0f1c99d857f17264f5284553de19d935f8d9e00"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/celebrate-288.webp",
+      "bytes": 19050,
+      "width": 288,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "08f515761aea5ef5c1c2b01e89d1e1d3181450d43e53e473bff3c9b35423875d"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/celebrate-96.webp",
+      "bytes": 3934,
+      "width": 96,
+      "height": 96,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "abb140a1211fe1c4d41fa7f42c6d86a7aaf0277df19ce8c501fca3520127bfb9"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/explain-192.webp",
+      "bytes": 10786,
+      "width": 192,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "23bf2c3d5e3c428049289c0da4825bda707cc0707e40ec6d4f9147e7df1ac9b3"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/explain-288.webp",
+      "bytes": 20412,
+      "width": 288,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "8803d8d8770b655d4fd1d0f0aed8ac44504df6adcfffe852a34cdf14e539674d"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/explain-96.webp",
+      "bytes": 4090,
+      "width": 96,
+      "height": 96,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "83379d12218cdc9da6b31630dcfc9b27902c88201bd9ef0bcc196dec7ed46371"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/repair-192.webp",
+      "bytes": 10558,
+      "width": 192,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "69b32f8a280f017eccf6096f87438d6389d33e79d182eb968f6b4fde55fc131e"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/repair-288.webp",
+      "bytes": 19570,
+      "width": 288,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "9ab310adf8ddcab140d079f2b2ab83456473eedb237a10d48c42dce1d1876117"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/repair-96.webp",
+      "bytes": 4032,
+      "width": 96,
+      "height": 96,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "51d7b7d24fdb1e81dc90650942278c578ca4e64d95e737ba23ce2c9ad4c9e220"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/thinking-192.webp",
+      "bytes": 11236,
+      "width": 192,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "5df630d07261c03073f93a45de7b4335d9e27ff5f8f3c065e38628beaea6ec37"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/thinking-288.webp",
+      "bytes": 21286,
+      "width": 288,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "afa204b987b9cf11e1215b1daf0352662d00fb275f123ae09f05c4d92c38708d"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/thinking-96.webp",
+      "bytes": 4208,
+      "width": 96,
+      "height": 96,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "3c2d5f1fc418323d70550ef40e116885125f3307155d9e37600bb5306f8e5bed"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/typing-192.webp",
+      "bytes": 10098,
+      "width": 192,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "8ed685d20e4d6d5bb3995bc730728e548e282f3560b4fa331c0175b2f111f369"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/typing-288.webp",
+      "bytes": 18528,
+      "width": 288,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "224aaaee132a28967833095a5fc1cc4c9b26fe9d9ddb10f9895752eec968d7f3"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/typing-96.webp",
+      "bytes": 4012,
+      "width": 96,
+      "height": 96,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "a56fe9d7ba792fd4fae2715b2023a4e685ea268e334cf53d566b9af3f3aadbd2"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/wave-192.webp",
+      "bytes": 11546,
+      "width": 192,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "c1fdd2d0903a7cd548cd8adb194c9e22a4cc6fef5a65b4768312a646b9bcef8b"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/wave-288.webp",
+      "bytes": 21846,
+      "width": 288,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "1e3e2d70fc877a25f6e3bb70aa831c5dba2572b44d7acdc63198f5a60a06c1ac"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/posters/wave-96.webp",
+      "bytes": 4284,
+      "width": 96,
+      "height": 96,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "cdc2ff445dfae115f78072acba7fea7402cbbf7502f7339f3de8dcccc8e1b1ad"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/celebrate-192.webp",
+      "bytes": 78070,
+      "width": 1536,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "18fc3e840941a38f5878848ace14793f5d376e85658399dc7159a68ffb355a0f"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/celebrate-288.webp",
+      "bytes": 148464,
+      "width": 2304,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "6d19f2cbdb2c8d65d42b6b6e9f73dac1a2cea6b31343d886a8aec5d4f7f78e58"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/explain-192.webp",
+      "bytes": 80110,
+      "width": 1536,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "30cd87c3ea52615ee0d867190dd853428f7f202fb0017c19853eba744146ec84"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/explain-288.webp",
+      "bytes": 132238,
+      "width": 2304,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "68a1982c5164793f4c2df16aca730728c0b86f75abeda291d70dc70fb01fa9cc"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/repair-192.webp",
+      "bytes": 79858,
+      "width": 1536,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "dcd65796f012844d6455f06792046d100bc6e132982c7d73ba47761c905daf41"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/repair-288.webp",
+      "bytes": 129664,
+      "width": 2304,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "ac1e2378b05d69e5a9057a439ea91e73fec1dd45690f48309f98a1494fffdfd3"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/thinking-192.webp",
+      "bytes": 85146,
+      "width": 1536,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "e7e786bd1658f961793193b634cdd7dbe8488adc9319506bf03be2ce97f548db"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/thinking-288.webp",
+      "bytes": 140532,
+      "width": 2304,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "92fdde9db1eb8fa44801c46e7193a0622c6637fa5f8e9b308d71887d19682d9a"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/typing-192.webp",
+      "bytes": 74500,
+      "width": 1536,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "bea1cdb4eff22bb1eceb794f443c5aaf98997b0c050ee5564b65a70d2f530ee7"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/typing-288.webp",
+      "bytes": 138860,
+      "width": 2304,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "49b58f8d54273e1cfdad4039bd4b0a39b8ef3d8531dd959c6ef3feeba802df1e"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/wave-192.webp",
+      "bytes": 80964,
+      "width": 1536,
+      "height": 192,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "6c3bb88d8a0913320648f6a3a42dfb2040c23f03b7d2cee7bf2df3027d7dd275"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/sprites/wave-288.webp",
+      "bytes": 131496,
+      "width": 2304,
+      "height": 288,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "0f5d2f4921a7d3a4dd226802e43ab56b562fb47a77683f2b15e3a9016a658bf3"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/book-dark.svg",
+      "bytes": 648,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "b1074c04741c1a0383551a66a9ad95ff233aa4bb2657b5a4058eaef0e42a444e"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/book-light.svg",
+      "bytes": 648,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "baaeda23051e3e010583570f84fd574b5ae36420f9511819f952b3259a2bcef8"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/check-dark.svg",
+      "bytes": 479,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "004a701c96e713648a48655a19afb07ea8e0295481fd28c12f900a4e51649a24"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/check-light.svg",
+      "bytes": 479,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "525850c9be07242a9332649b966d9a0343e5929b2bb22c23bf8ca0416934f524"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/continue-dark.svg",
+      "bytes": 394,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "87385f55d769b5d9d5c0d53601f448e820390efa770a0033a06db906d76a36d9"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/continue-light.svg",
+      "bytes": 394,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "0f36770668b1145da3d67f2c5f7a11f8902a0275f36010bae3755a0b4aa2d291"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/dots-dark.svg",
+      "bytes": 610,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "9c59a60da8f4fb478258ff48153896e41063c2ad2c0b8fe425619e56970a7197"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/dots-light.svg",
+      "bytes": 610,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "cdab310c0f6d61d76d8bd7fa2b00d55193e6818cda4981bb492915882c5a29b6"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/hourglass-dark.svg",
+      "bytes": 631,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "9631fea79c15278ee59eeadb94717bafa6f02100c2efcab9192bad6d1651b2ec"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/hourglass-light.svg",
+      "bytes": 631,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "44adedb1988d65e451b18393c888fd1b74933ecb10faa63e6a5d8473961324b6"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/milestone-dark.svg",
+      "bytes": 561,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "4497a8cccfb34411541037af45b05a0bc82e2aaadf77c1928e0f019240eadf63"
+    },
+    {
+      "file": "public/assets/offer-hub-motion/vectors/milestone-light.svg",
+      "bytes": 561,
+      "width": 64,
+      "height": 64,
+      "pages": 1,
+      "hasAlpha": true,
+      "sha256": "54d2ed0783f29834f8e8b24ff468e15b98babd32cb94d77e39e85bf52b585971"
+    }
+  ]
+}

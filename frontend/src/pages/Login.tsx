@@ -2,13 +2,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
-import { AtlasSprite } from '@/components/art'
+import { CharacterSprite } from '@/components/art'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { DialogueBox } from '@/components/vn/DialogueBox'
 import { VNStage } from '@/components/vn/VNStage'
-import { ART, CHIBI_STATES, HOST } from '@/constants/art'
+import { ART, GUIDE } from '@/constants/art'
 import { useIsDesktop } from '@/hooks/useMediaQuery'
 import { useTypewriter } from '@/hooks/useTypewriter'
 import { useTheme } from '@/lib/theme'
@@ -34,22 +34,23 @@ type AuthValues = z.infer<ReturnType<typeof createSchema>>
 
 const LINES: Record<AuthMode, string> = {
   login: '欢迎回来！登录之后就能看完整解析，掌握进度也会同步到账号。',
-  register: '初次见面，我是墨樱，Offer Hub 的引导员。注册一个账号，我们开始吧。',
+  register: `初次见面，我是${GUIDE.name}，Offer Hub 的引导员。注册一个账号，我们开始吧。`,
 }
 
 /**
  * 登录 / 注册页，目前只有界面，认证接口接入后再提交。
- * VN 舞台：墨樱站在左边说一句欢迎，表单放在右侧独立的实色卡片里；手机端舞台只留对话框，表单在下面
+ * VN 舞台：澜汐站在左边说一句欢迎，表单放在右侧独立的实色卡片里；手机端舞台只留对话框，头像挥一次手，表单在下面
  */
 export function LoginPage({ mode }: { mode: AuthMode }) {
   const theme = useTheme()
   const isDesktop = useIsDesktop()
+  const scene = theme === 'dark' ? ART.sceneNight : ART.sceneDay
   const typer = useTypewriter<HTMLDivElement>(mode, 40)
 
   const dialogue = (
     <DialogueBox
-      speaker={{ name: HOST.name, role: HOST.role }}
-      avatar={isDesktop ? undefined : <AtlasSprite art={HOST.chibi} index={CHIBI_STATES.indexOf('welcome')} size={56} />}
+      speaker={GUIDE}
+      avatar={isDesktop ? undefined : <CharacterSprite name="wave" size={56} />}
       contentRef={typer.ref}
       done={typer.done}
       onAdvance={typer.done ? undefined : typer.finish}
@@ -92,7 +93,7 @@ export function LoginPage({ mode }: { mode: AuthMode }) {
   if (!isDesktop) {
     return (
       <div className="space-y-4">
-        <VNStage scene={theme === 'dark' ? ART.sceneInterviewNight : ART.sceneLogin} dim>
+        <VNStage scene={scene} dim>
           <div className="flex-1 p-3 pt-6">{dialogue}</div>
         </VNStage>
         {card}
@@ -102,8 +103,8 @@ export function LoginPage({ mode }: { mode: AuthMode }) {
 
   return (
     <VNStage
-      scene={theme === 'dark' ? ART.sceneInterviewNight : ART.sceneLogin}
-      character={HOST.standing}
+      scene={scene}
+      character={ART.portraitWelcome}
       characterSide="left"
       className="h-[calc(100dvh-12rem)] min-h-[600px]"
     >

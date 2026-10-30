@@ -1,0 +1,18 @@
+{
+  "name": "offer-hub-motion-assets",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:motion": "node tools/build-motion.cjs",
+    "build:vectors": "node tools/build-vectors.cjs",
+    "verify": "node tools/verify.cjs",
+    "qa:preview": "node tools/preview-qa.cjs"
+  },
+  "devDependencies": {
+    "sharp": "0.35.5",
+    "playwright": "1.62.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DocumentText, History } from 'reicon-react'
-import { AtlasSprite } from '@/components/art'
+import { CharacterSprite } from '@/components/art'
 import { PanelCaption } from '@/components/bento'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { Markdown } from '@/components/Markdown'
@@ -11,7 +11,7 @@ import { Backlog } from '@/components/vn/Backlog'
 import { ChoiceList, type Choice } from '@/components/vn/ChoiceList'
 import { DialogueBox } from '@/components/vn/DialogueBox'
 import { VNStage } from '@/components/vn/VNStage'
-import { ART, EXPRESSIONS, INTERVIEWERS, type Expression } from '@/constants/art'
+import { ART, GUIDE, preloadArt, type ArtAsset, type MotionName } from '@/constants/art'
 import { useIsDesktop } from '@/hooks/useMediaQuery'
 import { useNeighbors } from '@/hooks/useNeighbors'
 import { useTypewriter } from '@/hooks/useTypewriter'
@@ -38,38 +38,44 @@ const SPEEDS = [
   { value: 0, label: '文字：立即显示' },
 ]
 
-const REACTIONS: Record<Mastery, { line: string; expression: Expression }> = {
-  1: { line: '很好！这道题可以放心了。', expression: 'celebrating' },
-  2: { line: '思路差不多了，过两天再来巩固一下就稳了。', expression: 'thinking' },
-  3: { line: '没关系，把解析再过一遍，明天再来试试。', expression: 'encouraging' },
+const INTERVIEWER = { name: GUIDE.name, role: '面试官' }
+const GREETING = `我是${GUIDE.name}。先把思路理清楚，再一起看看边界条件和复杂度。`
+
+/**
+ * 每一步澜汐的样子：桌面端舞台上的立绘，加上对话框头像的 Q 版动作。
+ * 动作跟着步骤走：念题挥一次手、想一想时一直托腮、每段讲解翻一次书、标记「会了」庆祝一次，其余停在静态封面
+ */
+interface Pose {
+  portrait: ArtAsset
+  motion: MotionName
+  /** 这一步播放动作；不播就是静态封面 */
+  play?: boolean
+  /** 不传按动作的默认值 */
+  loop?: boolean
 }
 
-/** 文字速度和指定的面试官记在本机，下次进来还是这个设置 */
+const RESTING: Pose = { portrait: ART.portraitWelcome, motion: 'wave' }
+
+const REACTIONS: Record<Mastery, { line: string; pose: Pose }> = {
+  1: { line: '很好！这道题可以放心了。', pose: { portrait: ART.portraitWelcome, motion: 'celebrate', play: true } },
+  2: { line: '思路差不多了，过两天再来巩固一下就稳了。', pose: { portrait: ART.portraitThinking, motion: 'thinking' } },
+  3: { line: '没关系，把解析再过一遍，明天再来试试。', pose: { portrait: ART.portraitExplain, motion: 'explain' } },
+}
+
+/** 文字速度记在本机，下次进来还是这个设置 */
 const SETTINGS_KEY = 'offer-hub-vn'
 
 interface VNSettings {
   speed: number
-  /** 面试官 id；auto 表示按题目随机分配 */
-  interviewer: string
 }
 
 function readSettings(): VNSettings {
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '') as Partial<VNSettings>
-    return {
-      speed: SPEEDS.find((s) => s.value === saved.speed)?.value ?? 40,
-      interviewer: typeof saved.interviewer === 'string' ? saved.interviewer : 'auto',
-    }
+    return { speed: SPEEDS.find((s) => s.value === saved.speed)?.value ?? 40 }
   } catch {
-    return { speed: 40, interviewer: 'auto' }
+    return { speed: 40 }
   }
-}
-
-/** 同一道题每次分到同一位面试官 */
-function pickInterviewer(questionId: string) {
-  let hash = 0
-  for (const ch of questionId) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0
-  return INTERVIEWERS[hash % INTERVIEWERS.length]
 }
 
 /**
@@ -108,9 +114,13 @@ export function InterviewMode({
     }
   }, [settings])
 
-  const interviewer = INTERVIEWERS.find((i) => i.id === settings.interviewer) ?? pickInterviewer(question.question_id)
+  // 讲解和想一想时会换立绘，先在后台下好，换姿势时不闪空白；手机端不放立绘
+  useEffect(() => {
+    if (isDesktop) preloadArt(ART.portraitExplain, ART.portraitThinking)
+  }, [isDesktop])
+
   const stepKey = step.kind === 'answer' ? `answer-${step.index}` : step.kind === 'reaction' ? `reaction-${step.mastery}` : step.kind
-  const typer = useTypewriter<HTMLDivElement>(`${stepKey}-${interviewer.id}`, settings.speed)
+  const typer = useTypewriter<HTMLDivElement>(stepKey, settings.speed)
 
   const afterAnswers = (): Step => (truncated ? { kind: 'truncated' } : { kind: 'rate' })
   const firstAnswer = (): Step => (segments.length > 0 ? { kind: 'answer', index: 0 } : afterAnswers())
@@ -126,18 +136,19 @@ export function InterviewMode({
     setStep({ kind: 'reaction', mastery })
   }
 
-  // 当前这一步的台词、表情、展开面板、选项，以及能不能推进到下一句
+  // 当前这一步的台词、姿势、展开面板、选项，以及能不能推进到下一句
   let line: ReactNode
-  let expression: Expression = 'speaking'
+  let pose = RESTING
   let panel: string | undefined
   let choices: Choice[] = []
   let advance: (() => void) | undefined
 
   switch (step.kind) {
     case 'question':
+      pose = { portrait: ART.portraitWelcome, motion: 'wave', play: true }
       line = (
         <>
-          <p>{interviewer.greeting}</p>
+          <p>{GREETING}</p>
           <p>今天的题目是：「{question.title}」</p>
         </>
       )
@@ -148,12 +159,13 @@ export function InterviewMode({
       ]
       break
     case 'think':
-      expression = 'thinking'
+      pose = { portrait: ART.portraitThinking, motion: 'thinking', play: true }
       line = <p>不着急，慢慢想。想好了就继续，我们对一下参考答案。</p>
       advance = () => setStep(firstAnswer())
       break
     case 'answer': {
       const segment = segments[step.index]
+      pose = { portrait: ART.portraitExplain, motion: 'explain', play: true, loop: false }
       line = <Markdown content={segment.text} plain />
       panel = segment.panel
       advance = () =>
@@ -161,7 +173,6 @@ export function InterviewMode({
       break
     }
     case 'truncated':
-      expression = 'encouraging'
       line = <p>参考答案先讲到这里。登录之后能看完整解析，掌握进度也会同步到账号。</p>
       choices = [
         { label: '去登录', onSelect: () => navigate('/login') },
@@ -170,7 +181,6 @@ export function InterviewMode({
       ]
       break
     case 'rate':
-      expression = 'neutral'
       line = <p>讲完了。这道题你掌握得怎么样？</p>
       choices = [
         { label: '会了', onSelect: () => rate(1) },
@@ -179,7 +189,7 @@ export function InterviewMode({
       ]
       break
     case 'reaction':
-      expression = REACTIONS[step.mastery].expression
+      pose = REACTIONS[step.mastery].pose
       line = (
         <>
           <p>{REACTIONS[step.mastery].line}</p>
@@ -226,22 +236,9 @@ export function InterviewMode({
           <h1 className="truncate font-title text-heading font-semibold">{question.title}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <Select value={settings.interviewer} onValueChange={(value) => setSettings((s) => ({ ...s, interviewer: value }))}>
-            <SelectTrigger aria-label="面试官" className="w-auto px-2 sm:min-w-36 sm:px-3">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="auto">面试官：随机</SelectItem>
-              {INTERVIEWERS.map((item) => (
-                <SelectItem key={item.id} value={item.id}>
-                  {item.name} · {item.role}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Select
             value={String(settings.speed)}
-            onValueChange={(value) => setSettings((s) => ({ ...s, speed: Number(value) }))}
+            onValueChange={(value) => setSettings({ speed: Number(value) })}
           >
             <SelectTrigger aria-label="文字速度" className="w-auto px-2 sm:min-w-32 sm:px-3">
               <SelectValue />
@@ -267,8 +264,8 @@ export function InterviewMode({
       </div>
 
       <VNStage
-        scene={theme === 'dark' ? ART.sceneInterviewNight : ART.sceneInterviewDay}
-        character={interviewer.standing}
+        scene={theme === 'dark' ? ART.sceneNight : ART.sceneDay}
+        character={pose.portrait}
         className="h-[calc(100dvh-12.5rem)] min-h-[460px] md:h-[calc(100dvh-14.5rem)] md:min-h-[520px]"
       >
         <div className="flex min-h-0 flex-1 flex-col p-3 md:p-6">
@@ -296,12 +293,14 @@ export function InterviewMode({
           </div>
 
           <DialogueBox
-            speaker={{ name: interviewer.name, role: interviewer.role }}
+            speaker={INTERVIEWER}
             avatar={
-              <AtlasSprite
-                art={interviewer.expressions}
-                index={EXPRESSIONS.indexOf(expression)}
+              <CharacterSprite
+                name={pose.motion}
                 size={isDesktop ? 96 : 56}
+                playKey={stepKey}
+                loop={pose.loop}
+                still={!pose.play}
               />
             }
             contentRef={typer.ref}

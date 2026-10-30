@@ -7,7 +7,6 @@ import { LoadingBar } from '@/components/LoadingBar'
 import { SearchBox } from '@/components/SearchBox'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ART } from '@/constants/art'
 import { DIFFICULTY_OPTIONS, SORT_OPTIONS } from '@/constants/question'
 import { PAGE_SIZE, type QuestionFilterState } from '@/hooks/useQuestionFilters'
 import { useQuestionList } from '@/hooks/useQuestionQueries'
@@ -170,7 +169,7 @@ export function QuestionResults({ bankId, filters }: { bankId?: string; filters:
         <EmptyState
           className="border-t-0"
           icon={data.total > 0 ? <SearchStatus size={32} /> : <FileText size={32} />}
-          art={data.total > 0 ? undefined : hasFilter ? ART.stateEmptySearch : ART.stateEmptyBookmarks}
+          pose={data.total > 0 ? undefined : hasFilter ? 'thinking' : 'explain'}
           title={data.total > 0 ? '这一页没有题目' : hasFilter ? '没有找到符合条件的题目' : '这里还没有题目'}
           action={
             data.total > 0 ? (

@@ -1,0 +1,13 @@
+{
+  "errors": [],
+  "typewriterProgressive": true,
+  "speedChangePreservesProgress": true,
+  "revealAll": true,
+  "completionOnce": true,
+  "oneShot": true,
+  "replay": true,
+  "disabledFallback": true,
+  "systemReducedMotion": true,
+  "bookmarkControlledState": true,
+  "progressClamped": true
+}

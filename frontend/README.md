@@ -56,11 +56,25 @@ src/
 - **主题**：跟随系统，导航栏可手动切换，记在 localStorage（`lib/theme.ts`，`index.html` 里有首屏前套主题的脚本）。
 - **本机记录**：掌握程度和最近浏览先存在 localStorage（`lib/progress.ts`），登录接口接入后改成同步到账号。
 
-### 插画素材
+### 插画与动效素材
 
-- 网页用的 WebP 和 SVG 在 `public/offer-hub-assets/`（`web/desktop`、`web/mobile`、`vectors/`），登记表是 `src/constants/art.ts`，用 `components/art.tsx` 的 `ArtImage`（按断点只下载一档）、`AtlasSprite`（3×2 图集取一格）、`InkDecor`（单色 SVG 当遮罩，颜色跟随主题）显示。
-- 母图、提示词、页面适用规则在 `design/offer-hub-assets/`，不随网站发布；`originals/`（约 50MB PNG）已加进 `.gitignore`，需要版本管理时用 Git LFS。
-- 四位面试官（澜汐、绫序、曦文、星澈）是没有品牌授权的品牌拟人，页面上只用中文名，只限个人作品集等非商用场景，商用前要换成原创角色；墨樱是原创角色。
-- 补位图要遵循 `design/offer-hub-assets/docs/characters.md` 的一致性要求，从母图衍生，导出 desktop 和 mobile 两档 WebP（1x 单张 ≤150KB），再登记到 `src/constants/art.ts`。目前的缺口：
-  - 墨樱没有表情图集，手机端头像暂用 Q 版「欢迎」格；
-  - 立绘桌面档只有 672×1008，高分屏上偏软，需要补一档 1344×2016 的 2x（≤300KB）。
+- 素材来自动效包 `design/offer-hub-motion-assets/`：澜汐的 6 组 8 帧 Q 版动作、3 张立绘、昼夜两张书房场景、12 份动画 SVG，触发规则在包里的 `docs/triggers.md`。网页只发布用到的部分，在 `public/offer-hub-motion/`：`sprites/`（8 帧横排序列图）、`posters/`（静态封面）、`vectors/`（亮暗两份 SVG）、`fallbacks/`（立绘和场景）；包里的 `animated/` 动态 WebP 没用到，不发布。
+- 登记表是 `src/constants/art.ts`，组件在 `components/art.tsx`：
+  - `ArtImage`：场景和立绘。
+  - `CharacterSprite`：Q 版动作。先显示静态封面，序列图解码完、进入视口才开始播；系统减少动态效果、页面切到后台、离开视口时停在封面。
+  - `MotionVector`：动画 SVG，按主题选亮色或暗色文件。
+  - CSS 在 `src/motion.css`：动效包 `motion.css` 里用到的部分，加上 `frames.css` 的逐帧 keyframes（动效包重新生成后整段替换）。
+- 各处用法：
+  - 首页封面：书房场景 + 欢迎立绘（入场 + 呼吸），手机端不加载；手机端的新手引导配一次挥手。
+  - 掌握进度：掌握过题目时显示完成勾，满 10 题换成樱红的里程碑星。
+  - 登录：欢迎立绘站在左边（水平翻转，让手势朝向表单），手机端改成对话框头像挥一次手。
+  - 模拟面试：立绘随步骤换（念题伸手、想一想托腮、讲解捧书）；对话框头像念题挥一次手、想一想时循环托腮、每段讲解翻一次书、标记「会了」庆祝一次，其余停在静态封面。
+  - 列表空状态（搜索无结果托腮、还没有题目捧书）、列表出错（修理）、404 和出错页（托腮、修理）：都是静态封面。
+  - 按需加载页面的首屏占位：翻书 SVG。
+- 动作要和真实状态绑定：步骤切换、请求结束就停，不用庆祝动画代替保存结果。除了 VN，一屏最多一个角色，所以首页目录的空状态和出错只用图标（封面已经有立绘）。
+- 澜汐是没有品牌授权的品牌拟人（蓝鲸母题，动效包里叫「DeepSeek 娘」），页面上只用中文名，只限个人作品集等非商用场景，商用前要换成原创角色。
+- 动效包里的 `masters/`、`frames/`（约 31MB PNG）和 `public/`（网页文件的原件，和 `public/offer-hub-motion/` 重复）已加进 `.gitignore`。包里的 `preview/index.html` 要靠 `public/`，本地有原件时直接打开就能看。
+- 旧素材包 `offer-hub-assets` 已停用：网页文件已删除，需要时从提交 ab211f7 恢复；`design/offer-hub-assets/` 只留作存档，页面不要再引用。站点标识改成 `layout.tsx` 里的内联 SVG，颜色跟随主题；favicon 是 `public/favicon.svg`。
+- 目前的缺口：
+  - 立绘只有 512×768 一档，桌面 VN 舞台上约 580px 高，在高分屏上偏软，需要补一档 1024×1536（≤300KB）；
+  - 场景只有 1536×864 一档，手机端也下载这一张（约 135KB），可以补一档 800 宽的手机档。

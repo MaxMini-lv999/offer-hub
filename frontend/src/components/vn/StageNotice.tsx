@@ -1,26 +1,29 @@
-import { AtlasSprite } from '@/components/art'
+import { CharacterSprite } from '@/components/art'
 import { ChoiceList, type Choice } from '@/components/vn/ChoiceList'
 import { DialogueBox } from '@/components/vn/DialogueBox'
 import { VNStage } from '@/components/vn/VNStage'
-import { ART, CHIBI_STATES, HOST } from '@/constants/art'
+import { ART, GUIDE, MOTIONS, type MotionName } from '@/constants/art'
 import { useIsDesktop } from '@/hooks/useMediaQuery'
 import { useTypewriter } from '@/hooks/useTypewriter'
 import { useVNKeys } from '@/hooks/useVNKeys'
 import { useTheme } from '@/lib/theme'
 
 /**
- * 404 和出错页的 VN 舞台：档案馆场景 + 墨樱迷路的 Q 版 + 一句台词 + 选项。
+ * 404 和出错页的 VN 舞台：书房场景 + 澜汐的 Q 版（静态封面，出错页不放循环动画）+ 一句台词 + 选项。
  * 错误码、标题和按钮都是 HTML；选项一开始就能点，数字键也能选，不用等台词显示完
  */
 export function StageNotice({
   code,
   title,
+  pose,
   line,
   detail,
   choices,
 }: {
   code: string
   title: string
+  /** 澜汐的姿势：404 托腮想、出错页拿扳手修 */
+  pose: MotionName
   line: string
   /** 台词下面的小字，比如具体的错误信息 */
   detail?: string
@@ -37,7 +40,7 @@ export function StageNotice({
 
   return (
     <VNStage
-      scene={ART.sceneError}
+      scene={theme === 'dark' ? ART.sceneNight : ART.sceneDay}
       dim={theme === 'dark'}
       className="min-h-[calc(100dvh-10rem)] md:h-[calc(100dvh-12rem)] md:min-h-[520px]"
     >
@@ -51,17 +54,17 @@ export function StageNotice({
 
         <div className="flex min-h-0 flex-1 items-end justify-between gap-4 pt-3">
           {isDesktop && <ChoiceList choices={choices} className="w-full max-w-sm" />}
-          <AtlasSprite
-            art={HOST.chibi}
-            index={CHIBI_STATES.indexOf('lost')}
+          <CharacterSprite
+            name={pose}
             size={isDesktop ? 200 : 112}
-            label="迷路的墨樱"
+            still
+            label={`${MOTIONS[pose].label}的${GUIDE.name}`}
             className="ml-auto"
           />
         </div>
 
         <DialogueBox
-          speaker={{ name: HOST.name, role: HOST.role }}
+          speaker={GUIDE}
           contentRef={typer.ref}
           done={typer.done}
           onAdvance={typer.done ? undefined : typer.finish}

@@ -26,7 +26,7 @@ export function DialogueBox({
   className,
 }: {
   speaker: { name: string; role?: string }
-  /** 头像（表情图集里的一格），放在台词左边 */
+  /** 头像（澜汐的 Q 版动作），放在台词左边 */
   avatar?: ReactNode
   /** 交给 useTypewriter 的容器 */
   contentRef?: Ref<HTMLDivElement>
@@ -54,7 +54,8 @@ export function DialogueBox({
         <NameTag {...speaker} />
       </div>
       <div className="flex gap-3 px-4 pb-4 pt-7 md:gap-5 md:px-6 md:pb-6 md:pt-8">
-        {avatar && <div className="shrink-0 self-start border border-dialogue-foreground/30">{avatar}</div>}
+        {/* 头像垫一块纸白，深蓝头发在墨色对话框上才看得清 */}
+        {avatar && <div className="flex shrink-0 self-start bg-dialogue-foreground">{avatar}</div>}
         <div
           ref={contentRef}
           aria-live="polite"
@@ -81,8 +82,8 @@ export function DialogueBox({
           aria-label={done ? '继续' : '显示整句'}
           className="absolute bottom-1 right-1 flex h-11 w-11 items-center justify-center text-brand"
         >
-          <span aria-hidden className={cn('text-meta', done ? 'animate-bounce' : 'opacity-40')}>
-            ▼
+          <span aria-hidden className={cn('text-meta', done ? 'ohm-continue' : 'opacity-40')}>
+            ▶
           </span>
         </button>
       )}

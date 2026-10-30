@@ -1,0 +1,34 @@
+{
+  "errors": [],
+  "results": [
+    {
+      "device": "desktop",
+      "theme": "light",
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "device": "desktop",
+      "theme": "dark",
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "device": "mobile",
+      "theme": "light",
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "device": "mobile",
+      "theme": "dark",
+      "overflow": false,
+      "broken": []
+    }
+  ],
+  "frameAdvance": true,
+  "oneShot": true,
+  "reducedMotion": true,
+  "manualReducedMotionIncludesPseudoElements": true,
+  "offscreenStops": true
+}

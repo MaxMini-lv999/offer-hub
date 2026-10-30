@@ -1,34 +1,39 @@
 import type { ReactNode } from 'react'
 import { AlertCircle, Refresh } from 'reicon-react'
-import { ArtImage } from '@/components/art'
+import { CharacterSprite } from '@/components/art'
 import { Button } from '@/components/ui/button'
-import { ART, type ArtAsset } from '@/constants/art'
+import type { MotionName } from '@/constants/art'
+import { useIsDesktop } from '@/hooks/useMediaQuery'
 import { cn } from '@/lib/utils'
 
 /**
- * 空状态：图标或插画 + 一句说明 + 一个操作按钮。
- * 插画只用在主内容区的空状态（120–160px），侧栏、抽屉这类窄地方用图标
+ * 空状态：图标或澜汐的 Q 版 + 一句说明 + 一个操作按钮。
+ * Q 版只用在主内容区的空状态（120–160px），侧栏、抽屉这类窄地方用图标；
+ * 一屏最多一个角色，页面上已经有立绘（首页封面）时也用图标
  */
 export function EmptyState({
   icon,
-  art,
+  pose,
   title,
   hint,
   action,
   className,
 }: {
   icon?: ReactNode
-  art?: ArtAsset
+  /** 澜汐的姿势，只显示静态封面：空状态和出错都不是进行中的状态，不放循环动画 */
+  pose?: MotionName
   title: string
   /** 标题下面一行补充说明 */
   hint?: ReactNode
   action?: ReactNode
   className?: string
 }) {
+  const isDesktop = useIsDesktop()
+
   return (
     <div className={cn('flex flex-col items-center gap-4 border px-4 py-12 text-center', className)}>
-      {art ? (
-        <ArtImage art={art} variant="mobile" className="h-[120px] w-[120px] object-contain md:h-40 md:w-40" />
+      {pose ? (
+        <CharacterSprite name={pose} size={isDesktop ? 160 : 120} still />
       ) : (
         <span className="text-muted-foreground">{icon}</span>
       )}
@@ -42,7 +47,8 @@ export function EmptyState({
 }
 
 /**
- * 出错状态：错误信息 + 重试按钮。withArt 时配「连接中断」插画，天青只用在系统提示那一行，重试按钮仍是墨色
+ * 出错状态：错误信息 + 重试按钮。withArt 时配澜汐拿扳手修理的 Q 版（静态）；
+ * 点重试后查询回到加载中，由各处的骨架屏接手。天青只用在系统提示那一行，重试按钮仍是墨色
  */
 export function ErrorState({
   message,
@@ -58,7 +64,7 @@ export function ErrorState({
   return (
     <EmptyState
       icon={<AlertCircle size={32} />}
-      art={withArt ? ART.stateNetworkError : undefined}
+      pose={withArt ? 'repair' : undefined}
       title={`加载失败：${message}`}
       hint={withArt && <span className="text-system">请检查网络连接后重试</span>}
       className={className}

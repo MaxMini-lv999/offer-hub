@@ -1,13 +1,13 @@
 import { createSearchParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Eye, Teacher } from 'reicon-react'
-import { ArtImage, AtlasSprite, InkDecor } from '@/components/art'
+import { Book, Eye, Teacher } from 'reicon-react'
+import { ArtImage, CharacterSprite, MotionVector } from '@/components/art'
 import { BankLogo } from '@/components/BankLogo'
 import { BentoCard, PanelCaption } from '@/components/bento'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
 import { HotContent } from '@/components/HotContent'
 import { SearchBox } from '@/components/SearchBox'
 import { Button } from '@/components/ui/button'
-import { ART, CHIBI_STATES, HOST } from '@/constants/art'
+import { ART, GUIDE } from '@/constants/art'
 import { useIsDesktop } from '@/hooks/useMediaQuery'
 import { useQuestionBanks } from '@/hooks/useQuestionQueries'
 import { useTodayQuestion } from '@/hooks/useTodayQuestion'
@@ -19,8 +19,9 @@ import { bankPath, questionPath } from '@/utils/route'
 
 /**
  * 首页：入口页，「封面 + 目录」。
- * 上面一个墨线框，从上到下是封面（标题、搜索、插画）、今日一题头条、一行学习进度和继续上次；
- * 下面左边是题库目录（职位方向 + 按系列分组的题库索引），右边（手机端在下方）当前方向的热门题目
+ * 上面一个墨线框，从上到下是封面（标题、搜索、澜汐立绘）、今日一题头条、一行学习进度和继续上次；
+ * 下面左边是题库目录（职位方向 + 按系列分组的题库索引），右边（手机端在下方）当前方向的热门题目。
+ * 一屏最多一个角色：封面已经有立绘，所以目录的空状态和出错状态只用图标
  */
 export function HomePage() {
   const { data, isPending, isError, error, refetch } = useQuestionBanks()
@@ -50,11 +51,11 @@ export function HomePage() {
 
           {isPending && <IndexSkeleton />}
 
-          {isError && <ErrorState message={error.message} onRetry={() => refetch()} withArt />}
+          {isError && <ErrorState message={error.message} onRetry={() => refetch()} />}
 
           {data && data.length === 0 && (
             <EmptyState
-              art={ART.stateEmptyBookmarks}
+              icon={<Book size={32} />}
               title="还没有任何题库"
               action={
                 <Button variant="outline" size="sm" onClick={() => refetch()}>
@@ -77,8 +78,8 @@ export function HomePage() {
 }
 
 /**
- * 封面：左边标题、搜索框和题库概况，右边是封面插画（独立容器，文字不压在图上）。
- * 手机端只留文字，不加载插画
+ * 封面：左边标题、搜索框和题库概况，右边是书房场景 + 澜汐的半身立绘（独立容器，文字不压在图上）。
+ * 立绘从右边淡入、之后轻微呼吸；手机端只留文字，不加载插画
  */
 function Cover({ groups }: { groups?: JobQuestionGroup[] }) {
   const navigate = useNavigate()
@@ -106,16 +107,26 @@ function Cover({ groups }: { groups?: JobQuestionGroup[] }) {
             {groups && groups.length > 0 && `${groups.length} 个职位方向 · ${bankCount} 个题库 · 回车搜索全部题目`}
           </p>
         </div>
-        {/* 左下角一小片网点，压在文字下面 */}
-        <InkDecor name="ink-halftone" tile className="absolute bottom-0 left-0 -z-10 h-20 w-48 text-foreground opacity-10" />
+        {/* 左下角一小片网点，往右上渐隐，压在文字下面 */}
+        <span
+          aria-hidden
+          className="absolute bottom-0 left-0 -z-10 h-20 w-48 bg-[radial-gradient(currentColor_1px,transparent_1.5px)] bg-[length:6px_6px] opacity-15 [mask-image:linear-gradient(to_top_right,black,transparent_75%)]"
+        />
       </div>
       {isDesktop && (
-        <div className="relative min-w-0 flex-1 border-l border-foreground">
+        <div className="relative isolate min-w-0 flex-1 overflow-hidden border-l border-foreground">
+          {/* 放大 3% 再模糊，免得边缘透出底色；和 VN 舞台同一种处理 */}
           <ArtImage
-            art={theme === 'dark' ? ART.heroCoverDark : ART.heroCover}
+            art={theme === 'dark' ? ART.sceneNight : ART.sceneDay}
             priority
-            className="absolute inset-0 h-full w-full object-cover object-[78%_30%]"
+            className="absolute inset-0 -z-10 h-full w-full scale-[1.03] object-cover blur-[1.5px]"
           />
+          {/* 立绘按封面高度的 1.8 倍放，只露出头到腰，伸出的手朝向左边的标题 */}
+          <div className="ohm-character-enter absolute right-[8%] top-3 h-[180%]">
+            <div className="ohm-breathe h-full">
+              <ArtImage art={ART.portraitWelcome} priority className="h-full w-auto max-w-none" />
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -190,9 +201,11 @@ const MILESTONES = [1, 10, 30, 50, 100, 200, 500]
 
 /**
  * 一行次要信息：本机记录的掌握进度 + 继续上次（手机端分两行）。
- * 第一次来（没看过题也没掌握过）时整行换成墨樱的新手引导；掌握满 10 题时进度前面换成奖杯插画
+ * 第一次来（没看过题也没掌握过）时整行换成澜汐的新手引导，手机端封面没有立绘，这里配一次挥手；
+ * 掌握过题目时进度前面是完成勾，满 10 题换成樱红的里程碑星
  */
 function StudyStatus() {
+  const isDesktop = useIsDesktop()
   const { mastery, recent } = useProgress()
   const counts = countMastery(mastery)
   const mastered = counts[1]
@@ -201,8 +214,8 @@ function StudyStatus() {
   if (!last && mastered === 0) {
     return (
       <div className="flex items-center gap-3 border-t px-4 py-2 text-meta text-muted-foreground md:px-6">
-        <AtlasSprite art={HOST.chibi} index={CHIBI_STATES.indexOf('welcome')} size={40} />
-        <p>第一次来？我是墨樱。从上面的「今日一题」开始，或者在题目页右上角切到模拟面试。</p>
+        {!isDesktop && <CharacterSprite name="wave" size={44} />}
+        <p>第一次来？我是{GUIDE.name}。从上面的「今日一题」开始，或者在题目页右上角切到模拟面试。</p>
       </div>
     )
   }
@@ -215,9 +228,9 @@ function StudyStatus() {
     <div className="flex flex-col gap-2 border-t px-4 py-3 text-meta text-muted-foreground md:flex-row md:items-center md:justify-between md:gap-6 md:px-6">
       <div className="flex min-w-0 items-center gap-3">
         {mastered >= 10 ? (
-          <ArtImage art={ART.stateMastery} alt="掌握里程碑奖杯" variant="mobile" className="h-6 w-6 shrink-0 object-contain" />
+          <MotionVector name="milestone" size={24} alt="掌握里程碑" />
         ) : (
-          mastered > 0 && <InkDecor name="progress-seal" className="h-5 w-5 shrink-0 text-brand" />
+          mastered > 0 && <MotionVector name="check" size={20} />
         )}
         <span className="shrink-0">
           <span className="font-medium tabular-nums text-foreground">{mastered}</span> 题已掌握 · 本机
@@ -330,7 +343,7 @@ function SeriesIndex({ group }: { group: JobQuestionGroup }) {
   if (group.series_list.length === 0) {
     return (
       <EmptyState
-        art={ART.stateEmptyBookmarks}
+        icon={<Book size={32} />}
         title="这个方向还没有题库"
         className="mt-6 lg:mt-0"
         action={

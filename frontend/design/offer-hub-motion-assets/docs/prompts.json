@@ -1,0 +1,107 @@
+{
+  "engine": "built-in image_gen",
+  "jobs": [
+    {
+      "id": "wave",
+      "label": "挥手欢迎",
+      "duration": 1500,
+      "loop": 1,
+      "delays": [
+        350,
+        100,
+        150,
+        150,
+        150,
+        150,
+        150,
+        300
+      ],
+      "prompt": "DeepSeek girl matching the supplied reference exactly: cute 2.4-heads-tall chibi girl, long indigo hair with cyan tips, blue eyes, curled ahoge, white lace maid headband, blue side ribbon, navy long-sleeved maid dress, white frilled apron with small blue whale motif, gold floral embroidery at skirt hem, dark Mary Jane shoes, blue whale tail. Japanese light-novel anime illustration, clean precise navy outlines, polished cel shading with restrained gradients. Preserve the same face, clothes and proportions across ALL frames. Create ONE animation SPRITE SHEET with exactly 8 chronological frames in FOUR columns and TWO rows. Canvas 1536x1024, each frame in its own equal 384x512 cell. Each character+prop silhouette must fit inside a central 280x380 region with generous EMPTY TRANSPARENT gutters on all four sides of every cell. Align the head center and feet/laptop base identically in all frames, locked camera, identical scale. No zoom, no layout changes, no cell outlines, no numbers, no text, no watermark. True alpha background, opaque white cloth. Draw each frame independently but with precise temporal consistency; ONLY the described local body parts and expression should move. All eight frames present, no missing slots. The last frame returns to the first for a loop. Animation: friendly standing wave. Frame 1 relaxed smile both hands low; 2 raise viewer-left hand; 3 open palm tilted left by cheek; 4 palm tilted right; 5 palm tilted left; 6 palm tilted right with closed-eye happy smile; 7 hand lowering; 8 exactly return to frame 1. Tail and skirt nearly stationary; arm genuinely changes pose, not merely whole-body translation. No floating punctuation."
+    },
+    {
+      "id": "thinking",
+      "label": "思考与想通",
+      "duration": 2400,
+      "loop": 0,
+      "delays": [
+        500,
+        250,
+        250,
+        300,
+        300,
+        250,
+        250,
+        300
+      ],
+      "prompt": "DeepSeek girl matching the supplied reference exactly: cute 2.4-heads-tall chibi girl, long indigo hair with cyan tips, blue eyes, curled ahoge, white lace maid headband, blue side ribbon, navy long-sleeved maid dress, white frilled apron with small blue whale motif, gold floral embroidery at skirt hem, dark Mary Jane shoes, blue whale tail. Japanese light-novel anime illustration, clean precise navy outlines, polished cel shading with restrained gradients. Preserve the same face, clothes and proportions across ALL frames. Create ONE animation SPRITE SHEET with exactly 8 chronological frames in FOUR columns and TWO rows. Canvas 1536x1024, each frame in its own equal 384x512 cell. Each character+prop silhouette must fit inside a central 280x380 region with generous EMPTY TRANSPARENT gutters on all four sides of every cell. Align the head center and feet/laptop base identically in all frames, locked camera, identical scale. No zoom, no layout changes, no cell outlines, no numbers, no text, no watermark. True alpha background, opaque white cloth. Draw each frame independently but with precise temporal consistency; ONLY the described local body parts and expression should move. All eight frames present, no missing slots. The last frame returns to the first for a loop. Animation: thinking then understanding. Same standing pose and stable head origin. Frame 1 curious eyes, hands near waist; 2 bring index finger toward chin; 3 finger on chin eyes glance left; 4 finger on chin eyes glance right, one tiny question mark above right shoulder; 5 close eyes in concentration; 6 open eyes brighten, question mark becomes a tiny warm light bulb; 7 smile lower hand, bulb fades; 8 return to frame 1. No other text or symbols. Hand and eye movements clearly visible."
+    },
+    {
+      "id": "typing",
+      "label": "敲键盘",
+      "duration": 1280,
+      "loop": 0,
+      "delays": [
+        160,
+        160,
+        160,
+        160,
+        160,
+        160,
+        160,
+        160
+      ],
+      "prompt": "DeepSeek girl matching the supplied reference exactly: cute 2.4-heads-tall chibi girl, long indigo hair with cyan tips, blue eyes, curled ahoge, white lace maid headband, blue side ribbon, navy long-sleeved maid dress, white frilled apron with small blue whale motif, gold floral embroidery at skirt hem, dark Mary Jane shoes, blue whale tail. Japanese light-novel anime illustration, clean precise navy outlines, polished cel shading with restrained gradients. Preserve the same face, clothes and proportions across ALL frames. Create ONE animation SPRITE SHEET with exactly 8 chronological frames in FOUR columns and TWO rows. Canvas 1536x1024, each frame in its own equal 384x512 cell. Each character+prop silhouette must fit inside a central 280x380 region with generous EMPTY TRANSPARENT gutters on all four sides of every cell. Align the head center and feet/laptop base identically in all frames, locked camera, identical scale. No zoom, no layout changes, no cell outlines, no numbers, no text, no watermark. True alpha background, opaque white cloth. Draw each frame independently but with precise temporal consistency; ONLY the described local body parts and expression should move. All eight frames present, no missing slots. The last frame returns to the first for a loop. Animation: sitting behind the SAME small navy laptop, actively typing. Laptop size, screen and body remain fixed in exact position in each cell; show hands over the visible keyboard at a gentle 3/4 angle. Frames 1-8 alternate left fingers lowered / right fingers raised, right fingers lowered / left fingers raised, both down, left up, right up, both down, blink with right fingers down, and return to first. Tiny alternating wrist movement, subtle eye blink, hair and tail sway only minimally. Must visibly tap keyboard with different hand shapes, not just blink. No logos or words on laptop except a small simple blue whale motif."
+    },
+    {
+      "id": "explain",
+      "label": "翻书讲解",
+      "duration": 1840,
+      "loop": 0,
+      "delays": [
+        300,
+        180,
+        180,
+        300,
+        240,
+        180,
+        180,
+        280
+      ],
+      "prompt": "DeepSeek girl matching the supplied reference exactly: cute 2.4-heads-tall chibi girl, long indigo hair with cyan tips, blue eyes, curled ahoge, white lace maid headband, blue side ribbon, navy long-sleeved maid dress, white frilled apron with small blue whale motif, gold floral embroidery at skirt hem, dark Mary Jane shoes, blue whale tail. Japanese light-novel anime illustration, clean precise navy outlines, polished cel shading with restrained gradients. Preserve the same face, clothes and proportions across ALL frames. Create ONE animation SPRITE SHEET with exactly 8 chronological frames in FOUR columns and TWO rows. Canvas 1536x1024, each frame in its own equal 384x512 cell. Each character+prop silhouette must fit inside a central 280x380 region with generous EMPTY TRANSPARENT gutters on all four sides of every cell. Align the head center and feet/laptop base identically in all frames, locked camera, identical scale. No zoom, no layout changes, no cell outlines, no numbers, no text, no watermark. True alpha background, opaque white cloth. Draw each frame independently but with precise temporal consistency; ONLY the described local body parts and expression should move. All eight frames present, no missing slots. The last frame returns to the first for a loop. Animation: holding a small open navy-and-ivory book at waist, explaining. Frame 1 smiling with book open in left hand; 2 right index finger points to left page; 3 finger travels to right page; 4 lift one page slightly; 5 settle turned page and look toward viewer; 6 lift right index finger in explanation with slightly open mouth; 7 lower hand toward book; 8 return to frame 1. Keep book location stable, clean page edges, only one pair of arms, no writing on pages."
+    },
+    {
+      "id": "celebrate",
+      "label": "掌握庆祝",
+      "duration": 1520,
+      "loop": 1,
+      "delays": [
+        180,
+        140,
+        160,
+        220,
+        220,
+        160,
+        140,
+        300
+      ],
+      "prompt": "DeepSeek girl matching the supplied reference exactly: cute 2.4-heads-tall chibi girl, long indigo hair with cyan tips, blue eyes, curled ahoge, white lace maid headband, blue side ribbon, navy long-sleeved maid dress, white frilled apron with small blue whale motif, gold floral embroidery at skirt hem, dark Mary Jane shoes, blue whale tail. Japanese light-novel anime illustration, clean precise navy outlines, polished cel shading with restrained gradients. Preserve the same face, clothes and proportions across ALL frames. Create ONE animation SPRITE SHEET with exactly 8 chronological frames in FOUR columns and TWO rows. Canvas 1536x1024, each frame in its own equal 384x512 cell. Each character+prop silhouette must fit inside a central 280x380 region with generous EMPTY TRANSPARENT gutters on all four sides of every cell. Align the head center and feet/laptop base identically in all frames, locked camera, identical scale. No zoom, no layout changes, no cell outlines, no numbers, no text, no watermark. True alpha background, opaque white cloth. Draw each frame independently but with precise temporal consistency; ONLY the described local body parts and expression should move. All eight frames present, no missing slots. The last frame returns to the first for a loop. Animation: restrained happy success celebration. Frame 1 standing with hands low neutral smile; 2 bend knees slightly and bring fists near chest; 3 lift both hands toward head height; 4 both hands up, eyes closed delighted, two tiny gold stars beside shoulders; 5 hands still up, stars slightly expand and move outward; 6 lower hands, stars fade; 7 stand straight with proud smile; 8 return to frame 1. Feet remain within safe area, very small bounce only, no large jumping or explosion of particles. Genuine changing arms and face."
+    },
+    {
+      "id": "repair",
+      "label": "重试与修复",
+      "duration": 1680,
+      "loop": 0,
+      "delays": [
+        240,
+        160,
+        240,
+        160,
+        240,
+        160,
+        240,
+        240
+      ],
+      "prompt": "DeepSeek girl matching the supplied reference exactly: cute 2.4-heads-tall chibi girl, long indigo hair with cyan tips, blue eyes, curled ahoge, white lace maid headband, blue side ribbon, navy long-sleeved maid dress, white frilled apron with small blue whale motif, gold floral embroidery at skirt hem, dark Mary Jane shoes, blue whale tail. Japanese light-novel anime illustration, clean precise navy outlines, polished cel shading with restrained gradients. Preserve the same face, clothes and proportions across ALL frames. Create ONE animation SPRITE SHEET with exactly 8 chronological frames in FOUR columns and TWO rows. Canvas 1536x1024, each frame in its own equal 384x512 cell. Each character+prop silhouette must fit inside a central 280x380 region with generous EMPTY TRANSPARENT gutters on all four sides of every cell. Align the head center and feet/laptop base identically in all frames, locked camera, identical scale. No zoom, no layout changes, no cell outlines, no numbers, no text, no watermark. True alpha background, opaque white cloth. Draw each frame independently but with precise temporal consistency; ONLY the described local body parts and expression should move. All eight frames present, no missing slots. The last frame returns to the first for a loop. Animation: kneeling beside the SAME small navy laptop, holding a small silver wrench. Fixed laptop and kneeling body position. Frame 1 wrench held upright; 2 tilt wrench toward laptop edge; 3 gently tighten a visible small bolt, wrist turns clockwise; 4 lift wrench; 5 repeat gentle tightening with focused face; 6 lift wrench and blink; 7 brief satisfied smile; 8 return to first frame. Laptop stays rigid and unchanged, hand and tool move clearly. No warning text, no checkmark, no extra hands."
+    }
+  ]
+}

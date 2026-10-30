@@ -1,7 +1,6 @@
 import { Link, Outlet, ScrollRestoration, useLocation, useNavigation } from 'react-router-dom'
 import { Link2, Moon, Sun } from 'reicon-react'
 import { LoadingBar } from '@/components/LoadingBar'
-import { ART_BASE } from '@/constants/art'
 import { setTheme, useTheme } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 
@@ -12,6 +11,17 @@ const NAV_ITEMS = [
   { to: '/', label: '首页', isActive: (path: string) => path === '/' || path.startsWith('/bank/') },
   { to: '/questions', label: '全部题目', isActive: (path: string) => path === '/questions' },
 ]
+
+/** 站点标识：两本书夹一枚樱红书签。墨色和纸白跟随主题 token，暗色下自动反色；favicon 是同一个图形（public/favicon.svg） */
+function BrandMark() {
+  return (
+    <svg viewBox="0 0 64 64" width={24} height={24} aria-hidden>
+      <path className="fill-foreground" d="M6 8h22v48H6zM36 8h22v48H36z" />
+      <path className="fill-background" d="M12 14h10v30l-5-4-5 4zM42 14h10v30l-5-4-5 4z" />
+      <path className="fill-brand" d="M27 23h10v18H27z" />
+    </svg>
+  )
+}
 
 /** 全站布局：56px 吸顶导航 + 1200px 内容区 + 一行页脚 */
 export function Layout() {
@@ -26,12 +36,7 @@ export function Layout() {
         {/* 手机上两侧按内容宽度、导航在剩余空间居中；宽屏两侧等宽，导航正好在页面正中 */}
         <div className="mx-auto grid h-full max-w-[1200px] grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:grid-cols-[1fr_auto_1fr]">
           <Link to="/" aria-label="Offer Hub 首页" className="flex items-center gap-2 justify-self-start whitespace-nowrap">
-            <img
-              src={`${ART_BASE}/vectors/${theme === 'dark' ? 'offer-hub-mark-inverse' : 'offer-hub-mark'}.svg`}
-              alt=""
-              width={24}
-              height={24}
-            />
+            <BrandMark />
             {/* 手机上放不下，只留标识 */}
             <span className="hidden font-title text-heading font-semibold leading-none sm:inline">Offer Hub</span>
           </Link>
