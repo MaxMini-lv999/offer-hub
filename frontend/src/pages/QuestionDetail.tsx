@@ -8,6 +8,7 @@ import IconFileText from '~icons/solar/file-text-linear'
 import IconMenu from '~icons/solar/hamburger-menu-linear'
 import IconAcademicCap from '~icons/solar/square-academic-cap-linear'
 import IconThumbsUp from '~icons/solar/like-linear'
+import { Comments } from '@/components/comment/Comments'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
 import { InterviewMode } from '@/components/InterviewMode'
@@ -15,6 +16,7 @@ import { Markdown } from '@/components/Markdown'
 import { QuestionNav, QuestionNavSkeleton } from '@/components/QuestionNav'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { COMMENT_TARGET_QUESTION } from '@/constants/comment'
 import { GUEST_CONTENT_LIMIT } from '@/constants/question'
 import { useLogin } from '@/hooks/useLogin'
 import { useNeighbors } from '@/hooks/useNeighbors'
@@ -235,6 +237,14 @@ function QuestionArticle({
       </div>
 
       {bankId && <PrevNextNav bankId={bankId} currentId={question.question_id} />}
+
+      {/* 换题时重新挂载，上一题打开的回复框、编辑框不带过来 */}
+      <Comments
+        key={question.question_id}
+        targetType={COMMENT_TARGET_QUESTION}
+        targetId={question.question_id}
+        className="mt-12"
+      />
     </article>
   )
 }
