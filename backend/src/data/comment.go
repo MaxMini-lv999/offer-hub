@@ -2,15 +2,20 @@ package data
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// CommentStatusNormal 评论状态：正常，见 状态与枚举.md
-const CommentStatusNormal = 2
+// comments 集合的枚举值，见 状态与枚举.md
+const (
+	CommentStatusNormal   = 2 // status：正常
+	CommentTargetQuestion = 1 // target_type：题目
+)
 
 // Comment 对应 MongoDB 的 comments 集合。
 type Comment struct {
@@ -105,4 +110,43 @@ func ListSubCommentsByParentIDs(ctx context.Context, parentIDs []string) ([]Comm
 	}
 
 	return list, nil
+}
+
+// ErrCommentNotFound 评论不存在（包括审核中、已删除等非正常状态的评论）
+var ErrCommentNotFound = errors.New("comment not found")
+
+// GetCommentByID 按 comment_id 查询一条正常状态的评论，查不到时返回 ErrCommentNotFound
+func GetCommentByID(ctx context.Context, commentID string) (*Comment, error) {
+	coll := GetData().MongoDB.Collection("comments")
+	filter := bson.M{"comment_id": commentID, "status": CommentStatusNormal}
+
+	var c Comment
+	if err := coll.FindOne(ctx, filter).Decode(&c); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, ErrCommentNotFound
+		}
+		return nil, fmt.Errorf("find comment %s GetCommentByID: %w", commentID, err)
+	}
+	return &c, nil
+}
+
+// InsertComment 插入一条评论，_id 由驱动生成
+func InsertComment(ctx context.Context, c *Comment) error {
+	coll := GetData().MongoDB.Collection("comments")
+	if _, err := coll.InsertOne(ctx, c); err != nil {
+		return fmt.Errorf("insert comment %s InsertComment: %w", c.CommentID, err)
+	}
+	return nil
+}
+
+// IncCommentChildCount 把评论的 child_count 加 delta（发表回复传 1）。
+// 用 $inc 原子自增，并发回复不会丢计数；不改 update_time，它只表示评论内容被修改的时间
+func IncCommentChildCount(ctx context.Context, commentID string, delta int) error {
+	coll := GetData().MongoDB.Collection("comments")
+	filter := bson.M{"comment_id": commentID}
+	update := bson.M{"$inc": bson.M{"child_count": delta}}
+	if _, err := coll.UpdateOne(ctx, filter, update); err != nil {
+		return fmt.Errorf("update comment %s IncCommentChildCount: %w", commentID, err)
+	}
+	return nil
 }

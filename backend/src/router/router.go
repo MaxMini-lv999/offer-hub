@@ -27,6 +27,10 @@ func RegisterRouter(r *gin.Engine) {
 	open := v1.Group("/open", middleware.SoftJWTAuth())
 	open.GET("/list_comments", commentCtrl.ListComments)
 
+	// 评论的增删改都要强制登录
+	comment := v1.Group("/comment", middleware.JWTAuth())
+	comment.POST("/add", commentCtrl.AddComment)
+
 	userInfo := v1.Group("/user_info")
 	userInfo.GET("/get_user_info", middleware.JWTAuth(), userCtrl.GetUserInfo)
 

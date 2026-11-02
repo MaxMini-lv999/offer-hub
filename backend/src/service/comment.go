@@ -2,11 +2,16 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"time"
+
+	"github.com/google/uuid"
 
 	"offer-hub/data"
 	"offer-hub/model"
+	"offer-hub/tools"
 )
 
 // pageOf 取 list 的第 page 页（每页 size 条），越界时返回空切片。
@@ -141,4 +146,91 @@ func ListComments(ctx context.Context, req *model.ListCommentsReq, userID string
 	}
 
 	return model.ListCommentsData{Total: total, List: result}, nil
+}
+
+// ErrParentCommentNotFound 父评论不存在，ctrl 据此返回"父评论不存在"。
+// parent_id 必须是同一评论对象下、正常状态的顶层评论（评论只有两层），回复子评论时也传它所在的顶层评论 ID
+var ErrParentCommentNotFound = errors.New("parent comment not found")
+
+// AddComment 以 userID 的身份发表评论，返回新评论，格式和评论列表里的一致。
+// req.ParentID 为空是顶层评论；不为空是回复，req.ReplyTo 为空时默认回复父评论的作者
+func AddComment(ctx context.Context, req *model.AddCommentReq, userID string) (model.AddCommentData, error) {
+	// ① 查评论者：token 有效但用户已不存在按未登录处理；被禁用的账号不能发评论
+	author, err := data.GetUserByUserID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, data.ErrUserNotFound) {
+			return model.AddCommentData{}, ErrInvalidToken
+		}
+		return model.AddCommentData{}, fmt.Errorf("get user AddComment: %w", err)
+	}
+	if author.UserStatus == data.UserStatusDisabled {
+		return model.AddCommentData{}, ErrUserDisabled
+	}
+
+	// ② 回复：校验父评论，并补上默认的被回复人
+	replyTo := req.ReplyTo
+	if req.ParentID != "" {
+		parent, err := data.GetCommentByID(ctx, req.ParentID)
+		if err != nil {
+			if errors.Is(err, data.ErrCommentNotFound) {
+				return model.AddCommentData{}, ErrParentCommentNotFound
+			}
+			return model.AddCommentData{}, fmt.Errorf("get parent comment AddComment: %w", err)
+		}
+		if parent.TargetType != req.TargetType || parent.TargetID != req.TargetID || parent.ParentID != "" {
+			return model.AddCommentData{}, ErrParentCommentNotFound
+		}
+		if replyTo == "" {
+			replyTo = parent.UserID
+		}
+	}
+
+	// ③ 查被回复人的昵称，组装响应时用。所有读操作放在写入之前，查询出错时不会留下半条数据。
+	//    对方已注销时查不到，reply_to_name 为空串，和评论列表一致
+	users := map[string]data.UserInfo{userID: *author}
+	if replyTo != "" {
+		list, err := data.ListUsersByUserIDs(ctx, []string{replyTo})
+		if err != nil {
+			return model.AddCommentData{}, fmt.Errorf("list users AddComment: %w", err)
+		}
+		for _, u := range list {
+			users[u.UserID] = u
+		}
+	}
+
+	// ④ 写入评论：内容先过滤敏感词；question_id 只有评论对象是题目时才填
+	now := time.Now()
+	c := data.Comment{
+		CommentID:  uuid.NewString(),
+		TargetType: req.TargetType,
+		TargetID:   req.TargetID,
+		UserID:     userID,
+		Content:    tools.FilterSensitiveWords(req.Content),
+		ParentID:   req.ParentID,
+		ReplyTo:    replyTo,
+		Status:     data.CommentStatusNormal,
+		CreateTime: now,
+		UpdateTime: now,
+	}
+	if req.TargetType == data.CommentTargetQuestion {
+		c.QuestionID = req.TargetID
+	}
+	if err := data.InsertComment(ctx, &c); err != nil {
+		return model.AddCommentData{}, fmt.Errorf("insert comment AddComment: %w", err)
+	}
+
+	// ⑤ 回复：父评论 child_count +1。评论已经写进去了，这里失败只记日志不报错：
+	//    返回失败的话前端会重试，同一条回复就发了两次。child_count 只是冗余计数，
+	//    评论列表的 sub_comment_total 按实际条数算，不读它
+	if c.ParentID != "" {
+		if err := data.IncCommentChildCount(ctx, c.ParentID, 1); err != nil {
+			log.Printf("inc child count AddComment: %v", err)
+		}
+	}
+
+	// ⑥ 新评论还没人点过赞，liked 传 nil，读出来都是 false
+	return model.AddCommentData{
+		CommentID: c.CommentID,
+		Comment:   toCommentItem(&c, users, nil),
+	}, nil
 }

@@ -1,8 +1,10 @@
 package comment
 
 import (
+	"errors"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -90,6 +92,54 @@ func ListComments(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, model.ListCommentsResp{
+		Code: 0,
+		Msg:  "success",
+		Data: result,
+	})
+}
+
+// AddComment POST /api/v1/comment/add 发表评论
+func AddComment(c *gin.Context) {
+	// ① 读参数：target_type 只能是 1 / 2，content 必填且不超过 1000 字，binding 已校验
+	var req model.AddCommentReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	// ② content 去掉首尾空白后不能为空（binding 的 required 拦不住全是空格的）；顶层评论不能带 reply_to
+	req.Content = strings.TrimSpace(req.Content)
+	if req.Content == "" || (req.ParentID == "" && req.ReplyTo != "") {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	// ③ 调 service。user_id 由 JWTAuth 写入 context；不能从请求头读，否则客户端可以冒充别人发评论
+	userID := c.GetString(middleware.CtxKeyUserID)
+	result, err := service.AddComment(c.Request.Context(), &req, userID)
+	if err != nil {
+		if errors.Is(err, service.ErrParentCommentNotFound) {
+			c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "父评论不存在", "data": nil})
+			return
+		}
+		if errors.Is(err, service.ErrInvalidToken) {
+			c.JSON(http.StatusOK, gin.H{"code": 401, "msg": "未登录或登录已过期", "data": nil})
+			return
+		}
+		if errors.Is(err, service.ErrUserDisabled) {
+			c.JSON(http.StatusOK, gin.H{"code": 403, "msg": "账号已被禁用", "data": nil})
+			return
+		}
+		log.Printf("service.AddComment: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "服务器内部错误",
+			"data": nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.AddCommentResp{
 		Code: 0,
 		Msg:  "success",
 		Data: result,
