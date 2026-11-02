@@ -4,8 +4,8 @@
   "description": "本地测试用的题库种子数据脚本",
   "type": "module",
   "scripts": {
-    "seed": "node insert_bank_and_series.js && node insert_question.js",
-    "seed:reset": "node insert_bank_and_series.js --reset && node insert_question.js --reset"
+    "seed": "node insert_bank_and_series.js && node insert_question.js && node insert_comment.js",
+    "seed:reset": "node insert_bank_and_series.js --reset && node insert_question.js --reset && node insert_comment.js --reset"
   },
   "dependencies": {
     "mongodb": "6.21.0",

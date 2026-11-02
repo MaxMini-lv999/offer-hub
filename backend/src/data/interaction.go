@@ -32,3 +32,43 @@ func IsQuestionLiked(ctx context.Context, userID, questionID string) (bool, erro
 	}
 	return n > 0, nil
 }
+
+// target_type：评论
+const InteractionTargetComment = 3
+
+func GetLikedTargetIDs(ctx context.Context, userID string, targetType int, targetIDs []string) (map[string]bool, error) {
+	if len(targetIDs) == 0 {
+		return map[string]bool{}, nil
+	}
+
+	coll := GetData().MongoDB.Collection("user_interactions")
+	filter := bson.M{
+		"user_id":          userID,
+		"target_type":      targetType,
+		"target_id":        bson.M{"$in": targetIDs},
+		"interaction_type": InteractionTypeLike,
+		"status":           InteractionStatusValid,
+	}
+
+	opts := options.Find().SetProjection(bson.M{"target_id": 1, "_id": 0})
+
+	var ts []struct {
+		TargetID string `bson:"target_id"`
+	}
+
+	cur, err := coll.Find(ctx, filter, opts)
+	if err != nil {
+		return map[string]bool{}, fmt.Errorf("find GetLikedTargetIDs:%w", err)
+	}
+
+	if err := cur.All(ctx, &ts); err != nil {
+		return map[string]bool{}, fmt.Errorf("decode GetLikedTargetIDs:%w", err)
+	}
+
+	m := make(map[string]bool, 0)
+	for _, t := range ts {
+		m[t.TargetID] = true
+	}
+
+	return m, nil
+}

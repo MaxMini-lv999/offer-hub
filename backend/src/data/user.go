@@ -83,3 +83,17 @@ func GetUserByUserID(ctx context.Context, userID string) (*UserInfo, error) {
 
 // UserStatusDisabled 账号状态：禁用
 const UserStatusDisabled = -1
+
+func ListUsersByUserIDs(ctx context.Context, userIDs []string) ([]UserInfo, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
+
+	db := GetData().MySQL.WithContext(ctx)
+	var list []UserInfo
+	if err := db.Select("user_id", "nick_name", "avatar").Where("user_id in ?", userIDs).Find(&list).Error; err != nil {
+		return nil, fmt.Errorf("find ListUsersByUserIDs: %w", err)
+	}
+
+	return list, nil
+}

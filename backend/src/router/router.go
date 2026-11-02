@@ -2,6 +2,7 @@ package router
 
 import (
 	authCtrl "offer-hub/ctrl/auth"
+	commentCtrl "offer-hub/ctrl/comment"
 	"offer-hub/ctrl/middleware"
 	questionCtrl "offer-hub/ctrl/question"
 	userCtrl "offer-hub/ctrl/user"
@@ -21,6 +22,10 @@ func RegisterRouter(r *gin.Engine) {
 	question.GET("/meta/list", questionCtrl.ListQuestionsMeta)
 	question.GET("/detail", questionCtrl.GetQuestionDetail)
 	question.GET("/hot/list", questionCtrl.GetHotQuestions)
+
+	// 开放接口：软鉴权，游客也能访问
+	open := v1.Group("/open", middleware.SoftJWTAuth())
+	open.GET("/list_comments", commentCtrl.ListComments)
 
 	userInfo := v1.Group("/user_info")
 	userInfo.GET("/get_user_info", middleware.JWTAuth(), userCtrl.GetUserInfo)
