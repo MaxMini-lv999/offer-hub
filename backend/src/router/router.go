@@ -31,6 +31,7 @@ func RegisterRouter(r *gin.Engine) {
 	comment := v1.Group("/comment", middleware.JWTAuth())
 	comment.POST("/add", commentCtrl.AddComment)
 	comment.POST("/delete", commentCtrl.DeleteComment)
+	comment.POST("/update", commentCtrl.UpdateComment)
 
 	userInfo := v1.Group("/user_info")
 	userInfo.GET("/get_user_info", middleware.JWTAuth(), userCtrl.GetUserInfo)

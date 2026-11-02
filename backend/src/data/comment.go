@@ -168,3 +168,19 @@ func SoftDeleteComment(ctx context.Context, commentID string) error {
 	}
 	return nil
 }
+
+// UpdateCommentContent 修改一条正常状态的评论的内容，update_time 一起改成当前时间，没有匹配到时返回 ErrCommentNotFound。
+// 条件带上 status，理由同 SoftDeleteComment：改之前被删掉的评论不会被改回来
+func UpdateCommentContent(ctx context.Context, commentID, content string) error {
+	coll := GetData().MongoDB.Collection("comments")
+	filter := bson.M{"comment_id": commentID, "status": CommentStatusNormal}
+	update := bson.M{"$set": bson.M{"content": content, "update_time": time.Now()}}
+	res, err := coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("update comment %s UpdateCommentContent: %w", commentID, err)
+	}
+	if res.MatchedCount == 0 {
+		return ErrCommentNotFound
+	}
+	return nil
+}

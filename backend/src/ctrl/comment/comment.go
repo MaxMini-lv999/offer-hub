@@ -180,3 +180,55 @@ func DeleteComment(c *gin.Context) {
 		Msg:  "success",
 	})
 }
+
+// UpdateComment POST /api/v1/comment/update 修改评论内容
+func UpdateComment(c *gin.Context) {
+	// ① 读参数：content 必填且不超过 1000 字，binding 已校验
+	var req model.UpdateCommentReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	// ② content 去掉首尾空白后不能为空，和发表评论一致
+	req.Content = strings.TrimSpace(req.Content)
+	if req.Content == "" {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	// ③ 调 service。user_id 由 JWTAuth 写入 context；不能从请求头读，否则客户端可以冒充别人改评论
+	userID := c.GetString(middleware.CtxKeyUserID)
+	result, err := service.UpdateComment(c.Request.Context(), &req, userID)
+	if err != nil {
+		if errors.Is(err, service.ErrCommentNotFound) {
+			c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "评论不存在", "data": nil})
+			return
+		}
+		if errors.Is(err, service.ErrCommentForbidden) {
+			c.JSON(http.StatusOK, gin.H{"code": 403, "msg": "只能修改自己的评论", "data": nil})
+			return
+		}
+		if errors.Is(err, service.ErrInvalidToken) {
+			c.JSON(http.StatusOK, gin.H{"code": 401, "msg": "未登录或登录已过期", "data": nil})
+			return
+		}
+		if errors.Is(err, service.ErrUserDisabled) {
+			c.JSON(http.StatusOK, gin.H{"code": 403, "msg": "账号已被禁用", "data": nil})
+			return
+		}
+		log.Printf("service.UpdateComment: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "服务器内部错误",
+			"data": nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.UpdateCommentResp{
+		Code: 0,
+		Msg:  "success",
+		Data: result,
+	})
+}

@@ -275,3 +275,43 @@ func DeleteComment(ctx context.Context, req *model.DeleteCommentReq, userID stri
 
 	return nil
 }
+
+// UpdateComment 以 userID 的身份修改评论内容，只能改自己的。
+// 改内容等于发新内容，所以和 AddComment 一样，被禁用的账号不能改
+func UpdateComment(ctx context.Context, req *model.UpdateCommentReq, userID string) (model.UpdateCommentData, error) {
+	// ① 查当前用户：token 有效但用户已不存在按未登录处理；被禁用的账号不能改评论
+	author, err := data.GetUserByUserID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, data.ErrUserNotFound) {
+			return model.UpdateCommentData{}, ErrInvalidToken
+		}
+		return model.UpdateCommentData{}, fmt.Errorf("get user UpdateComment: %w", err)
+	}
+	if author.UserStatus == data.UserStatusDisabled {
+		return model.UpdateCommentData{}, ErrUserDisabled
+	}
+
+	// ② 查评论：不存在、已删除等非正常状态的都按不存在处理
+	c, err := data.GetCommentByID(ctx, req.CommentID)
+	if err != nil {
+		if errors.Is(err, data.ErrCommentNotFound) {
+			return model.UpdateCommentData{}, ErrCommentNotFound
+		}
+		return model.UpdateCommentData{}, fmt.Errorf("get comment UpdateComment: %w", err)
+	}
+
+	// ③ 只能改自己的评论
+	if c.UserID != userID {
+		return model.UpdateCommentData{}, ErrCommentForbidden
+	}
+
+	// ④ 新内容先过滤敏感词再写入。②到④之间评论被删掉时，这里匹配不到，同样按不存在处理
+	if err := data.UpdateCommentContent(ctx, c.CommentID, tools.FilterSensitiveWords(req.Content)); err != nil {
+		if errors.Is(err, data.ErrCommentNotFound) {
+			return model.UpdateCommentData{}, ErrCommentNotFound
+		}
+		return model.UpdateCommentData{}, fmt.Errorf("update comment UpdateComment: %w", err)
+	}
+
+	return model.UpdateCommentData{CommentID: c.CommentID}, nil
+}
