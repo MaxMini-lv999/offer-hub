@@ -14,6 +14,7 @@ import (
 // comments 集合的枚举值，见 状态与枚举.md
 const (
 	CommentStatusNormal   = 2 // status：正常
+	CommentStatusDeleted  = 5 // status：删除（软删除）
 	CommentTargetQuestion = 1 // target_type：题目
 )
 
@@ -147,6 +148,23 @@ func IncCommentChildCount(ctx context.Context, commentID string, delta int) erro
 	update := bson.M{"$inc": bson.M{"child_count": delta}}
 	if _, err := coll.UpdateOne(ctx, filter, update); err != nil {
 		return fmt.Errorf("update comment %s IncCommentChildCount: %w", commentID, err)
+	}
+	return nil
+}
+
+// SoftDeleteComment 把一条正常状态的评论的 status 改成 5（删除），没有匹配到时返回 ErrCommentNotFound。
+// 条件带上 status：两个请求同时删同一条，只有先到的那次能改成功，后到的拿到 ErrCommentNotFound；
+// 不改 update_time，理由同 IncCommentChildCount
+func SoftDeleteComment(ctx context.Context, commentID string) error {
+	coll := GetData().MongoDB.Collection("comments")
+	filter := bson.M{"comment_id": commentID, "status": CommentStatusNormal}
+	update := bson.M{"$set": bson.M{"status": CommentStatusDeleted}}
+	res, err := coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("update comment %s SoftDeleteComment: %w", commentID, err)
+	}
+	if res.MatchedCount == 0 {
+		return ErrCommentNotFound
 	}
 	return nil
 }

@@ -145,3 +145,38 @@ func AddComment(c *gin.Context) {
 		Data: result,
 	})
 }
+
+// DeleteComment POST /api/v1/comment/delete 删除评论（软删除）
+func DeleteComment(c *gin.Context) {
+	// ① 读参数
+	var req model.DeleteCommentReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	// ② 调 service。user_id 由 JWTAuth 写入 context；不能从请求头读，否则客户端可以冒充别人删评论
+	userID := c.GetString(middleware.CtxKeyUserID)
+	if err := service.DeleteComment(c.Request.Context(), &req, userID); err != nil {
+		if errors.Is(err, service.ErrCommentNotFound) {
+			c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "评论不存在", "data": nil})
+			return
+		}
+		if errors.Is(err, service.ErrCommentForbidden) {
+			c.JSON(http.StatusOK, gin.H{"code": 403, "msg": "只能删除自己的评论", "data": nil})
+			return
+		}
+		log.Printf("service.DeleteComment: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "服务器内部错误",
+			"data": nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.DeleteCommentResp{
+		Code: 0,
+		Msg:  "success",
+	})
+}

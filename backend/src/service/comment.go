@@ -234,3 +234,44 @@ func AddComment(ctx context.Context, req *model.AddCommentReq, userID string) (m
 		Comment:   toCommentItem(&c, users, nil),
 	}, nil
 }
+
+// ErrCommentNotFound 评论不存在或已删除，ctrl 据此返回"评论不存在"
+var ErrCommentNotFound = errors.New("comment not found")
+
+// ErrCommentForbidden 评论不是当前用户发的，ctrl 据此返回 403
+var ErrCommentForbidden = errors.New("comment not owned by user")
+
+// DeleteComment 以 userID 的身份软删除评论，只能删自己的。
+// 删的是回复时，父评论 child_count 减 1，和发表回复时的加 1 对应
+func DeleteComment(ctx context.Context, req *model.DeleteCommentReq, userID string) error {
+	// ① 查评论：不存在、已删除等非正常状态的都按不存在处理
+	c, err := data.GetCommentByID(ctx, req.CommentID)
+	if err != nil {
+		if errors.Is(err, data.ErrCommentNotFound) {
+			return ErrCommentNotFound
+		}
+		return fmt.Errorf("get comment DeleteComment: %w", err)
+	}
+
+	// ② 只能删自己的评论
+	if c.UserID != userID {
+		return ErrCommentForbidden
+	}
+
+	// ③ 软删除。①到③之间被另一个请求抢先删掉时，这里匹配不到，同样按不存在处理
+	if err := data.SoftDeleteComment(ctx, c.CommentID); err != nil {
+		if errors.Is(err, data.ErrCommentNotFound) {
+			return ErrCommentNotFound
+		}
+		return fmt.Errorf("soft delete comment DeleteComment: %w", err)
+	}
+
+	// ④ 删的是回复：父评论 child_count -1。评论已经删掉了，这里失败只记日志不报错，理由同 AddComment ⑤
+	if c.ParentID != "" {
+		if err := data.IncCommentChildCount(ctx, c.ParentID, -1); err != nil {
+			log.Printf("dec child count DeleteComment: %v", err)
+		}
+	}
+
+	return nil
+}
