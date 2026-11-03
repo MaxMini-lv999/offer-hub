@@ -260,3 +260,27 @@ func ListHotQuestions(ctx context.Context, jobName string, limit int64) ([]Quest
 	}
 	return list, nil
 }
+
+// IncQuestionThumbsUp 把题目的 thumbs_up_count 加 delta（点赞传 1，取消点赞传 -1），返回改完后的点赞数。
+// 用 $inc 原子自增，并发点赞不会丢计数；减的时候条件要求当前值够减，不会减成负数。
+// 匹配不到（够不上减，或题目已被物理删除）时什么都不改，返回 0
+func IncQuestionThumbsUp(ctx context.Context, questionID string, delta int) (int, error) {
+	coll := GetData().MongoDB.Collection("question")
+	filter := bson.M{"question_id": questionID}
+	if delta < 0 {
+		filter["thumbs_up_count"] = bson.M{"$gte": -delta}
+	}
+	update := bson.M{"$inc": bson.M{"thumbs_up_count": delta}}
+	opts := options.FindOneAndUpdate().
+		SetReturnDocument(options.After). // 返回改之后的文档
+		SetProjection(bson.M{"thumbs_up_count": 1, "_id": 0})
+
+	var q Question
+	if err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&q); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return 0, nil
+		}
+		return 0, fmt.Errorf("update question %s IncQuestionThumbsUp: %w", questionID, err)
+	}
+	return q.ThumbsUpCount, nil
+}

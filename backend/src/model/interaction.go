@@ -2,7 +2,7 @@ package model
 
 // LikeReq POST /api/v1/interaction/like 点赞请求，点赞者取自 context 里的 user_id
 type LikeReq struct {
-	TargetType int    `json:"target_type" binding:"required,oneof=1 2 3"` // 1题目 / 2面经 / 3评论
+	TargetType int    `json:"target_type" binding:"required,oneof=1 3"` // 1题目 / 3评论（2面经本期无）
 	TargetID   string `json:"target_id" binding:"required"`
 }
 

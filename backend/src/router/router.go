@@ -3,6 +3,7 @@ package router
 import (
 	authCtrl "offer-hub/ctrl/auth"
 	commentCtrl "offer-hub/ctrl/comment"
+	interactionCtrl "offer-hub/ctrl/interaction"
 	"offer-hub/ctrl/middleware"
 	questionCtrl "offer-hub/ctrl/question"
 	userCtrl "offer-hub/ctrl/user"
@@ -32,6 +33,11 @@ func RegisterRouter(r *gin.Engine) {
 	comment.POST("/add", commentCtrl.AddComment)
 	comment.POST("/delete", commentCtrl.DeleteComment)
 	comment.POST("/update", commentCtrl.UpdateComment)
+
+	// 点赞、取消点赞要强制登录
+	interaction := v1.Group("/interaction", middleware.JWTAuth())
+	interaction.POST("/like", interactionCtrl.Like)
+	interaction.POST("/unlike", interactionCtrl.Unlike)
 
 	userInfo := v1.Group("/user_info")
 	userInfo.GET("/get_user_info", middleware.JWTAuth(), userCtrl.GetUserInfo)

@@ -184,3 +184,27 @@ func UpdateCommentContent(ctx context.Context, commentID, content string) error 
 	}
 	return nil
 }
+
+// IncCommentThumbsUp 把评论的 thumbs_up 加 delta（点赞传 1，取消点赞传 -1），返回改完后的点赞数。
+// 评论集合的点赞数字段叫 thumbs_up，和题目的 thumbs_up_count 不同；其余同 IncQuestionThumbsUp。
+// 不改 update_time，理由同 IncCommentChildCount
+func IncCommentThumbsUp(ctx context.Context, commentID string, delta int) (int, error) {
+	coll := GetData().MongoDB.Collection("comments")
+	filter := bson.M{"comment_id": commentID}
+	if delta < 0 {
+		filter["thumbs_up"] = bson.M{"$gte": -delta}
+	}
+	update := bson.M{"$inc": bson.M{"thumbs_up": delta}}
+	opts := options.FindOneAndUpdate().
+		SetReturnDocument(options.After). // 返回改之后的文档
+		SetProjection(bson.M{"thumbs_up": 1, "_id": 0})
+
+	var c Comment
+	if err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&c); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return 0, nil
+		}
+		return 0, fmt.Errorf("update comment %s IncCommentThumbsUp: %w", commentID, err)
+	}
+	return c.ThumbsUp, nil
+}

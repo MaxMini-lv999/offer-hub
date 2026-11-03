@@ -44,6 +44,10 @@ func run() error {
 		}
 	}()
 
+	if err := data.EnsureMongoIndexes(); err != nil {
+		return fmt.Errorf("ensure mongo indexes: %w", err)
+	}
+
 	rdb, err := data.InitRedis(config.Conf)
 	if err != nil {
 		return fmt.Errorf("init redis: %w", err)
