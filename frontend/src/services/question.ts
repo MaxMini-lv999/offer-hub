@@ -1,4 +1,4 @@
-import { get } from '@/lib/request'
+import { get, post } from '@/lib/request'
 import type {
   AllQuestionListParams,
   HotQuestionListData,
@@ -10,6 +10,8 @@ import type {
   QuestionListParams,
   QuestionMetaListData,
   QuestionMetaListParams,
+  TagQuestionParams,
+  UserTag,
 } from '@/types/question'
 
 /** GET /api/v1/question/all/list 题库全量列表，按职位方向 → 系列 → 题库分组 */
@@ -35,4 +37,10 @@ export function getQuestionDetail(params: QuestionDetailParams) {
 /** GET /api/v1/question/hot/list 热门题目列表 */
 export function getHotQuestionList(params?: HotQuestionListParams) {
   return get<HotQuestionListData>('/api/v1/question/hot/list', { params })
+}
+
+/** POST /api/v1/safe/tag_question 标记掌握状态，需要登录；tag 传 0 取消标记。成功时 data 为 null */
+export function tagQuestion(questionId: string, tag: UserTag) {
+  const data: TagQuestionParams = { question_id: questionId, tag }
+  return post<null>('/api/v1/safe/tag_question', data)
 }

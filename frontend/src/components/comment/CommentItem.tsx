@@ -2,15 +2,15 @@ import { useState, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import IconAltArrowDown from '~icons/solar/alt-arrow-down-linear'
 import IconAltArrowUp from '~icons/solar/alt-arrow-up-linear'
 import IconChat from '~icons/solar/chat-round-line-linear'
-import IconThumbsUpFilled from '~icons/solar/like-bold'
-import IconThumbsUp from '~icons/solar/like-linear'
 import IconPen from '~icons/solar/pen-linear'
 import IconTrash from '~icons/solar/trash-bin-minimalistic-linear'
 import { CommentEditor } from '@/components/comment/CommentEditor'
 import { useCommentsContext } from '@/components/comment/context'
 import { ReplyBoxEnhanced } from '@/components/comment/ReplyBoxEnhanced'
 import { SubComments } from '@/components/comment/SubComments'
+import { LikeContent } from '@/components/LikeContent'
 import { useDeleteComment, useThumbsUpComment, useUpdateComment } from '@/hooks/useCommentQueries'
+import { useLikeEffect } from '@/hooks/useLikeEffect'
 import { useLogin } from '@/hooks/useLogin'
 import { cn } from '@/lib/utils'
 import type { CommentItem as CommentItemData } from '@/types/comment'
@@ -36,6 +36,7 @@ export function CommentItem({
   const { isLoggedIn, userInfo, setShowLoginDialog } = useLogin()
   const { replyingTo, editingComment, setReplyingTo, setEditingComment } = useCommentsContext()
   const thumbsUp = useThumbsUpComment()
+  const [likeEffect, playLikeEffect] = useLikeEffect()
   const deleteComment = useDeleteComment()
   const updateComment = useUpdateComment()
   const [expanded, setExpanded] = useState(false)
@@ -114,15 +115,22 @@ export function CommentItem({
               </>
             ) : (
               <>
+                {/* 不用 disabled：变灰会打断按下的动效，请求进行中的点击直接忽略 */}
                 <ActionButton
-                  onClick={() => requireLogin(() => thumbsUp.mutate(comment))}
-                  disabled={thumbsUp.isPending}
+                  onClick={() =>
+                    requireLogin(() => {
+                      if (thumbsUp.isPending) return
+                      thumbsUp.mutate(comment, { onSuccess: (data) => playLikeEffect(data.liked) })
+                    })
+                  }
                   aria-pressed={comment.user_liked}
+                  aria-busy={thumbsUp.isPending}
                   aria-label={`点赞，当前 ${comment.thumbs_up} 个赞`}
-                  className={cn(comment.user_liked && 'text-foreground')}
+                  className={cn('group', comment.user_liked && 'text-foreground')}
                 >
-                  {comment.user_liked ? <IconThumbsUpFilled /> : <IconThumbsUp />}
-                  {comment.thumbs_up > 0 ? comment.thumbs_up : '赞'}
+                  <LikeContent liked={comment.user_liked} pending={thumbsUp.isPending} effect={likeEffect}>
+                    {comment.thumbs_up > 0 ? comment.thumbs_up : '赞'}
+                  </LikeContent>
                 </ActionButton>
                 <ActionButton
                   onClick={() => requireLogin(() => setReplyingTo(replying ? null : id))}

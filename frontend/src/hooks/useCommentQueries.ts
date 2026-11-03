@@ -1,7 +1,8 @@
 import { useInfiniteQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query'
 import { SUB_COMMENT_PAGE_SIZE } from '@/constants/comment'
+import { LIKE_TARGET_COMMENT } from '@/constants/interaction'
 import { getCommentList, postAddComment, postDeleteComment, postUpdateComment } from '@/services/comment'
-import { postLike, postUnlike } from '@/services/interaction'
+import { toggleLike } from '@/services/interaction'
 import type {
   AddCommentParams,
   CommentItem,
@@ -11,7 +12,6 @@ import type {
   DeleteCommentParams,
   UpdateCommentParams,
 } from '@/types/comment'
-import type { LikeData } from '@/types/interaction'
 
 /** 评论列表的参数，不含 page：页码由 useInfiniteQuery 管 */
 export type CommentListQuery = Omit<CommentListParams, 'page'>
@@ -123,14 +123,7 @@ function patchComment(list: CommentItem[], commentId: string, patch: Partial<Com
 export function useThumbsUpComment() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (comment: CommentItem): Promise<LikeData> => {
-      const target = { target_type: 3, target_id: comment.comment_id } as const
-      if (comment.user_liked) {
-        const { count } = await postUnlike(target)
-        return { liked: false, count }
-      }
-      return postLike(target)
-    },
+    mutationFn: (comment: CommentItem) => toggleLike(LIKE_TARGET_COMMENT, comment.comment_id, !comment.user_liked),
     onSuccess: ({ liked, count }, comment) => {
       queryClient.setQueriesData<InfiniteData<CommentListData>>({ queryKey: queryKeys.lists() }, (old) =>
         old

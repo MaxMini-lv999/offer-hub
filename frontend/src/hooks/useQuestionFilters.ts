@@ -1,13 +1,19 @@
 import { useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { SORT_OPTIONS } from '@/constants/question'
-import type { Difficulty, QuestionFilters } from '@/types/question'
+import { useLogin } from '@/hooks/useLogin'
+import type { Difficulty, QuestionFilters, UserTag } from '@/types/question'
 
 export const PAGE_SIZE = 20
 
 /** URL 里的 difficulty 只认 1/2/3，其他值当作不过滤 */
 function parseDifficulty(raw: string | null): Difficulty | undefined {
   return raw === '1' || raw === '2' || raw === '3' ? (Number(raw) as Difficulty) : undefined
+}
+
+/** URL 里的 mastery（掌握状态）只认 1/2/3，其他值当作不过滤 */
+function parseUserTag(raw: string | null): Exclude<UserTag, 0> | undefined {
+  return raw === '1' || raw === '2' || raw === '3' ? (Number(raw) as Exclude<UserTag, 0>) : undefined
 }
 
 /** URL 里的 page 缺失或不是正整数时回退到第 1 页 */
@@ -22,14 +28,17 @@ function parseSort(raw: string | null) {
 }
 
 /**
- * 题目列表的筛选条件：关键词、难度、标签、排序和页码都放在 URL 里，刷新、分享链接、从详情页返回时都能还原。
- * bankId 为空时列出全部题目。页面调一次，把结果分别交给筛选卡片和列表；query 是请求参数，同样的条件共用查询缓存
+ * 题目列表的筛选条件：关键词、难度、标签、掌握状态、排序和页码都放在 URL 里，刷新、分享链接、从详情页返回时都能还原。
+ * bankId 为空时列出全部题目。页面调一次，把结果分别交给筛选卡片和列表；query 是请求参数，同样的条件共用查询缓存。
+ * 掌握状态只对登录用户有效：游客打开带 mastery 的链接时不显示这项筛选，也不传 user_tag
  */
 export function useQuestionFilters(bankId?: string) {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { isLoggedIn } = useLogin()
   const keyword = searchParams.get('keyword') ?? ''
   const difficulty = parseDifficulty(searchParams.get('difficulty'))
   const tags = [...new Set(searchParams.getAll('tag'))]
+  const userTag = isLoggedIn ? parseUserTag(searchParams.get('mastery')) : undefined
   const sort = parseSort(searchParams.get('sort'))
   const page = parsePage(searchParams.get('page'))
 
@@ -38,6 +47,7 @@ export function useQuestionFilters(bankId?: string) {
     keyword: keyword || undefined,
     difficulty,
     tags: tags.length > 0 ? tags : undefined,
+    user_tag: userTag,
     sort_by: sort.sortBy,
     sort_order: sort.sortOrder,
     page,
@@ -70,6 +80,10 @@ export function useQuestionFilters(bankId?: string) {
     updateFilters((next) => (value ? next.set('difficulty', String(value)) : next.delete('difficulty')))
   }
 
+  function setUserTag(value?: Exclude<UserTag, 0>) {
+    updateFilters((next) => (value ? next.set('mastery', String(value)) : next.delete('mastery')))
+  }
+
   function setSort(value: string) {
     updateFilters((next) => (value === SORT_OPTIONS[0].value ? next.delete('sort') : next.set('sort', value)))
   }
@@ -95,6 +109,7 @@ export function useQuestionFilters(bankId?: string) {
       next.delete('keyword')
       next.delete('difficulty')
       next.delete('tag')
+      next.delete('mastery')
     })
   }
 
@@ -117,12 +132,14 @@ export function useQuestionFilters(bankId?: string) {
     keyword,
     difficulty,
     tags,
+    userTag,
     sort,
     page,
     query,
-    hasFilter: !!keyword || difficulty !== undefined || tags.length > 0,
+    hasFilter: !!keyword || difficulty !== undefined || tags.length > 0 || userTag !== undefined,
     setKeyword,
     setDifficulty,
+    setUserTag,
     setSort,
     addTag,
     removeTag,

@@ -1,12 +1,22 @@
-import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { LIKE_TARGET_QUESTION } from '@/constants/interaction'
+import { toggleLike } from '@/services/interaction'
 import {
   getAllQuestionList,
   getHotQuestionList,
   getQuestionDetail,
   getQuestionList,
   getQuestionMetaList,
+  tagQuestion,
 } from '@/services/question'
-import type { HotQuestionListParams, JobQuestionGroup, QuestionBank, QuestionFilters } from '@/types/question'
+import type {
+  HotQuestionListParams,
+  JobQuestionGroup,
+  Question,
+  QuestionBank,
+  QuestionFilters,
+  TagQuestionParams,
+} from '@/types/question'
 
 /** 题目导航列表每页条数，等于后端 page_size 上限 */
 const NAV_PAGE_SIZE = 100
@@ -91,5 +101,38 @@ export function useHotQuestions(params?: HotQuestionListParams, enabled: boolean
     queryKey: queryKeys.hot(params),
     queryFn: () => getHotQuestionList(params),
     enabled,
+  })
+}
+
+/**
+ * 给题目点赞或取消点赞，按 user_liked 决定调哪个接口。悲观更新：接口成功后才改详情缓存里的 user_liked 和 thumbs_up_count，
+ * 点赞数用接口返回的总数（别人同时点的赞也算进去），不重新拉详情。
+ * 题目列表能按点赞数排序，一并标记过期，回到列表时重新请求
+ */
+export function useLikeQuestion() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (question: Question) => toggleLike(LIKE_TARGET_QUESTION, question.question_id, !question.user_liked),
+    onSuccess: ({ liked, count }, question) => {
+      queryClient.setQueryData<Question>(queryKeys.detail(question.question_id), (old) =>
+        old ? { ...old, user_liked: liked, thumbs_up_count: count } : old,
+      )
+      void queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
+    },
+  })
+}
+
+/**
+ * 标记题目的掌握状态，tag 传 0 取消标记。悲观更新：接口成功后才改详情缓存里的 user_tag；
+ * 题目列表能按掌握状态筛选，一并标记过期，回到列表时重新请求
+ */
+export function useTagQuestion() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ question_id, tag }: TagQuestionParams) => tagQuestion(question_id, tag),
+    onSuccess: (_, { question_id, tag }) => {
+      queryClient.setQueryData<Question>(queryKeys.detail(question_id), (old) => (old ? { ...old, user_tag: tag } : old))
+      void queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
+    },
   })
 }

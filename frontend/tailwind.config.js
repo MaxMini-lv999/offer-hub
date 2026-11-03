@@ -30,6 +30,56 @@ export default {
   		transitionTimingFunction: {
   			standard: 'cubic-bezier(0.2, 0, 0, 1)'
   		},
+  		// 点赞动效（components/LikeContent.tsx）：只动 transform 和 opacity；系统减少动态效果时由 index.css 统一关掉
+  		keyframes: {
+  			// 点赞成功：图标从按下的大小弹过头再回来
+  			'like-pop': {
+  				'0%': { transform: 'scale(0.7)' },
+  				'45%': { transform: 'scale(1.3)' },
+  				'100%': { transform: 'scale(1)' }
+  			},
+  			// 取消点赞：图标往里收一下再回原位
+  			'like-settle': {
+  				'0%': { transform: 'scale(1)' },
+  				'40%': { transform: 'scale(0.75)' },
+  				'100%': { transform: 'scale(1)' }
+  			},
+  			// 点赞成功：图标外一圈方形墨线向外扩散并淡出
+  			'like-ring': {
+  				'0%': { transform: 'scale(0.9)', opacity: '0.5' },
+  				'100%': { transform: 'scale(1.8)', opacity: '0' }
+  			},
+  			// +1 从图标上方浮现、继续上飘并淡出
+  			'like-float-up': {
+  				'0%': { transform: 'translateY(4px)', opacity: '0' },
+  				'20%': { transform: 'translateY(0)', opacity: '1' },
+  				'100%': { transform: 'translateY(-10px)', opacity: '0' }
+  			},
+  			// -1 浮现后往下沉回图标并淡出
+  			'like-float-down': {
+  				'0%': { transform: 'translateY(-4px)', opacity: '0' },
+  				'20%': { transform: 'translateY(0)', opacity: '1' },
+  				'100%': { transform: 'translateY(4px)', opacity: '0' }
+  			},
+  			// 点赞数变化：新数字从下（增加）或上（减少）滑进来
+  			'like-count-up': {
+  				'0%': { transform: 'translateY(45%)', opacity: '0' },
+  				'100%': { transform: 'translateY(0)', opacity: '1' }
+  			},
+  			'like-count-down': {
+  				'0%': { transform: 'translateY(-45%)', opacity: '0' },
+  				'100%': { transform: 'translateY(0)', opacity: '1' }
+  			}
+  		},
+  		animation: {
+  			'like-pop': 'like-pop 420ms cubic-bezier(0.2, 0, 0, 1)',
+  			'like-settle': 'like-settle 320ms cubic-bezier(0.2, 0, 0, 1)',
+  			'like-ring': 'like-ring 520ms cubic-bezier(0.2, 0, 0, 1) forwards',
+  			'like-float-up': 'like-float-up 800ms cubic-bezier(0.2, 0, 0, 1) forwards',
+  			'like-float-down': 'like-float-down 640ms cubic-bezier(0.2, 0, 0, 1) forwards',
+  			'like-count-up': 'like-count-up 240ms cubic-bezier(0.2, 0, 0, 1)',
+  			'like-count-down': 'like-count-down 240ms cubic-bezier(0.2, 0, 0, 1)'
+  		},
   		colors: {
   			background: 'oklch(var(--background) / <alpha-value>)',
   			foreground: 'oklch(var(--foreground) / <alpha-value>)',

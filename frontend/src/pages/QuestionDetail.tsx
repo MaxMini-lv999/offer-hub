@@ -2,14 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import IconChevronLeft from '~icons/solar/alt-arrow-left-linear'
 import IconChevronRight from '~icons/solar/alt-arrow-right-linear'
-import IconClock from '~icons/solar/clock-circle-linear'
-import IconEye from '~icons/solar/eye-linear'
 import IconFileText from '~icons/solar/file-text-linear'
 import IconMenu from '~icons/solar/hamburger-menu-linear'
-import IconAcademicCap from '~icons/solar/square-academic-cap-linear'
-import IconThumbsUp from '~icons/solar/like-linear'
 import { Comments } from '@/components/comment/Comments'
-import { DifficultyLabel } from '@/components/DifficultyLabel'
+import { DetailHeader } from '@/components/detail/DetailHeader'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
 import { InterviewMode } from '@/components/InterviewMode'
 import { Markdown } from '@/components/Markdown'
@@ -21,7 +17,7 @@ import { GUEST_CONTENT_LIMIT } from '@/constants/question'
 import { useLogin } from '@/hooks/useLogin'
 import { useNeighbors } from '@/hooks/useNeighbors'
 import { useQuestionDetail } from '@/hooks/useQuestionQueries'
-import { MASTERY_LABELS, recordVisit, useProgress } from '@/lib/progress'
+import { recordVisit } from '@/lib/progress'
 import { ApiError } from '@/lib/request'
 import { cn } from '@/lib/utils'
 import type { Question } from '@/types/question'
@@ -182,46 +178,12 @@ function QuestionArticle({
   truncated: boolean
   onInterview: () => void
 }) {
-  const { mastery } = useProgress()
-  const mark = mastery[question.question_id]
   const { setShowLoginDialog } = useLogin()
 
   return (
     <article className="max-w-[72ch]">
-      <header className="border-b pb-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-          <h1 className="font-title text-title font-semibold">{question.title}</h1>
-          <Button variant="outline" onClick={onInterview} className="shrink-0 self-start">
-            <IconAcademicCap />
-            模拟面试
-          </Button>
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-meta text-muted-foreground">
-          <DifficultyLabel difficulty={question.difficulty} />
-          {mark && <span className="border border-brand px-2 text-brand">本机标记：{MASTERY_LABELS[mark]}</span>}
-          {question.tags.length > 0 && (
-            <span className="flex flex-wrap gap-2">
-              {question.tags.map((tag) => (
-                <span key={tag} className="border px-2">
-                  {tag}
-                </span>
-              ))}
-            </span>
-          )}
-          <span className="inline-flex items-center gap-1">
-            <IconEye className="size-3.5" />
-            {question.view_count} 浏览
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <IconThumbsUp className="size-3.5" />
-            {question.thumbs_up_count} 点赞
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <IconClock className="size-3.5" />
-            {question.create_time}
-          </span>
-        </div>
-      </header>
+      {/* 换题时重新挂载，上一题点赞、标记的报错不带过来。key 加前缀：和下面的 Comments 是兄弟节点，key 不能相同 */}
+      <DetailHeader key={`header-${question.question_id}`} question={question} onInterview={onInterview} />
 
       {/* 游客遮罩高 200px，绝对定位叠在正文底部：下面 120px 是给按钮留的空白，
           渐变在上面 80px 内从透明变到背景色，只盖住正文最后约 3 行，不然游客能看的 150 字会被淡掉一大半 */}
@@ -301,7 +263,7 @@ function NeighborLink({
   )
 }
 
-/** 骨架和正文同形：标题 + 一行元信息 + 几行正文 */
+/** 骨架和正文同形：标题 + 一行元信息 + 一行 32px 高的点赞、标记按钮 + 几行正文 */
 function DetailSkeleton() {
   return (
     <div aria-hidden className="max-w-[72ch] skeleton">
@@ -312,6 +274,7 @@ function DetailSkeleton() {
             <div key={i} className="h-5 w-16 bg-skeleton" />
           ))}
         </div>
+        <div className="mt-3 h-8 w-40 bg-skeleton" />
       </div>
       <div className="mt-6 space-y-3">
         {['w-full', 'w-full', 'w-5/6', 'w-full', 'w-2/3', 'w-full', 'w-3/4'].map((width, i) => (

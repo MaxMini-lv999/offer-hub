@@ -12,11 +12,12 @@ import { LoadingBar } from '@/components/LoadingBar'
 import { SearchBox } from '@/components/SearchBox'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DIFFICULTY_OPTIONS, SORT_OPTIONS } from '@/constants/question'
+import { DIFFICULTY_OPTIONS, SORT_OPTIONS, USER_TAG_OPTIONS } from '@/constants/question'
+import { useLogin } from '@/hooks/useLogin'
 import { PAGE_SIZE, type QuestionFilterState } from '@/hooks/useQuestionFilters'
 import { useQuestionList } from '@/hooks/useQuestionQueries'
 import { cn } from '@/lib/utils'
-import type { Difficulty, Question } from '@/types/question'
+import type { Difficulty, Question, UserTag } from '@/types/question'
 import { questionPath } from '@/utils/route'
 
 /** 吸顶导航栏的高度（layout.tsx 里的 h-14） */
@@ -54,12 +55,15 @@ export function QuestionWorkbench({ bankId, filters }: { bankId?: string; filter
 
 /**
  * 筛选栏：吸顶在导航栏下面，滚到列表中间也能改条件。平板以上搜索框、难度、排序排一行，手机端搜索框单独一行；
+ * 登录后多一个掌握状态下拉，控件变多，≥1280px 才和搜索框排一行，手机端难度单独一行、掌握状态和排序并排。
  * 选了标签时多一行已选标签，可以单个移除或全部清除。loading 时墨线底边变成加载条
  */
 export const QuestionFilterBar = forwardRef<HTMLElement, { filters: QuestionFilterState; loading?: boolean }>(function QuestionFilterBar(
   { filters, loading = false },
   ref,
 ) {
+  const { isLoggedIn } = useLogin()
+
   return (
     // 吸顶位置比导航栏底边高 1px、藏在导航栏下面：题目行高是半像素，滚到某些位置时两条栏之间会漏出列表的墨线边框
     <section
@@ -67,12 +71,17 @@ export const QuestionFilterBar = forwardRef<HTMLElement, { filters: QuestionFilt
       aria-label="筛选题目"
       className="sticky top-[55px] z-30 space-y-2 border-b border-foreground bg-background py-3"
     >
-      <div className="flex flex-col gap-3 md:flex-row">
-        <div className="min-w-0 md:flex-1">
+      <div className={cn('flex flex-col gap-3', isLoggedIn ? 'xl:flex-row' : 'md:flex-row')}>
+        <div className={cn('min-w-0', isLoggedIn ? 'xl:flex-1' : 'md:flex-1')}>
           <SearchBox value={filters.keyword} onSearch={filters.setKeyword} placeholder="搜索题目标题或内容" />
         </div>
-        <div className="flex gap-3">
-          <DifficultyToggle value={filters.difficulty} onChange={filters.setDifficulty} />
+        <div className="flex flex-wrap gap-3 md:flex-nowrap">
+          <DifficultyToggle
+            value={filters.difficulty}
+            onChange={filters.setDifficulty}
+            className={cn(isLoggedIn && 'basis-full md:basis-auto')}
+          />
+          {isLoggedIn && <UserTagSelect value={filters.userTag} onChange={filters.setUserTag} />}
           <Select value={filters.sort.value} onValueChange={filters.setSort}>
             <SelectTrigger aria-label="排序" className="w-32 shrink-0">
               <SelectValue />
@@ -143,7 +152,7 @@ export function QuestionResults({ bankId, filters }: { bankId?: string; filters:
   const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1
 
   // 筛选栏吸顶后，滚到列表中间也能改条件；条件变了就回到列表顶部，从第一条开始看。首次渲染（含从详情页返回）不滚
-  const filterKey = JSON.stringify([filters.keyword, filters.difficulty, tags, filters.sort.value])
+  const filterKey = JSON.stringify([filters.keyword, filters.difficulty, tags, filters.userTag, filters.sort.value])
   const prevFilterKey = useRef(filterKey)
   useEffect(() => {
     if (prevFilterKey.current === filterKey) return
@@ -214,11 +223,19 @@ export function QuestionResults({ bankId, filters }: { bankId?: string; filters:
 }
 
 /** 难度切换：全部 / 简单 / 中等 / 困难，选中项反白 */
-function DifficultyToggle({ value, onChange }: { value?: Difficulty; onChange: (value?: Difficulty) => void }) {
+function DifficultyToggle({
+  value,
+  onChange,
+  className,
+}: {
+  value?: Difficulty
+  onChange: (value?: Difficulty) => void
+  className?: string
+}) {
   const options = [{ value: undefined, label: '全部', dotClassName: '' }, ...DIFFICULTY_OPTIONS]
 
   return (
-    <div role="group" aria-label="难度" className="flex min-w-0 flex-1 divide-x border border-input">
+    <div role="group" aria-label="难度" className={cn('flex min-w-0 flex-1 divide-x border border-input', className)}>
       {options.map((opt) => {
         const active = opt.value === value
         return (
@@ -241,6 +258,40 @@ function DifficultyToggle({ value, onChange }: { value?: Difficulty; onChange: (
         )
       })}
     </div>
+  )
+}
+
+/** 掌握状态下拉的「不过滤」选项；Select 的选项值不能是空字符串 */
+const ALL_USER_TAGS = 'all'
+
+/** 掌握状态筛选：全部状态 / 已掌握 / 晚点再刷 / 未掌握，只有登录后显示 */
+function UserTagSelect({
+  value,
+  onChange,
+}: {
+  value?: Exclude<UserTag, 0>
+  onChange: (value?: Exclude<UserTag, 0>) => void
+}) {
+  return (
+    <Select
+      value={value ? String(value) : ALL_USER_TAGS}
+      onValueChange={(v) => onChange(v === ALL_USER_TAGS ? undefined : (Number(v) as Exclude<UserTag, 0>))}
+    >
+      <SelectTrigger aria-label="掌握状态" className="min-w-0 flex-1 md:w-32 md:flex-none">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={ALL_USER_TAGS}>全部状态</SelectItem>
+        {USER_TAG_OPTIONS.map((opt) => (
+          <SelectItem key={opt.value} value={String(opt.value)}>
+            <span className="inline-flex items-center gap-2">
+              <span aria-hidden className={cn('h-1.5 w-1.5 shrink-0', opt.dotClassName)} />
+              {opt.label}
+            </span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
 

@@ -109,6 +109,13 @@ export interface QuestionDetailParams {
   question_id: string
 }
 
+/** POST /api/v1/safe/tag_question 请求体，标记者取自 token */
+export interface TagQuestionParams {
+  question_id: string
+  /** 传 0 取消标记 */
+  tag: UserTag
+}
+
 /** GET /api/v1/question/hot/list 请求参数 */
 export interface HotQuestionListParams {
   /** 默认 10，最大 50 */
