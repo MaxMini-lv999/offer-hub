@@ -33,3 +33,17 @@ type UnlikeResp struct {
 	Msg  string     `json:"msg"`
 	Data UnlikeData `json:"data"`
 }
+
+// TagQuestionReq POST /api/v1/safe/tag_question 标记掌握状态请求，标记者取自 context 里的 user_id。
+// Tag 用指针：int 的 required 会把 0 当成没传，而 0（取消标记）是合法值
+type TagQuestionReq struct {
+	QuestionID string `json:"question_id" binding:"required"`
+	Tag        *int   `json:"tag" binding:"required,oneof=0 1 2 3"` // 0未标记 / 1已掌握 / 2晚点再刷 / 3未掌握
+}
+
+// TagQuestionResp POST /api/v1/safe/tag_question 标记掌握状态响应，成功时 data 为 null
+type TagQuestionResp struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+	Data any    `json:"data"`
+}

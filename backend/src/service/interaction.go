@@ -117,3 +117,21 @@ func Unlike(ctx context.Context, req *model.UnlikeReq, userID string) (model.Unl
 
 	return model.UnlikeData{Count: count}, nil
 }
+
+// TagQuestion 以 userID 的身份标记题目的掌握状态，重复标记时覆盖之前的状态，tag 为 0 表示取消标记
+func TagQuestion(ctx context.Context, req *model.TagQuestionReq, userID string) error {
+	// ① 题目必须存在且是正常状态，避免给不存在的题写标记
+	if _, err := data.GetQuestionByID(ctx, req.QuestionID); err != nil {
+		if errors.Is(err, data.ErrQuestionNotFound) {
+			return ErrQuestionNotFound
+		}
+		return fmt.Errorf("get question TagQuestion: %w", err)
+	}
+
+	// ② upsert：标记过就改 tag，没标记过就新建一条。ctrl 的 binding 保证 Tag 不为 nil
+	if err := data.UpsertUserQuestionTag(ctx, userID, req.QuestionID, *req.Tag); err != nil {
+		return fmt.Errorf("upsert tag TagQuestion: %w", err)
+	}
+
+	return nil
+}

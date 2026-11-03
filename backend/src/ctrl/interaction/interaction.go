@@ -77,3 +77,35 @@ func Unlike(c *gin.Context) {
 		Data: result,
 	})
 }
+
+// TagQuestion POST /api/v1/safe/tag_question 标记题目掌握状态
+func TagQuestion(c *gin.Context) {
+	// ① 读参数：tag 必填且只能是 0~3，binding 已校验（tag 为 0 也算传了，见 TagQuestionReq）
+	var req model.TagQuestionReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	// ② 调 service。user_id 由 JWTAuth 写入 context；不能从请求头读，否则客户端可以改别人的标记
+	userID := c.GetString(middleware.CtxKeyUserID)
+	if err := service.TagQuestion(c.Request.Context(), &req, userID); err != nil {
+		if errors.Is(err, service.ErrQuestionNotFound) {
+			c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "题目不存在", "data": nil})
+			return
+		}
+		log.Printf("service.TagQuestion: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "服务器内部错误",
+			"data": nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.TagQuestionResp{
+		Code: 0,
+		Msg:  "success",
+		Data: nil,
+	})
+}

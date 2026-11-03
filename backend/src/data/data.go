@@ -62,6 +62,7 @@ func GetData() *Data {
 // 索引已存在时 CreateOne 什么都不做，所以重复启动没有影响；
 // 已有数据违反唯一约束（存在重复记录）时会建失败，需要先清理重复数据。
 //   - user_interactions：同一用户对同一目标的同一种交互只有一条记录，UpsertLike 并发时靠它防止插入两条
+//   - user_question_tag：同一用户对同一道题只有一条标记，UpsertUserQuestionTag 同理
 func EnsureMongoIndexes() error {
 	ctx, cancel := context.WithTimeout(context.Background(), connectTimeout)
 	defer cancel()
@@ -72,6 +73,10 @@ func EnsureMongoIndexes() error {
 			{Key: "target_type", Value: 1},
 			{Key: "target_id", Value: 1},
 			{Key: "interaction_type", Value: 1},
+		},
+		"user_question_tag": {
+			{Key: "user_id", Value: 1},
+			{Key: "question_id", Value: 1},
 		},
 	}
 	for coll, keys := range indexes {

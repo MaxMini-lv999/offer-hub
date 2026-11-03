@@ -39,6 +39,10 @@ func RegisterRouter(r *gin.Engine) {
 	interaction.POST("/like", interactionCtrl.Like)
 	interaction.POST("/unlike", interactionCtrl.Unlike)
 
+	// 用户私有数据的写操作，强制登录
+	safe := v1.Group("/safe", middleware.JWTAuth())
+	safe.POST("/tag_question", interactionCtrl.TagQuestion)
+
 	userInfo := v1.Group("/user_info")
 	userInfo.GET("/get_user_info", middleware.JWTAuth(), userCtrl.GetUserInfo)
 
