@@ -1,11 +1,11 @@
 // 题库查询链路用到的 MongoDB 索引。可重复执行：同名、同定义的索引已存在时 createIndex 什么都不做。
-// 只建索引：不改数据、不删索引，也不碰下面 5 个集合以外的集合。
+// 只建索引：不改数据、不删索引，也不碰下面 6 个集合以外的集合。
 //
 // 用法（在 backend 下执行；脚本只用 mongosh 当前连接的库，不写连接地址）：
 //   mongosh "mongodb://127.0.0.1:27017/offer_hub" testdata/init_mongo_indexes.js
 // 库名以 src/config-test.toml 里 [MongoDB] database 为准。种子数据（npm run seed）之前、之后执行都行。
 //
-// 索引照着 data 层的真实查询设计（data/question.go、interaction.go、user_question_tag.go）：
+// 索引照着 data 层的真实查询设计（data/question.go、comment.go、interaction.go、user_question_tag.go）：
 //   - 题目列表按 (sort_by, _id) 排序，_id 兜底让分页稳定，所以 _id 也放进索引：
 //     默认的 order 升序这样能直接按索引顺序取一页，不用把命中的题全捞出来在内存里排
 //   - 前端调 /question/list 不传 job_name，所以列表索引不以 job_name 开头：
@@ -67,6 +67,23 @@ const INDEXES = {
       key: { user_id: 1, target_type: 1, target_id: 1, interaction_type: 1 },
       name: 'user_id_1_target_type_1_target_id_1_interaction_type_1',
       unique: true,
+    },
+  ],
+  comments: [
+    // 按 comment_id 查一条评论（详情、回复时查父评论、删除、修改、点赞计数 $inc）；种子脚本也会建它，沿用默认名
+    { key: { comment_id: 1 }, name: 'comment_id_1', unique: true },
+    // 评论列表（ListComments）：4 个等值条件在前，排序字段在后（ESR）。
+    // 顶层评论默认 create_time 倒序、"查看更多回复"默认正序，data 层的 _id 兜底方向跟随主排序，
+    // 一个升序索引正着扫、倒着扫都能直接取一页，不用内存排序；分页前的 CountDocuments 只扫索引
+    {
+      key: { target_type: 1, target_id: 1, parent_id: 1, status: 1, create_time: 1, _id: 1 },
+      name: 'idx_comments_target_parent_status_time',
+    },
+    // 顶层评论附带的子评论（ListSubCommentsByParentIDs）：parent_id $in 一页顶层评论的 ID，按 create_time 正序。
+    // $in 的每个值各取一段已经排好序的索引，再归并（SORT_MERGE），不用把所有回复读出来再排
+    {
+      key: { parent_id: 1, status: 1, create_time: 1, _id: 1 },
+      name: 'idx_comments_parent_status_time',
     },
   ],
 };

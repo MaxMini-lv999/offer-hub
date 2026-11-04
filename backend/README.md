@@ -4,7 +4,7 @@
 
 ## MongoDB 索引
 
-题库查询链路（题目列表、题库目录、热门题目、点赞和掌握标记）用到的索引由 `testdata/init_mongo_indexes.js` 创建。脚本可以重复执行：只建索引，不改数据，不删索引，在种子数据（`testdata` 下 `npm run seed`）之前、之后执行都可以。
+题库查询链路（题目列表、题库目录、热门题目、评论、点赞和掌握标记）用到的索引由 `testdata/init_mongo_indexes.js` 创建。脚本可以重复执行：只建索引，不改数据，不删索引，在种子数据（`testdata` 下 `npm run seed`）之前、之后执行都可以。
 
 ### 执行
 
@@ -34,6 +34,9 @@ mongosh "mongodb://127.0.0.1:27017/offer_hub" testdata/init_mongo_indexes.js
 | user_question_tag | `user_id_1_question_id_1`（唯一） | user_id, question_id | 标记幂等、详情页的掌握状态 |
 | user_question_tag | `idx_user_question_tag_user_tag_question` | user_id, tag, question_id | 登录用户的列表按掌握状态筛选 |
 | user_interactions | `user_id_1_target_type_1_target_id_1_interaction_type_1`（唯一） | user_id, target_type, target_id, interaction_type | 点赞幂等、是否点赞、批量查点赞状态 |
+| comments | `comment_id_1`（唯一） | comment_id | 查单条评论、回复时查父评论、删除、修改、点赞计数 |
+| comments | `idx_comments_target_parent_status_time` | target_type, target_id, parent_id, status, create_time, _id | 评论列表（顶层倒序、"查看更多回复"正序都直接按索引取） |
+| comments | `idx_comments_parent_status_time` | parent_id, status, create_time, _id | 顶层评论附带的子评论（parent_id $in，SORT_MERGE 归并） |
 
 设计取舍（详细注释在脚本开头）：
 
@@ -53,6 +56,7 @@ db.question_bank.getIndexes()
 db.question_bank_series.getIndexes()
 db.user_question_tag.getIndexes()
 db.user_interactions.getIndexes()
+db.comments.getIndexes()
 ```
 
 题库页列表的 explain。前端进入题库时发的就是这种查询：只带 bank_id，按 order 升序，每页 20 条：
@@ -71,6 +75,12 @@ db.question.find({ status: 1, bank_list: 'b001' }).sort({ order: 1, _id: 1 }).li
 
 ```js
 db.question.find({ status: 1, job_name: '后端开发' }).sort({ hot_degree: -1, _id: 1 }).limit(10).explain('executionStats')
+```
+
+评论列表默认按时间倒序，应倒着扫 `idx_comments_target_parent_status_time`，没有 `SORT` 阶段。data 层的 `_id` 兜底方向跟随主排序，如果写成 `{ create_time: -1, _id: 1 }`，即使有这个索引也会多出一个 `SORT` 阶段：
+
+```js
+db.comments.find({ target_type: 1, target_id: 'q142', parent_id: '', status: 2 }).sort({ create_time: -1, _id: -1 }).limit(20).explain('executionStats')
 ```
 
 本地种子数据只有几十道题，扫描量的差别不明显，主要看有没有用上索引、有没有 `SORT` 阶段。

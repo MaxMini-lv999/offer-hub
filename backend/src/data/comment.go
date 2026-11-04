@@ -68,7 +68,9 @@ func ListComments(ctx context.Context, f CommentFilter) ([]Comment, int64, error
 		dir = -1 // -1 降序
 	}
 	opts := options.Find().
-		SetSort(bson.D{{Key: f.SortBy, Value: dir}, {Key: "_id", Value: 1}}).
+		// _id 兜底让分页稳定；方向跟主排序一致，倒序时 MongoDB 能直接倒着扫索引，不用在内存里排（同 FilterQuestions）。
+		// 调用方保证翻页深度已限制，这里的乘法不会溢出
+		SetSort(bson.D{{Key: f.SortBy, Value: dir}, {Key: "_id", Value: dir}}).
 		SetSkip((int64(f.Page) - 1) * int64(f.PageSize)).SetLimit(int64(f.PageSize))
 
 	cur, err := coll.Find(ctx, filter, opts)
