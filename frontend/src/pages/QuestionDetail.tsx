@@ -7,7 +7,6 @@ import IconMenu from '~icons/solar/hamburger-menu-linear'
 import { Comments } from '@/components/comment/Comments'
 import { DetailHeader } from '@/components/detail/DetailHeader'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
-import { InterviewMode } from '@/components/InterviewMode'
 import { Markdown } from '@/components/Markdown'
 import { QuestionNav, QuestionNavSkeleton } from '@/components/QuestionNav'
 import { Button } from '@/components/ui/button'
@@ -24,15 +23,12 @@ import type { Question } from '@/types/question'
 import { bankPath, questionPath } from '@/utils/route'
 
 /**
- * 题目详情，两种模式，用 URL 的 mode 参数切换：
- * 阅读模式（默认）是左侧题目栏（桌面端固定 280px，手机端收进抽屉）+ 右侧正文；
- * 模拟面试模式（mode=interview）是 VN 舞台，面试官念题、逐段讲解析。
+ * 题目详情：左侧题目栏（桌面端固定 280px，手机端收进抽屉）+ 右侧正文。
  * 切题只改 URL 里的 questionId，这个组件和左侧题目栏都不重新挂载
  */
 export function QuestionDetailPage() {
   const { questionId = '' } = useParams<{ questionId: string }>()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const interview = searchParams.get('mode') === 'interview'
+  const [searchParams] = useSearchParams()
   const { data: question, isPending, isError, error, refetch } = useQuestionDetail(questionId)
   const { isLoggedIn } = useLogin()
 
@@ -56,18 +52,6 @@ export function QuestionDetailPage() {
       recordVisit({ id: question.question_id, title: question.title, bankId: bankId || undefined })
   }, [question, bankId])
 
-  function setInterview(on: boolean) {
-    setSearchParams(
-      prev => {
-        const next = new URLSearchParams(prev)
-        if (on) next.set('mode', 'interview')
-        else next.delete('mode')
-        return next
-      },
-      { preventScrollReset: true }
-    )
-  }
-
   const notFoundState = notFound && (
     <EmptyState
       icon={<IconFileText className="size-8" />}
@@ -82,30 +66,6 @@ export function QuestionDetailPage() {
   const errorState = isError && !notFound && (
     <ErrorState message={error.message} onRetry={() => refetch()} />
   )
-
-  if (interview) {
-    return (
-      <>
-        {isPending && (
-          <div
-            aria-hidden
-            className="h-[calc(100dvh-13rem)] min-h-[460px] skeleton border bg-skeleton"
-          />
-        )}
-        {notFoundState}
-        {errorState}
-        {question && (
-          <InterviewMode
-            key={question.question_id}
-            question={question}
-            bankId={bankId}
-            truncated={truncated}
-            onExit={() => setInterview(false)}
-          />
-        )}
-      </>
-    )
-  }
 
   function renderNav(className?: string, onNavigate?: () => void) {
     if (bankId) {
@@ -168,14 +128,7 @@ export function QuestionDetailPage() {
         {notFoundState}
         {errorState}
 
-        {question && (
-          <QuestionArticle
-            question={question}
-            bankId={bankId}
-            truncated={truncated}
-            onInterview={() => setInterview(true)}
-          />
-        )}
+        {question && <QuestionArticle question={question} bankId={bankId} truncated={truncated} />}
       </div>
     </div>
   )
@@ -185,24 +138,18 @@ function QuestionArticle({
   question,
   bankId,
   truncated,
-  onInterview,
 }: {
   question: Question
   bankId: string
   /** 内容被截断时加渐隐遮罩和登录入口 */
   truncated: boolean
-  onInterview: () => void
 }) {
   const { setShowLoginDialog } = useLogin()
 
   return (
     <article className="max-w-[72ch]">
       {/* 换题时重新挂载，上一题点赞、标记的报错不带过来。key 加前缀：和下面的 Comments 是兄弟节点，key 不能相同 */}
-      <DetailHeader
-        key={`header-${question.question_id}`}
-        question={question}
-        onInterview={onInterview}
-      />
+      <DetailHeader key={`header-${question.question_id}`} question={question} />
 
       {/* 游客遮罩高 200px，绝对定位叠在正文底部：下面 120px 是给按钮留的空白，
           渐变在上面 80px 内从透明变到背景色，只盖住正文最后约 3 行，不然游客能看的 150 字会被淡掉一大半 */}

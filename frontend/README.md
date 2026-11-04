@@ -67,16 +67,16 @@ src/
 在原来的直角编辑风上增量演进：保留直角、无投影、墨色强调、反色和下划线交互态，只新增宋体标题与 display 字号、樱红和天青两种限定用途色、插画立绘层和 VN 模式。
 
 - **布局按页面类型区分，视觉风格全站统一**：
-  - 入口页（首页）是落地页：墨线分镜格（`components/bento.tsx` 的 `BentoCard`）框住的 Hero（标题、简介、题目 / 题库 / 职位方向三个概况数字、插画），下面依次是热门榜单（前 10 名）、四格平台特性、开始刷题引导（游客点了去全部题目页并弹出登录弹窗）。
+  - 入口页（首页）是落地页：墨线分镜格（`components/bento.tsx` 的 `BentoCard`）框住的 Hero（标题、简介、题目 / 题库 / 职位方向三个概况数字、插画），下面依次是热门榜单（前 10 名）、三格平台特性、开始刷题引导（游客点了去全部题目页并弹出登录弹窗）。
   - 题库目录（`/collections`）：一行标题，职位方向桌面端竖排、手机端横排，题库按系列分组成索引行，点线引到题数；右侧当前方向的热门题目。
   - 热门榜单（`/hot`）：职位方向页签 + 按热度排名的前 20 题，平板以上分两栏；和首页的热门榜单是同一个组件（`components/HotQuestions.tsx`）、同一份缓存。
   - 检索页（全部题目、题库页）是「检索工作台」：一行标题，主栏是吸顶筛选栏 + 紧凑题目列表（`components/QuestionList.tsx` 的 `QuestionWorkbench`，≥1280px 一行一题），右侧热门题目桌面端吸顶、往下滚收起、往上滚展开（`HotContent` 的 `sticky`），手机端排在列表下面。
-  - 阅读页（题目详情）是左侧题目栏 + 正文；VN 见下一条。
-- **VN**（题目详情的模拟面试、登录、404 和出错页）：`components/vn/`（`VNStage`、`DialogueBox`、`NameTag`、`ChoiceList`、`Backlog`、`StageNotice`）和 `components/InterviewMode.tsx`。逐字显示在 `hooks/useTypewriter.ts`，键盘操作在 `hooks/useVNKeys.ts`，解析分段在 `utils/segments.ts`。
+  - 阅读页（题目详情）是左侧题目栏 + 正文。
+- **VN**（登录、404 和出错页）：`components/vn/`（`VNStage`、`DialogueBox`、`NameTag`、`ChoiceList`、`StageNotice`）。逐字显示在 `hooks/useTypewriter.ts`，键盘操作在 `hooks/useVNKeys.ts`。
 - **Token**：颜色、难度色、代码高亮、动效都在 `src/index.css` 的 CSS 变量里，亮暗两套，对比度按 WCAG AA 校验过；Tailwind 的映射在 `tailwind.config.js`。樱红只用于品牌标识、VN 姓名牌、推进提示和掌握进度，天青只用于 VN 选项高亮和系统提示，金银铜（`medal-*`）只用于热门排名前三名的序号色块（`components/RankBadge.tsx`），按钮和交互强调仍用墨色。
 - **字体**：标题和台词用思源宋体 600、代码用 JetBrains Mono 400，都通过 `@fontsource` 自托管（宋体按 unicode-range 分片，只下载用到的字）；正文用系统黑体。
 - **主题**：跟随系统，导航栏可手动切换，记在 localStorage（`lib/theme.ts`，`index.html` 里有首屏前套主题的脚本）。
-- **本机记录**：掌握程度和最近浏览先存在 localStorage（`lib/progress.ts`），登录接口接入后改成同步到账号。
+- **本机记录**：最近浏览存在 localStorage（`lib/progress.ts`）。
 
 ### 插画与动效素材
 
@@ -90,10 +90,9 @@ src/
   - 首页 Hero：书房场景 + 欢迎立绘（入场 + 呼吸），手机端不加载。
   - 登录：欢迎立绘站在左边（水平翻转，让手势朝向表单），手机端改成对话框头像挥一次手。
   - 登录弹窗（`components/auth/LoginDialog.tsx`，站内所有登录入口都打开它，`/login`、`/register` 只留给直接打开链接的人）：标题旁 56px 头像，每次打开挥一次手。表单 `components/auth/AuthForm.tsx` 和登录页共用，按需加载，游客在浏览器空闲时预先下载。
-  - 模拟面试：立绘随步骤换（念题伸手、想一想托腮、讲解捧书）；对话框头像念题挥一次手、想一想时循环托腮、每段讲解翻一次书、标记「会了」庆祝一次，其余停在静态封面。
   - 列表和题库目录的空状态（搜索无结果托腮、还没有题目或题库捧书）、出错（修理）、404 和出错页（托腮、修理）：都是静态封面。
   - 按需加载页面的首屏占位：翻书 SVG。
-- 动作要和真实状态绑定：步骤切换、请求结束就停，不用庆祝动画代替保存结果。除了 VN，一屏最多一个角色，所以首页 Hero 以下的区块只用图标（Hero 已经有立绘），侧栏的空状态和出错也只用图标。
+- 动作要和真实状态绑定：步骤切换、请求结束就停，不用庆祝动画代替保存结果。一屏最多一个角色，所以首页 Hero 以下的区块只用图标（Hero 已经有立绘），侧栏的空状态和出错也只用图标。
 - 澜汐是没有品牌授权的品牌拟人（蓝鲸母题，动效包里叫「DeepSeek 娘」），页面上只用中文名，只限个人作品集等非商用场景，商用前要换成原创角色。
 - 动效包里的 `masters/`、`frames/`（约 31MB PNG）和 `public/`（网页文件的原件，和 `public/offer-hub-motion/` 重复）已加进 `.gitignore`。包里的 `preview/index.html` 要靠 `public/`，本地有原件时直接打开就能看。
 - 旧素材包 `offer-hub-assets` 已停用：网页文件已删除，需要时从提交 ab211f7 恢复；`design/offer-hub-assets/` 只留作存档，页面不要再引用。站点标识改成 `components/Header.tsx` 里的内联 SVG，颜色跟随主题；favicon 是 `public/favicon.svg`。

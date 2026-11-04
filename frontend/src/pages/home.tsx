@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import IconChecklist from '~icons/solar/checklist-minimalistic-linear'
 import IconLibrary from '~icons/solar/library-linear'
 import IconLightbulb from '~icons/solar/lightbulb-linear'
-import IconAcademicCap from '~icons/solar/square-academic-cap-linear'
 import { ArtImage } from '@/components/art'
 import { BentoCard, PanelCaption } from '@/components/bento'
 import { HotQuestions } from '@/components/HotQuestions'
@@ -43,9 +42,7 @@ function HeroSection() {
         <PanelCaption>Offer Hub · 面试题库</PanelCaption>
         <div className="space-y-2">
           <h1 className="font-title text-title font-semibold md:text-display">成为技术面试高手</h1>
-          <p className="text-muted-foreground">
-            按职位方向整理的面试真题，每道题配解析和讨论，还能来一场模拟面试。
-          </p>
+          <p className="text-muted-foreground">按职位方向整理的面试真题，每道题配解析和讨论。</p>
         </div>
         <StatsSection />
         {/* 左下角一小片网点，往右上渐隐，压在文字下面 */}
@@ -147,21 +144,16 @@ const FEATURES: { icon: ComponentType<SVGProps<SVGSVGElement>>; title: string; d
     title: '掌握状态追踪',
     desc: '登录后把题目标成已掌握、晚点再刷或未掌握，复习时心里有数。',
   },
-  {
-    icon: IconAcademicCap,
-    title: '模拟面试',
-    desc: '澜汐当面试官逐题提问，你先想再看讲解，最后自评掌握程度。',
-  },
 ]
 
-/** 平台特性：四格共用 1px 分隔线（外框画左边和上边，每格画右边和下边），平板两列、桌面四列 */
+/** 平台特性：三格共用 1px 分隔线（外框画左边和上边，每格画右边和下边），平板以上三列 */
 function FeaturesSection() {
   return (
     <section aria-labelledby="features-title" className="space-y-4">
       <h2 id="features-title" className="font-title text-heading font-semibold">
         平台特性
       </h2>
-      <ul className="grid border-l border-t sm:grid-cols-2 lg:grid-cols-4">
+      <ul className="grid border-l border-t md:grid-cols-3">
         {FEATURES.map(({ icon: Icon, title, desc }) => (
           <li key={title} className="space-y-2 border-b border-r p-4 md:p-6">
             <Icon className="size-6" />

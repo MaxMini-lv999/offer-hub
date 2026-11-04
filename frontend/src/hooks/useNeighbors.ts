@@ -19,7 +19,5 @@ export function useNeighbors(bankId: string, currentId: string) {
     found: index !== -1,
     prev: index > 0 ? list[index - 1] : undefined,
     next: index !== -1 ? list[index + 1] : undefined,
-    /** 题库里的第一题，题库页「从第一题开始模拟面试」用 */
-    first: list[0],
   }
 }

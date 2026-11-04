@@ -2,18 +2,16 @@ import { Link, useParams } from 'react-router-dom'
 import IconRefresh from '~icons/solar/refresh-linear'
 import { BankLogo } from '@/components/BankLogo'
 import { HotContent } from '@/components/HotContent'
-import { InterviewEntryLink } from '@/components/InterviewEntryLink'
 import { QuestionWorkbench } from '@/components/QuestionList'
 import { Button } from '@/components/ui/button'
 import { useQuestionFilters } from '@/hooks/useQuestionFilters'
-import { useBankInfo, useBankQuestionList, useQuestionList } from '@/hooks/useQuestionQueries'
+import { useBankInfo, useQuestionList } from '@/hooks/useQuestionQueries'
 import { cn } from '@/lib/utils'
 import type { QuestionBank } from '@/types/question'
 import { NotFoundPage } from '@/pages/not-found'
-import { questionPath } from '@/utils/route'
 
 /**
- * 题库页：检索工作台，和全部题目页同一套布局。页头两行：面包屑和模拟面试入口、题库名和简介；
+ * 题库页：检索工作台，和全部题目页同一套布局。页头两行：面包屑、题库名和简介；
  * 下面左边是吸顶筛选栏 + 题目列表，右边当前职位方向的热门题目（桌面端吸顶、往下滚时收起，手机端在列表下面）
  */
 export function QuestionBankPage() {
@@ -23,9 +21,6 @@ export function QuestionBankPage() {
   const filters = useQuestionFilters(bankId)
   // 和列表组件同一个查询，只用来判断列表是否还在首次加载
   const { isPending: listPending } = useQuestionList(filters.query)
-  // 题库的第一题，和详情页左侧题目栏共用同一份缓存
-  const { data: navList } = useBankQuestionList(bankId)
-  const first = navList?.pages[0]?.list[0]
 
   // 全量列表加载完了却找不到这个题库
   if (info === null) return <NotFoundPage />
@@ -33,17 +28,11 @@ export function QuestionBankPage() {
   return (
     <div className="space-y-4">
       <header className="space-y-2">
-        <div className="flex items-baseline justify-between gap-4">
-          {info ? (
-            <Breadcrumb jobName={info.jobName} />
-          ) : (
-            <div aria-hidden className="h-[1.5em] w-28 skeleton bg-skeleton text-meta" />
-          )}
-          <InterviewEntryLink
-            to={first && questionPath(first.question_id, bankId, 'interview')}
-            label="从第一题开始"
-          />
-        </div>
+        {info ? (
+          <Breadcrumb jobName={info.jobName} />
+        ) : (
+          <div aria-hidden className="h-[1.5em] w-28 skeleton bg-skeleton text-meta" />
+        )}
         {isPending && <BankSummarySkeleton />}
         {isError && (
           <div className="flex items-center gap-3">

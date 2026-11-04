@@ -3,7 +3,6 @@ import IconChevronDown from '~icons/solar/alt-arrow-down-linear'
 import IconChecklist from '~icons/solar/checklist-minimalistic-linear'
 import IconClock from '~icons/solar/clock-circle-linear'
 import IconEye from '~icons/solar/eye-linear'
-import IconAcademicCap from '~icons/solar/square-academic-cap-linear'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { LikeContent } from '@/components/LikeContent'
 import { Button } from '@/components/ui/button'
@@ -20,7 +19,6 @@ import { USER_TAG_OPTIONS } from '@/constants/question'
 import { useLikeEffect } from '@/hooks/useLikeEffect'
 import { useLogin } from '@/hooks/useLogin'
 import { useLikeQuestion, useTagQuestion } from '@/hooks/useQuestionQueries'
-import { MASTERY_LABELS, useProgress } from '@/lib/progress'
 import { cn } from '@/lib/utils'
 import type { Question, UserTag } from '@/types/question'
 
@@ -28,19 +26,13 @@ import type { Question, UserTag } from '@/types/question'
 const HOVER_CLOSE_DELAY = 150
 
 /**
- * 题目详情的页头：标题和掌握状态徽章、模拟面试入口；下面一行难度、标签、浏览量、时间，再下面一行点赞和标记掌握状态。
+ * 题目详情的页头：标题和掌握状态徽章；下面一行难度、标签、浏览量、时间，再下面一行点赞和标记掌握状态。
  * 操作单独一行而不是跟在元信息后面，标签多少不一样时按钮的位置也不变。
  * 点赞是乐观更新，点下去马上变，失败再改回去；标记是悲观更新，接口成功后才改缓存。
  * 游客点赞先打开登录弹窗，标记菜单只有登录后才显示。
  * 换题时由父组件用 key 重新挂载，上一题的操作报错不带过来
  */
-export function DetailHeader({
-  question,
-  onInterview,
-}: {
-  question: Question
-  onInterview: () => void
-}) {
+export function DetailHeader({ question }: { question: Question }) {
   const { isLoggedIn, setShowLoginDialog } = useLogin()
   const like = useLikeQuestion()
   const [likeEffect, playLikeEffect] = useLikeEffect()
@@ -48,9 +40,6 @@ export function DetailHeader({
   // 退出登录后、详情重新拉回来之前，缓存里还是登录时的状态，先按游客显示
   const userTag = isLoggedIn ? question.user_tag : 0
   const liked = isLoggedIn && question.user_liked
-  // 账号里没标记时，显示模拟面试里记在本机的掌握程度
-  const { mastery } = useProgress()
-  const localMark = userTag === 0 ? mastery[question.question_id] : undefined
 
   function handleLike() {
     if (!isLoggedIn) {
@@ -72,24 +61,13 @@ export function DetailHeader({
 
   return (
     <header className="border-b pb-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-        <div className="flex min-w-0 items-baseline gap-3">
-          <h1 className="min-w-0 font-title text-title font-semibold">{question.title}</h1>
-          {userTag !== 0 && <UserTagBadge tag={userTag} />}
-        </div>
-        <Button variant="outline" onClick={onInterview} className="shrink-0 self-start">
-          <IconAcademicCap />
-          模拟面试
-        </Button>
+      <div className="flex min-w-0 items-baseline gap-3">
+        <h1 className="min-w-0 font-title text-title font-semibold">{question.title}</h1>
+        {userTag !== 0 && <UserTagBadge tag={userTag} />}
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-meta text-muted-foreground">
         <DifficultyLabel difficulty={question.difficulty} />
-        {localMark && (
-          <span className="border border-brand px-2 text-brand">
-            本机标记：{MASTERY_LABELS[localMark]}
-          </span>
-        )}
         {question.tags.length > 0 && (
           <span className="flex flex-wrap gap-2">
             {question.tags.map(t => (

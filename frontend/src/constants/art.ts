@@ -17,11 +17,6 @@ export function artSrc(art: ArtAsset) {
   return `${ART_BASE}/${art.file}`
 }
 
-/** 提前在后台下载之后才会显示的图（比如 VN 里换姿势的立绘），换图时不闪空白 */
-export function preloadArt(...arts: ArtAsset[]) {
-  for (const art of arts) new Image().src = artSrc(art)
-}
-
 const SCENE = { width: 1536, height: 864 }
 const PORTRAIT = { width: 512, height: 768 }
 
@@ -33,12 +28,6 @@ export const ART = {
     ...PORTRAIT,
     alt: '澜汐，蓝色长发的鲸尾女仆，伸手示意',
   },
-  portraitThinking: {
-    file: 'fallbacks/portrait-thinking.webp',
-    ...PORTRAIT,
-    alt: '澜汐托着下巴思考',
-  },
-  portraitExplain: { file: 'fallbacks/portrait-explain.webp', ...PORTRAIT, alt: '澜汐捧着书讲解' },
 } satisfies Record<string, ArtAsset>
 
 /**
@@ -60,7 +49,7 @@ export type MotionName = keyof typeof MOTIONS
 export type VectorName = 'book' | 'check' | 'continue' | 'dots' | 'hourglass' | 'milestone'
 
 /**
- * 澜汐：站点唯一的角色，在登录、引导、空状态、出错页当引导员，在模拟面试里当面试官。
+ * 澜汐：站点唯一的角色，在登录、引导、空状态、出错页当引导员。
  * 她是没有品牌授权的品牌拟人（蓝鲸母题），页面上只用中文名，只限个人作品集等非商用场景，商用前要换成原创角色
  */
 export const GUIDE = {
