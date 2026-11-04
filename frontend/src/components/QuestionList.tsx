@@ -6,8 +6,10 @@ import IconEye from '~icons/solar/eye-linear'
 import IconFileText from '~icons/solar/file-text-linear'
 import IconMagnifierClose from '~icons/solar/magnifier-close-linear'
 import IconClose from '~icons/solar/close-linear'
+import IconPlay from '~icons/solar/play-linear'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
+import { GuideNote } from '@/components/guide'
 import { LoadingBar } from '@/components/LoadingBar'
 import { SearchBox } from '@/components/SearchBox'
 import { Button } from '@/components/ui/button'
@@ -24,7 +26,7 @@ import { PAGE_SIZE, type QuestionFilterState } from '@/hooks/useQuestionFilters'
 import { useQuestionList } from '@/hooks/useQuestionQueries'
 import { cn } from '@/lib/utils'
 import type { Difficulty, Question, UserTag } from '@/types/question'
-import { questionPath } from '@/utils/route'
+import { feedPath, questionPath } from '@/utils/route'
 
 /** 吸顶导航栏的高度（layout.tsx 里的 h-14） */
 const NAV_HEIGHT = 56
@@ -273,10 +275,66 @@ export function QuestionResults({
             ))}
           </ul>
 
+          <ListGuide
+            page={page}
+            totalPages={totalPages}
+            total={data.total}
+            bankId={bankId}
+            onNext={() => goToPage(page + 1)}
+          />
           <Pagination page={page} totalPages={totalPages} total={data.total} onChange={goToPage} />
         </>
       )}
     </div>
+  )
+}
+
+/**
+ * 列表底部澜汐的一句话（64px 静态 Q 版，不播动作）：还有下一页时带一个翻页按钮，
+ * 最后一页推荐换成沉浸刷题（题库页只刷这个题库）。排在列表下面，不占首屏的题目行
+ */
+function ListGuide({
+  page,
+  totalPages,
+  total,
+  bankId,
+  onNext,
+}: {
+  page: number
+  totalPages: number
+  total: number
+  bankId?: string
+  onNext: () => void
+}) {
+  if (page < totalPages) {
+    return (
+      <GuideNote
+        pose="explain"
+        action={
+          <Button variant="outline" size="sm" onClick={onNext}>
+            下一页
+            <IconChevronRight />
+          </Button>
+        }
+      >
+        这一页看完了？翻到第 {page + 1} 页接着刷。
+      </GuideNote>
+    )
+  }
+  return (
+    <GuideNote
+      pose="wave"
+      action={
+        <Button variant="outline" size="sm" asChild>
+          <Link to={feedPath({ bankId })}>
+            <IconPlay />
+            沉浸刷题
+          </Link>
+        </Button>
+      }
+    >
+      这里的 {total} 道题都列完了，想换种方式，可以一屏一题地刷。
+    </GuideNote>
   )
 }
 
@@ -540,6 +598,8 @@ function ListSkeleton() {
           </div>
         ))}
       </div>
+      {/* 列表底部澜汐那一行（ListGuide）：手机端按钮排在文字下面，高一些 */}
+      <div className="h-[102px] skeleton bg-skeleton md:h-[66px]" />
       <div className="h-8 w-40 skeleton bg-skeleton" />
     </div>
   )

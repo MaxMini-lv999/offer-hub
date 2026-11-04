@@ -9,12 +9,13 @@ import { cn } from '@/lib/utils'
 
 /**
  * 空状态：图标或澜汐的 Q 版 + 一句说明 + 一个操作按钮。
- * Q 版只用在主内容区的空状态（120–160px），侧栏、抽屉这类窄地方用图标；
- * 一屏最多一个角色，页面上已经有立绘（首页封面）时也用图标
+ * Q 版默认 120–160px，用在主内容区；评论区这类次要位置传 poseSize 缩到 96px，侧栏用图标。
+ * 一屏最多两个角色、同一时刻只有一个在动，页面上已经有立绘（首页封面）时用图标
  */
 export function EmptyState({
   icon,
   pose,
+  poseSize,
   title,
   hint,
   action,
@@ -23,6 +24,8 @@ export function EmptyState({
   icon?: ReactNode
   /** 澜汐的姿势，只显示静态封面：空状态和出错都不是进行中的状态，不放循环动画 */
   pose?: MotionName
+  /** 不传时桌面 160px、手机 120px */
+  poseSize?: number
   title: string
   /** 标题下面一行补充说明 */
   hint?: ReactNode
@@ -36,7 +39,7 @@ export function EmptyState({
       className={cn('flex flex-col items-center gap-4 border px-4 py-12 text-center', className)}
     >
       {pose ? (
-        <CharacterSprite name={pose} size={isDesktop ? 160 : 120} still />
+        <CharacterSprite name={pose} size={poseSize ?? (isDesktop ? 160 : 120)} still />
       ) : (
         <span className="text-muted-foreground">{icon}</span>
       )}

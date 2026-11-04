@@ -4,6 +4,7 @@ import IconChevronLeft from '~icons/solar/alt-arrow-left-linear'
 import IconChevronRight from '~icons/solar/alt-arrow-right-linear'
 import IconFileText from '~icons/solar/file-text-linear'
 import IconMenu from '~icons/solar/hamburger-menu-linear'
+import { GuestFade } from '@/components/auth/GuestFade'
 import { Comments } from '@/components/comment/Comments'
 import { DetailHeader } from '@/components/detail/DetailHeader'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
@@ -144,24 +145,15 @@ function QuestionArticle({
   /** 内容被截断时加渐隐遮罩和登录入口 */
   truncated: boolean
 }) {
-  const { setShowLoginDialog } = useLogin()
-
   return (
     <article className="max-w-[72ch]">
       {/* 换题时重新挂载，上一题点赞、标记的报错不带过来。key 加前缀：和下面的 Comments 是兄弟节点，key 不能相同 */}
       <DetailHeader key={`header-${question.question_id}`} question={question} />
 
-      {/* 游客遮罩高 200px，绝对定位叠在正文底部：下面 120px 是给按钮留的空白，
-          渐变在上面 80px 内从透明变到背景色，只盖住正文最后约 3 行，不然游客能看的 150 字会被淡掉一大半 */}
+      {/* 游客遮罩（GuestFade）叠在正文底部，下面 120px 给登录按钮那一行留空白 */}
       <div className={cn('relative mt-6', truncated && 'pb-[120px]')}>
         <Markdown content={question.content} />
-        {truncated && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-[200px] max-h-full items-end justify-center bg-gradient-to-b from-background/0 to-background to-40% pb-10">
-            <Button className="pointer-events-auto" onClick={() => setShowLoginDialog(true)}>
-              登录后查看完整内容
-            </Button>
-          </div>
-        )}
+        {truncated && <GuestFade />}
       </div>
 
       {bankId && <PrevNextNav bankId={bankId} currentId={question.question_id} />}

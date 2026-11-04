@@ -2,6 +2,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import IconBook from '~icons/solar/book-linear'
 import { BankLogo } from '@/components/BankLogo'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
+import { GuideNote } from '@/components/guide'
 import { HotContent } from '@/components/HotContent'
 import { Button } from '@/components/ui/button'
 import { useQuestionBanks } from '@/hooks/useQuestionQueries'
@@ -11,7 +12,7 @@ import { bankPath } from '@/utils/route'
 
 /**
  * 题库目录：一行标题，下面左边是职位方向 + 按系列分组的题库索引，右边（手机端在下方）当前方向的热门题目。
- * 整页没有立绘，目录整体出错或为空时配澜汐的静态 Q 版；某个方向下没有题库时只用图标
+ * 侧栏顶上澜汐一句话教人怎么挑题库（静态 Q 版）；目录整体出错或为空时主栏再配一个静态 Q 版，某个方向下没有题库时只用图标
  */
 export function BankCatalogPage() {
   const { data, isPending, isError, error, refetch } = useQuestionBanks()
@@ -59,7 +60,10 @@ export function BankCatalogPage() {
         </div>
 
         {/* 题库列表出错或为空时 activeGroup 是 undefined，退回全站热门 */}
-        <aside>
+        <aside className="space-y-4">
+          <GuideNote pose="explain">
+            先选职位方向，再挑题库；拿不准就从下面的热门题目刷起。
+          </GuideNote>
           <HotContent jobName={activeGroup?.job_name} enabled={!isPending} />
         </aside>
       </div>

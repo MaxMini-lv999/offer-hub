@@ -51,8 +51,11 @@ export function CommentList({
 
   if (comments.length === 0) {
     return (
+      // 澜汐敲键盘的静态封面，缩到 96px：详情页正文下面、沉浸刷题的评论抽屉里都不抢主内容
       <EmptyState
         icon={<IconChat className="size-8" />}
+        pose="typing"
+        poseSize={96}
         title="还没有评论"
         hint="来写下第一条吧"
         className={className}

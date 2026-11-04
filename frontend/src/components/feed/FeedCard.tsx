@@ -6,6 +6,7 @@ import IconEye from '~icons/solar/eye-linear'
 import IconEyeClosed from '~icons/solar/eye-closed-linear'
 import IconFileText from '~icons/solar/file-text-linear'
 import IconRefresh from '~icons/solar/refresh-linear'
+import { GuestFade } from '@/components/auth/GuestFade'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { TagMenu } from '@/components/detail/DetailHeader'
 import { LikeContent } from '@/components/LikeContent'
@@ -207,13 +208,7 @@ function QuestionBody({
       {/* 和详情页一样：游客的题干底部盖一层渐隐，中间是登录按钮 */}
       <div className={cn('relative mt-4', truncated && 'pb-[120px]')}>
         <Markdown content={question.content} />
-        {truncated && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-[200px] max-h-full items-end justify-center bg-gradient-to-b from-background/0 to-background to-40% pb-10">
-            <Button className="pointer-events-auto" onClick={() => setShowLoginDialog(true)}>
-              登录后查看完整内容
-            </Button>
-          </div>
-        )}
+        {truncated && <GuestFade />}
       </div>
 
       <section ref={answerRef} aria-label="答案" className="mt-8 border-t pt-4">
