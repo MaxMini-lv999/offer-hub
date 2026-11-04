@@ -1,0 +1,9 @@
+# Prettier 3 默认已读取 .gitignore（dist、node_modules 不用再写）
+package-lock.json
+
+# 素材包（生成产物，原样保留）
+design/
+public/
+
+# 文档里的代码片段不是完整文件，无分号模式下 Prettier 会给 JSX 行加前导分号
+*.md

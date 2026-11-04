@@ -19,6 +19,10 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // 未使用变量交给 tsconfig 的 noUnusedLocals / noUnusedParameters（npm run build 时报错）
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
