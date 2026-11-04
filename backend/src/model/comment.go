@@ -47,7 +47,7 @@ type ListCommentsResp struct {
 
 // AddCommentReq POST /api/v1/comment/add 发表评论请求，评论者取自 context 里的 user_id
 type AddCommentReq struct {
-	TargetType int    `json:"target_type" binding:"required,oneof=1 2"` // 1题目 / 2面经
+	TargetType int    `json:"target_type" binding:"required,oneof=1"` // 1题目（2面经本期没有，传 2 返回参数错误）
 	TargetID   string `json:"target_id" binding:"required"`
 	ParentID   string `json:"parent_id"`                           // 顶层评论为空
 	ReplyTo    string `json:"reply_to"`                            // 被回复的用户 ID，顶层评论为空

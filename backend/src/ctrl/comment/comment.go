@@ -91,7 +91,7 @@ func ListComments(c *gin.Context) {
 
 // AddComment POST /api/v1/comment/add 发表评论
 func AddComment(c *gin.Context) {
-	// ① 读参数：target_type 只能是 1 / 2，content 必填且不超过 1000 字，binding 已校验
+	// ① 读参数：target_type 只能是 1（面经本期没有），content 必填且不超过 1000 字，binding 已校验
 	var req model.AddCommentReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
@@ -109,6 +109,10 @@ func AddComment(c *gin.Context) {
 	userID := c.GetString(middleware.CtxKeyUserID)
 	result, err := service.AddComment(c.Request.Context(), &req, userID)
 	if err != nil {
+		if errors.Is(err, service.ErrCommentTargetNotFound) {
+			c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "评论对象不存在", "data": nil})
+			return
+		}
 		if errors.Is(err, service.ErrParentCommentNotFound) {
 			c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "父评论不存在", "data": nil})
 			return

@@ -148,6 +148,10 @@ func ListComments(ctx context.Context, req *model.ListCommentsReq, userID string
 	return model.ListCommentsData{Total: total, List: result}, nil
 }
 
+// ErrCommentTargetNotFound 评论对象不存在，ctrl 据此返回"评论对象不存在"。
+// 包括已隐藏、已删除的题目：和点赞一样，不能给看不到的题目写数据
+var ErrCommentTargetNotFound = errors.New("comment target not found")
+
 // ErrParentCommentNotFound 父评论不存在，ctrl 据此返回"父评论不存在"。
 // parent_id 必须是同一评论对象下、正常状态的顶层评论（评论只有两层），回复子评论时也传它所在的顶层评论 ID
 var ErrParentCommentNotFound = errors.New("parent comment not found")
@@ -167,7 +171,16 @@ func AddComment(ctx context.Context, req *model.AddCommentReq, userID string) (m
 		return model.AddCommentData{}, ErrUserDisabled
 	}
 
-	// ② 回复：校验父评论，并补上默认的被回复人
+	// ② 评论对象必须存在且是正常状态，否则能给不存在的 question_id 写评论。
+	//    target_type 只会是 1（题目），ctrl 的 binding 保证
+	if _, err := data.GetQuestionByID(ctx, req.TargetID); err != nil {
+		if errors.Is(err, data.ErrQuestionNotFound) {
+			return model.AddCommentData{}, ErrCommentTargetNotFound
+		}
+		return model.AddCommentData{}, fmt.Errorf("get question AddComment: %w", err)
+	}
+
+	// ③ 回复：校验父评论，并补上默认的被回复人
 	replyTo := req.ReplyTo
 	if req.ParentID != "" {
 		parent, err := data.GetCommentByID(ctx, req.ParentID)
@@ -185,7 +198,7 @@ func AddComment(ctx context.Context, req *model.AddCommentReq, userID string) (m
 		}
 	}
 
-	// ③ 查被回复人的昵称，组装响应时用。所有读操作放在写入之前，查询出错时不会留下半条数据。
+	// ④ 查被回复人的昵称，组装响应时用。所有读操作放在写入之前，查询出错时不会留下半条数据。
 	//    对方已注销时查不到，reply_to_name 为空串，和评论列表一致
 	users := map[string]data.UserInfo{userID: *author}
 	if replyTo != "" {
@@ -198,7 +211,7 @@ func AddComment(ctx context.Context, req *model.AddCommentReq, userID string) (m
 		}
 	}
 
-	// ④ 写入评论：内容先过滤敏感词（和 UpdateComment ④ 同一个函数，词库热更新后两边同时生效）；
+	// ⑤ 写入评论：内容先过滤敏感词（和 UpdateComment ④ 同一个函数，词库热更新后两边同时生效）；
 	//    question_id 只有评论对象是题目时才填
 	now := time.Now()
 	c := data.Comment{
@@ -220,7 +233,7 @@ func AddComment(ctx context.Context, req *model.AddCommentReq, userID string) (m
 		return model.AddCommentData{}, fmt.Errorf("insert comment AddComment: %w", err)
 	}
 
-	// ⑤ 回复：父评论 child_count +1。评论已经写进去了，这里失败只记日志不报错：
+	// ⑥ 回复：父评论 child_count +1。评论已经写进去了，这里失败只记日志不报错：
 	//    返回失败的话前端会重试，同一条回复就发了两次。child_count 只是冗余计数，
 	//    评论列表的 sub_comment_total 按实际条数算，不读它
 	if c.ParentID != "" {
@@ -229,7 +242,7 @@ func AddComment(ctx context.Context, req *model.AddCommentReq, userID string) (m
 		}
 	}
 
-	// ⑥ 新评论还没人点过赞，liked 传 nil，读出来都是 false
+	// ⑦ 新评论还没人点过赞，liked 传 nil，读出来都是 false
 	return model.AddCommentData{
 		CommentID: c.CommentID,
 		Comment:   toCommentItem(&c, users, nil),
@@ -267,7 +280,7 @@ func DeleteComment(ctx context.Context, req *model.DeleteCommentReq, userID stri
 		return fmt.Errorf("soft delete comment DeleteComment: %w", err)
 	}
 
-	// ④ 删的是回复：父评论 child_count -1。评论已经删掉了，这里失败只记日志不报错，理由同 AddComment ⑤
+	// ④ 删的是回复：父评论 child_count -1。评论已经删掉了，这里失败只记日志不报错，理由同 AddComment ⑥
 	if c.ParentID != "" {
 		if err := data.IncCommentChildCount(ctx, c.ParentID, -1); err != nil {
 			log.Printf("dec child count DeleteComment: %v", err)
@@ -306,7 +319,7 @@ func UpdateComment(ctx context.Context, req *model.UpdateCommentReq, userID stri
 		return model.UpdateCommentData{}, ErrCommentForbidden
 	}
 
-	// ④ 新内容先过滤敏感词再写入，规则和 AddComment ④ 相同。②到④之间评论被删掉时，这里匹配不到，同样按不存在处理
+	// ④ 新内容先过滤敏感词再写入，规则和 AddComment ⑤ 相同。②到④之间评论被删掉时，这里匹配不到，同样按不存在处理
 	if err := data.UpdateCommentContent(ctx, c.CommentID, tools.FilterSensitiveWords(req.Content)); err != nil {
 		if errors.Is(err, data.ErrCommentNotFound) {
 			return model.UpdateCommentData{}, ErrCommentNotFound
