@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import IconMagnifier from '~icons/solar/magnifier-linear'
 import { Input } from '@/components/ui/input'
+import { KEYWORD_MAX_LENGTH } from '@/constants/question'
 
 /**
- * 搜索框：停止输入 300ms 后自动搜索，回车立即搜索。value 是已生效的关键词（URL 或父组件里的）。
+ * 题目搜索框：停止输入 300ms 后自动搜索，回车立即搜索。value 是已生效的关键词（URL 或父组件里的）。
  * auto 为 false 时只在回车时搜索，用于搜索会跳页的地方（首页），免得输入到一半就被跳走
  */
 export function SearchBox({
@@ -49,6 +50,7 @@ export function SearchBox({
         onChange={e => setText(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
+        maxLength={KEYWORD_MAX_LENGTH}
         enterKeyHint="search"
         className="pl-9"
       />

@@ -39,7 +39,7 @@ type Question struct {
 // QuestionFilter FilterQuestions 的查询条件，字段为零值表示不按该条件过滤
 type QuestionFilter struct {
 	BankID     string
-	Keyword    string
+	Keywords   []string // 每个词都要在标题或正文里出现；为空表示不按关键词过滤
 	Difficulty int
 	Tags       []string
 	JobName    string
@@ -171,10 +171,16 @@ func FilterQuestions(ctx context.Context, f QuestionFilter) ([]Question, int64, 
 	if len(f.Tags) > 0 {
 		filter["tags"] = bson.M{"$all": f.Tags}
 	}
-	if f.Keyword != "" {
-		re := bson.M{"$regex": regexp.QuoteMeta(f.Keyword), "$options": "i"}
-		// title 或 content 任一匹配 re 就算命中，用 "$or"：
-		filter["$or"] = bson.A{bson.M{"title": re}, bson.M{"content": re}}
+	if len(f.Keywords) > 0 {
+		// 每个词各自是一个 "title 或 content 命中" 的 $or，再用 $and 要求所有词都命中。
+		// bson.M 的 key 不能重复，多个 "$or" 直接放进 filter 会互相覆盖，所以要套一层 $and：
+		// ["Redis", "持久化"] → {$and: [{$or: [title~Redis, content~Redis]}, {$or: [title~持久化, content~持久化]}]}
+		and := make(bson.A, 0, len(f.Keywords))
+		for _, kw := range f.Keywords {
+			re := bson.M{"$regex": regexp.QuoteMeta(kw), "$options": "i"} // QuoteMeta：关键词里的 . * 等按普通字符匹配
+			and = append(and, bson.M{"$or": bson.A{bson.M{"title": re}, bson.M{"content": re}}})
+		}
+		filter["$and"] = and
 	}
 
 	// ② 先查总数（分页之前的总数，前端用它算一共多少页）
@@ -183,14 +189,22 @@ func FilterQuestions(ctx context.Context, f QuestionFilter) ([]Question, int64, 
 		return nil, 0, fmt.Errorf("count question: %w", err)
 	}
 
-	// ③ 排序 + 分页
+	// ③ 这一页的起点已经超过总数（包括 total 为 0）时，后面肯定没有数据，不用再查一次。
+	// 调用方保证 page 已限制在上限内，这里的乘法不会溢出
+	skip := int64((f.Page - 1) * f.PageSize)
+	if skip >= total {
+		return nil, total, nil
+	}
+
+	// ④ 排序 + 分页
 	dir := 1 // 1 升序
 	if f.SortOrder == "desc" {
 		dir = -1 // -1 降序
 	}
 	opts := options.Find().
-		SetSort(bson.D{{Key: f.SortBy, Value: dir}, {Key: "_id", Value: 1}}).
-		SetSkip(int64((f.Page - 1) * f.PageSize)).
+		// _id 兜底让分页稳定；方向跟主排序一致，倒序时 MongoDB 能直接倒着扫索引，不用在内存里排
+		SetSort(bson.D{{Key: f.SortBy, Value: dir}, {Key: "_id", Value: dir}}).
+		SetSkip(skip).
 		SetLimit(int64(f.PageSize))
 
 	if f.MetaOnly {

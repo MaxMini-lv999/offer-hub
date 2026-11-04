@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"offer-hub/data"
@@ -93,7 +94,7 @@ func GetAllQuestionList(ctx context.Context, req *model.GetAllQuestionListReq) (
 func buildQuestionFilter(req *model.ListQuestionReq) data.QuestionFilter {
 	return data.QuestionFilter{
 		BankID:     req.BankID,
-		Keyword:    req.Keyword,
+		Keywords:   strings.Fields(req.Keyword), // 按空白（含全角空格）拆成多个词，全是空格时为空，不过滤
 		Difficulty: req.Difficulty,
 		Tags:       req.Tags,
 		JobName:    req.JobName,

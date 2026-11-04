@@ -4,6 +4,8 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
 
@@ -41,38 +43,65 @@ func GetAllQuestionList(c *gin.Context) {
 	})
 }
 
-// sortByWhitelist 允许的排序字段
-var sortByWhitelist = map[string]bool{
-	"order":           true, // 默认排序，文档里没列出，但我们要用它
-	"create_time":     true,
-	"view_count":      true,
-	"thumbs_up_count": true,
-	"dislike_count":   true,
+const (
+	defaultPageSize = 20
+	maxPageSize     = 100
+	// maxListOffset 分页最多跳过多少条。skip 越大，MongoDB 要先数过去的文档越多，再往后翻直接返回参数错误
+	maxListOffset = 10000
+	// maxKeywordLen 关键词最多多少个字符（按字符算，不是按字节），每个词都是一次正则匹配
+	maxKeywordLen = 50
+)
+
+// sortByDefaultOrder 允许的排序字段，以及没传 sort_order 时的默认方向：
+// 默认排序 order 从小到大；时间和计数字段从大到小（最新、最多浏览排在前面）
+var sortByDefaultOrder = map[string]string{
+	"order":           "asc", // 默认排序，文档里没列出，但我们要用它
+	"create_time":     "desc",
+	"view_count":      "desc",
+	"thumbs_up_count": "desc",
+	"dislike_count":   "desc",
 }
 
 // normalizeListReq 给题目列表请求补默认值并校验，list 和 meta/list 共用。参数不合法时返回 false
 func normalizeListReq(req *model.ListQuestionReq) bool {
+	// ① 分页
 	if req.Page <= 0 {
 		req.Page = 1
 	}
 	if req.PageSize <= 0 {
-		req.PageSize = 20
+		req.PageSize = defaultPageSize
 	}
-	if req.PageSize > 100 {
-		req.PageSize = 100
+	if req.PageSize > maxPageSize {
+		req.PageSize = maxPageSize
 	}
+	// 等价于 (page-1)*page_size > maxListOffset。用除法比：page 特别大时乘法会溢出成负数，反而通过检查
+	if req.Page-1 > maxListOffset/req.PageSize {
+		return false
+	}
+
+	// ② 排序
 	if req.SortBy == "" {
 		req.SortBy = "order"
 	}
-	// 校验
-	if !sortByWhitelist[req.SortBy] {
+	defaultOrder, ok := sortByDefaultOrder[req.SortBy]
+	if !ok {
 		return false
 	}
 	if req.SortOrder == "" {
-		req.SortOrder = "asc"
+		req.SortOrder = defaultOrder
 	}
 	// SortOrder 既不是 "asc" 也不是 "desc" 时，同样返回参数错误
 	if req.SortOrder != "asc" && req.SortOrder != "desc" {
+		return false
+	}
+
+	// ③ 关键词：先去掉首尾空白再校验，拆词在 service 里做
+	req.Keyword = strings.TrimSpace(req.Keyword)
+	// MongoDB 的正则不接受非法 UTF-8 和 \x00，直接传下去会变成 500
+	if !utf8.ValidString(req.Keyword) || strings.ContainsRune(req.Keyword, 0) {
+		return false
+	}
+	if utf8.RuneCountInString(req.Keyword) > maxKeywordLen {
 		return false
 	}
 

@@ -47,3 +47,6 @@ export const SORT_OPTIONS: {
 
 /** 游客看到的 content 会被后端截断到前 150 个字符 */
 export const GUEST_CONTENT_LIMIT = 150
+
+/** 题目搜索关键词的最大长度，超过时后端返回参数错误 */
+export const KEYWORD_MAX_LENGTH = 50

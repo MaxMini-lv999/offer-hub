@@ -306,9 +306,13 @@ expect_ok
 request page_1_10 "$API/list" page=1 page_size=10
 check '第 1 页 + 第 2 页 == page_size=10 的第 1 页' 'ids(R("page1")["data"]["list"]) + ids(R("page2")["data"]["list"]) == ids(L)'
 check '两页的 total 相同' 'R("page1")["data"]["total"] == R("page2")["data"]["total"] == d["data"]["total"]'
-request page_far "$API/list" page=9999 page_size=5
+request page_far "$API/list" page=999 page_size=5
 expect_ok
 check '超出范围的页：list 为 []（不是 null），total 不变' 'L == [] and d["data"]["total"] == R("all_q")["data"]["total"]' 'd["data"]'
+# 分页最多跳过 10000 条：page_size=20 时最后一个合法页是 501（跳过 500*20 = 10000 条），502 起返回参数错误（见 2.6）
+request page_cap "$API/list" page=501
+expect_ok
+check 'page=501（刚好跳过 10000 条）：还在上限内，list 为 []' 'L == [] and d["data"]["total"] == R("all_q")["data"]["total"]' 'd["data"]'
 
 step '2.4 题目列表：过滤'
 request f_diff "$API/list" difficulty=3 page_size=100
@@ -343,6 +347,26 @@ request f_kw_content "$API/list" keyword=两阶段提交
 expect_ok
 check '种子：keyword=两阶段提交 只在正文里出现，命中 q110' 'ids(L) == ["q110"]' 'ids(L)'
 
+request f_kw_trim "$API/list" 'keyword=  redis  ' page_size=100
+expect_ok
+check 'keyword 首尾的空格被去掉：结果与 keyword=redis 相同' 'ids(L) == ids(R("f_kw")["data"]["list"])' 'ids(L)'
+
+request f_kw_blank "$API/list" 'keyword=   ' page_size=100
+expect_ok
+check 'keyword 全是空格：当作没传，结果与不传完全相同' 'ids(L) == ids(R("all_q")["data"]["list"])' 'd["data"]["total"]'
+
+request f_kw_terms "$API/list" 'keyword=Redis 持久化'
+expect_ok
+check '种子：keyword=Redis 持久化 按空格拆成两个词，两个词都要命中，只有 q101' 'ids(L) == ["q101"]' 'ids(L)'
+
+request f_kw_fullwidth "$API/list" 'keyword=Redis　持久化'
+expect_ok
+check '全角空格也能拆词：结果与半角空格相同' 'ids(L) == ids(R("f_kw_terms")["data"]["list"])' 'ids(L)'
+
+request f_kw_max "$API/list" "keyword=$(printf '题%.0s' {1..50})"
+expect_ok
+check 'keyword 50 个字（上限）：正常查询' 'd["code"] == 0' 'd["code"]'
+
 request f_job "$API/list" job_name=后端开发
 expect_ok
 check '种子：job_name=后端开发 共 21 道' 'd["data"]["total"] == 21' 'd["data"]["total"]'
@@ -363,8 +387,22 @@ for spec in 'view_count desc' 'view_count asc' 'create_time desc' 'thumbs_up_cou
   fi
 done
 
+# 不传 sort_order 时：时间和计数字段默认降序，order 默认升序
+for field in view_count create_time; do
+  export SORT_FIELD=$field
+  request "sort_${field}_default" "$API/list" sort_by="$field" page_size=100
+  check "sort_by=$field 不传 sort_order：默认降序，与 sort_order=desc 相同" \
+    'ids(L) == ids(R("sort_" + E["SORT_FIELD"] + "_desc")["data"]["list"])' 'ids(L)'
+done
+request sort_default "$API/list" page_size=100
+check '不传 sort_by：按 order 升序' 'd["code"] == 0 and asc([q["order"] for q in L])' '[q["order"] for q in L]'
+
 step '2.6 题目列表：非法参数'
-for kv in sort_by=hot_degree sort_order=up page=abc page_size=abc difficulty=abc; do
+# MongoDB 的正则不接受 \x00，bash 字符串又放不下 \x00，所以从文件读（curl 的 name@文件 写法）
+printf 'a\0b' >"$TMP_DIR/keyword_nul.txt"
+for kv in sort_by=hot_degree sort_order=up page=abc page_size=abc difficulty=abc \
+  page=502 page=9223372036854775807 "keyword=$(printf '题%.0s' {1..51})" $'keyword=\xff' \
+  "keyword@$TMP_DIR/keyword_nul.txt"; do
   request bad_param "$API/list" "$kv"
   expect_err 400 参数错误
 done
