@@ -29,4 +29,4 @@ enable = true
 [RateLimit]
 enable = true
 window_seconds = 60
-max_requests = 20
+max_requests = 120

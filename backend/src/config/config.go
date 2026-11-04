@@ -73,6 +73,10 @@ func Init(configPath string) error {
 	if _, err := toml.DecodeFile(configPath, &c); err != nil {
 		return fmt.Errorf("load config %s: %w", configPath, err)
 	}
+	// 窗口为 0 时算窗口号会除以 0；上限为 0 时所有请求都会被拒绝
+	if rl := c.RateLimit; rl.Enable && (rl.WindowSeconds <= 0 || rl.MaxRequests <= 0) {
+		return fmt.Errorf("config %s: RateLimit window_seconds and max_requests must be > 0", configPath)
+	}
 	Conf = &c
 	return nil
 }
