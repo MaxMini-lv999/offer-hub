@@ -43,10 +43,18 @@ func ExistsUserByUsername(ctx context.Context, username string) (bool, error) {
 	return count > 0, nil
 }
 
-// CreateUser 插入一个用户，成功后 GORM 会把自增主键回填到 u.ID
+// ErrUserDuplicated 插入用户时撞了唯一索引（uk_username 或 uk_user_id）。
+// user_id 是 UUID，实际只会是用户名重复：两个请求同时注册同一个用户名，都通过了"是否已存在"的检查
+var ErrUserDuplicated = errors.New("user duplicated")
+
+// CreateUser 插入一个用户，成功后 GORM 会把自增主键回填到 u.ID；用户名已存在时返回 ErrUserDuplicated
 func CreateUser(ctx context.Context, u *UserInfo) error {
 	db := GetData().MySQL.WithContext(ctx)
 	if err := db.Create(u).Error; err != nil {
+		// 需要 gorm.Config 开启 TranslateError（见 newMySQL），否则拿到的是驱动原始的 1062 错误
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return ErrUserDuplicated
+		}
 		return fmt.Errorf("insert username:%s CreateUser: %w", u.Username, err)
 	}
 	return nil

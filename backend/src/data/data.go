@@ -105,7 +105,9 @@ func (d *Data) Close(ctx context.Context) error {
 func newMySQL(c config.MySQLConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Asia%%2FShanghai",
 		c.User, c.Pwd, c.URL, c.DBName)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	// TranslateError：把驱动的错误码翻译成 GORM 的通用错误，比如唯一索引冲突（MySQL 1062）→ gorm.ErrDuplicatedKey，
+	// data 层判断重复键时不用依赖具体的 MySQL 驱动
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{TranslateError: true})
 	if err != nil {
 		return nil, fmt.Errorf("connect mysql: %w", err)
 	}

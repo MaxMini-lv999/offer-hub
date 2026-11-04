@@ -19,7 +19,9 @@ const bcryptCost = 12
 // ErrUsernameExists 用户名已被注册，ctrl 据此返回"用户名已存在"
 var ErrUsernameExists = errors.New("username already exists")
 
-// Register 用户名密码注册，成功返回 nil
+// Register 用户名密码注册，成功返回 nil。
+// 先查用户名是否已存在只是为了尽早给出提示；两个请求同时注册同一个用户名时都会通过这一步，
+// 真正保证唯一的是 uk_username 唯一索引，后插入的那个在 CreateUser 失败，同样返回 ErrUsernameExists
 func Register(ctx context.Context, req *model.PasswordRegisterReq) error {
 	if res, err := data.ExistsUserByUsername(ctx, req.Username); err != nil {
 		return fmt.Errorf("failed Register:%w", err)
@@ -38,6 +40,9 @@ func Register(ctx context.Context, req *model.PasswordRegisterReq) error {
 		Password: string(hash),
 		NickName: req.Username,
 	}); err != nil {
+		if errors.Is(err, data.ErrUserDuplicated) {
+			return ErrUsernameExists
+		}
 		return fmt.Errorf("create Register.CreateUser:%w", err)
 	}
 
