@@ -18,6 +18,16 @@ import (
 
 const connectTimeout = 10 * time.Second
 
+// MySQL 连接池。database/sql 默认打开的连接数不设上限、空闲连接只留 2 个、连接永不过期：
+// 突发流量时连接数可能超过 MySQL 的 max_connections，流量过去后连接又被频繁关掉重建
+const (
+	mysqlMaxOpenConns = 50 // 同时打开的连接上限，多个实例加起来要小于 MySQL 的 max_connections（默认 151）
+	mysqlMaxIdleConns = 10 // 保留的空闲连接，请求来了不用重新建连
+	// mysqlConnMaxLifetime 一个连接最多用多久就换新的，要小于 MySQL 的 wait_timeout（默认 8 小时），
+	// 免得拿到已经被服务端关掉的连接
+	mysqlConnMaxLifetime = 30 * time.Minute
+)
+
 var (
 	data *Data
 	rdb  *redis.Client
@@ -111,6 +121,13 @@ func newMySQL(c config.MySQLConfig) (*gorm.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("connect mysql: %w", err)
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, fmt.Errorf("get mysql db: %w", err)
+	}
+	sqlDB.SetMaxOpenConns(mysqlMaxOpenConns)
+	sqlDB.SetMaxIdleConns(mysqlMaxIdleConns)
+	sqlDB.SetConnMaxLifetime(mysqlConnMaxLifetime)
 	return db, nil
 }
 
