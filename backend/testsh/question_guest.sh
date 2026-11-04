@@ -237,8 +237,8 @@ check '系列在各自方向内、题库在各自系列内按 order 升序' \
   'all(asc([s["order"] for s in g["series_list"]]) and all(asc([b["order"] for b in s["bank_list"]]) for s in g["series_list"]) for g in d["data"])'
 check '种子：三个方向依次是 后端开发 / 前端开发 / AI开发' \
   '[g["job_name"] for g in d["data"]] == ["后端开发", "前端开发", "AI开发"]' '[g["job_name"] for g in d["data"]]'
-check '种子：b001 MySQL题库 count=6（不含已删除的 q111），b004 空题库 count=0' \
-  '(m := {b["bank_id"]: b["count"] for g in d["data"] for s in g["series_list"] for b in s["bank_list"]}) and m.get("b001") == 6 and m.get("b004") == 0'
+check '种子：b001 MySQL题库 count=13（不含已删除的 q111），b004 空题库 count=0' \
+  '(m := {b["bank_id"]: b["count"] for g in d["data"] for s in g["series_list"] for b in s["bank_list"]}) and m.get("b001") == 13 and m.get("b004") == 0'
 check '种子：s006 前端工程化是空系列，bank_list 为 []' \
   '[s["bank_list"] for g in d["data"] for s in g["series_list"] if s["series_id"] == "s006"] == [[]]'
 
@@ -295,7 +295,7 @@ request all_q "$API/list" page_size=100
 expect_ok
 check '一页取完：total ≤ 100 且 len(list) == total' 'd["data"]["total"] <= 100 and len(L) == d["data"]["total"]' '[len(L), d["data"]["total"]]'
 check 'total 与默认参数时一致' 'd["data"]["total"] == R("list_default")["data"]["total"]'
-check '种子：正常状态的题共 30 道' 'd["data"]["total"] == 30' 'd["data"]["total"]'
+check '种子：正常状态的题共 65 道' 'd["data"]["total"] == 65' 'd["data"]["total"]'
 check '种子：隐藏的 q106 / q125 和已删除的 q111 不出现' 'not ({"q106", "q111", "q125"} & set(ids(L)))'
 check '种子：q102 正文 271 字，游客列表里截断为 150 字' 'len(by_id("all_q")["q102"]["content"]) == 150' 'len(by_id("all_q")["q102"]["content"])'
 
@@ -332,13 +332,16 @@ check "bank_id=$BANK（从 /all/list 取的第一个非空题库）：每道题�
 request f_tags "$API/list" tags=Go tags=并发 page_size=100
 expect_ok
 check 'tags=Go&tags=并发：每道题同时有这两个标签' 'len(L) > 0 and all({"Go", "并发"} <= set(q["tags"]) for q in L)' '[q["tags"] for q in L]'
-check '种子：命中 q119 / q123 / q124' 'sorted(ids(L)) == ["q119", "q123", "q124"]' 'ids(L)'
+check '种子：命中 q119 / q123 / q124 / q153 / q154 / q155 / q156' \
+  'sorted(ids(L)) == ["q119", "q123", "q124", "q153", "q154", "q155", "q156"]' 'ids(L)'
 
 request f_kw "$API/list" keyword=redis page_size=100
 expect_ok
+# 游客的正文截断到 150 字，redis 出现在截断位置之后时这里看不到，所以截断了的题不检查正文
 check 'keyword=redis：大小写不敏感，标题或正文包含 redis' \
-  'len(L) > 0 and all("redis" in (q["title"] + q["content"]).lower() for q in L)' '[q["title"] for q in L]'
+  'len(L) > 0 and all("redis" in (q["title"] + q["content"]).lower() or len(q["content"]) == 150 for q in L)' '[q["title"] for q in L]'
 check '种子：命中 q103（标题小写）和 q105（只有正文里的 REDIS）' '{"q103", "q105"} <= set(ids(L))' 'ids(L)'
+check '种子：命中 q147（Redis 只出现在正文第 150 字之后，按完整正文匹配）' '"q147" in ids(L)' 'ids(L)'
 
 request f_kw_special "$API/list" 'keyword=count(*)'
 expect_ok
@@ -370,7 +373,7 @@ check 'keyword 50 个字（上限）：正常查询' 'd["code"] == 0' 'd["code"]
 
 request f_job "$API/list" job_name=后端开发
 expect_ok
-check '种子：job_name=后端开发 共 21 道' 'd["data"]["total"] == 21' 'd["data"]["total"]'
+check '种子：job_name=后端开发 共 44 道' 'd["data"]["total"] == 44' 'd["data"]["total"]'
 
 request f_user_tag "$API/list" user_tag=1 page_size=100
 expect_ok
@@ -529,15 +532,16 @@ expect_ok
 check '带回传入的 seed，total 等于正常题总数' \
   'd["data"]["seed"] == 42 and d["data"]["total"] == R("all_q")["data"]["total"]' 'd["data"]["seed"], d["data"]["total"]'
 check '每条只有 question_id 和 title' 'all(set(q) == META_FIELDS for q in L)' '[sorted(q) for q in L][:1]'
-request rand_p2 "$API/random/list" seed=42 page=2 page_size=20
-expect_ok
-request rand_p3 "$API/random/list" seed=42 page=3 page_size=20
-expect_ok
+# 种子 65 道正常题，每页 20 条要翻 4 页；种子再加题超过 80 道时，在这里补一页
+for p in 2 3 4; do
+  request "rand_p$p" "$API/random/list" seed=42 page="$p" page_size=20
+  expect_ok
+done
 check '翻完所有页不重不漏，正好是全部正常题' \
-  'sorted(ids(R("rand_p1")["data"]["list"] + R("rand_p2")["data"]["list"] + L)) == sorted(ids(R("all_q")["data"]["list"]))' \
-  'len(R("rand_p1")["data"]["list"] + R("rand_p2")["data"]["list"] + L)'
+  'sorted(ids(sum((R(n)["data"]["list"] for n in ("rand_p1", "rand_p2", "rand_p3", "rand_p4")), []))) == sorted(ids(R("all_q")["data"]["list"]))' \
+  'len(sum((R(n)["data"]["list"] for n in ("rand_p1", "rand_p2", "rand_p3", "rand_p4")), []))'
 check '标题和 /list 一致' \
-  'all(by_id("all_q")[q["question_id"]]["title"] == q["title"] for q in R("rand_p1")["data"]["list"] + R("rand_p2")["data"]["list"] + L)'
+  'all(by_id("all_q")[q["question_id"]]["title"] == q["title"] for n in ("rand_p1", "rand_p2", "rand_p3", "rand_p4") for q in R(n)["data"]["list"])'
 check '顺序和默认的 order 顺序不同' \
   'ids(R("rand_p1")["data"]["list"]) != ids(R("all_q")["data"]["list"])[:len(R("rand_p1")["data"]["list"])]'
 request rand_again "$API/random/list" seed=42 page=1 page_size=20

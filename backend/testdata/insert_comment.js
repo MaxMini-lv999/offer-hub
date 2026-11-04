@@ -1,10 +1,15 @@
 // 写入评论（comments）和评论点赞（user_interactions）种子数据。需要先执行 insert_question.js：
 // 写入前会检查 target_type=1 的评论引用的 question_id 都已存在于 question。
-// 评论者是 insert_comment_users.sql 里的 3 个测试用户，MySQL 里没有这几个用户时 user_name 会是空串。
+// 评论者是 insert_comment_users.sql 里的测试用户，MySQL 里没有这些用户时 user_name 会是空串。
 //
 // 用法（在 backend/testdata 下）：
 //   node insert_comment.js           按 comment_id 幂等写入，可重复执行
-//   node insert_comment.js --reset   先清空 comments 集合、删掉 3 个测试用户的交互记录，再写入
+//   node insert_comment.js --reset   先清空 comments 集合（包括自己在页面上发的评论）、删掉测试用户的交互记录，再写入
+//
+// 数据分两部分：
+//   - 下面的 COMMENTS 和 INTERACTIONS：按接口规则构造的场景，用来测排序、分页、已删除、已注销等，下面逐条说明
+//   - demo_comments.js 的 THREADS：36 道题下 22 个用户的真实感讨论（185 条），只是让评论区有内容可看。
+//     演示用户之间的点赞记录由 demoLikes 按哈希生成，比如用 seed_dave 登录后能看到自己赞过的评论
 //
 // 用户：seed-user-001 小明（seed_alice）、seed-user-002 小红（seed_bob）、seed-user-003 小刚（seed_carol），
 // 密码都是 123456；seed-user-ghost 不在 MySQL 里，代表已注销的用户。
@@ -22,12 +27,10 @@
 //     c003 只有点踩记录，都不算已赞。小明登录时只有 c002 已赞
 
 import { assertRefsExist, bj, RESET, run, seedCollection } from './common.js';
+import { ALICE, BOB, CAROL, DEMO_USERS, THREADS } from './demo_comments.js';
 
-const ALICE = 'seed-user-001';
-const BOB = 'seed-user-002';
-const CAROL = 'seed-user-003';
 const GHOST = 'seed-user-ghost';
-const SEED_USERS = [ALICE, BOB, CAROL];
+const SEED_USERS = [ALICE, BOB, CAROL, ...DEMO_USERS];
 
 // comments.status，见 状态与枚举.md
 const STATUS_REVIEWING = 1;
@@ -114,8 +117,60 @@ const INTERACTIONS = [
   interaction(ALICE, TARGET_COMMENT, 'c002', TYPE_LIKE, 1),
 ];
 
+// expandThreads 把 THREADS 展开成评论文档：楼层 ID 是 <题目>-c<楼层>，回复是 <题目>-c<楼层>-r<序号>，
+// child_count 等于回复条数；回复不写 to 时回复的是楼主
+function expandThreads(threads) {
+  const docs = [];
+  for (const [qid, tops] of Object.entries(threads)) {
+    tops.forEach((t, i) => {
+      const id = `${qid}-c${i + 1}`;
+      docs.push(comment(id, {
+        user: t.user, targetID: qid, content: t.content, time: t.time,
+        thumbsUp: t.up, viewCount: t.view, childCount: t.replies.length,
+      }));
+      t.replies.forEach((r, j) => {
+        const replyTo = r.to ?? t.user;
+        if (replyTo === r.user) {
+          throw new Error(`${id}-r${j + 1}：回复楼主自己时要写 to，指明回复的是谁`);
+        }
+        docs.push(comment(`${id}-r${j + 1}`, {
+          user: r.user, targetID: qid, parent: id, replyTo, content: r.content, time: r.time, thumbsUp: r.up,
+        }));
+      });
+    });
+  }
+  return docs;
+}
+
+const DEMO_COMMENTS = expandThreads(THREADS);
+
+// hash 是 FNV-1a，让同一对 (用户, 评论) 每次生成的结果都一样
+function hash(s) {
+  let h = 0x811c9dc5;
+  for (const ch of s) {
+    h = Math.imul(h ^ ch.codePointAt(0), 0x01000193) >>> 0;
+  }
+  return h;
+}
+
+// demoLikes 给演示评论生成点赞记录：每个演示用户按哈希以约 1/3 的概率给一条评论点赞，
+// 不给自己点赞，人数不超过评论的 thumbs_up（其余的赞算作库外用户点的）
+function demoLikes(comments) {
+  const likes = [];
+  for (const c of comments) {
+    const likers = DEMO_USERS
+      .filter((u) => u !== c.user_id && hash(`${u}|${c.comment_id}`) % 3 === 0)
+      .slice(0, c.thumbs_up);
+    for (const u of likers) {
+      const like = interaction(u, TARGET_COMMENT, c.comment_id, TYPE_LIKE, 1);
+      likes.push({ ...like, create_time: c.create_time, update_time: c.create_time }); // 点赞时间取评论时间
+    }
+  }
+  return likes;
+}
+
 // seedInteractions 按 (user_id, target_type, target_id, interaction_type) 幂等写入。
-// --reset 只删 3 个测试用户的记录，不动其他用户的点赞
+// --reset 只删测试用户的记录，不动其他用户的点赞
 async function seedInteractions(db) {
   const coll = db.collection('user_interactions');
   if (RESET) {
@@ -123,7 +178,8 @@ async function seedInteractions(db) {
     console.log(`[user_interactions] --reset：已删除测试用户的 ${deletedCount} 条`);
   }
 
-  const ops = INTERACTIONS.map((doc) => ({
+  const docs = [...INTERACTIONS, ...demoLikes(DEMO_COMMENTS)];
+  const ops = docs.map((doc) => ({
     updateOne: {
       filter: {
         user_id: doc.user_id,
@@ -136,13 +192,14 @@ async function seedInteractions(db) {
     },
   }));
   const r = await coll.bulkWrite(ops, { ordered: true });
-  console.log(`[user_interactions] 种子 ${INTERACTIONS.length} 条：新增 ${r.upsertedCount}，更新 ${r.modifiedCount}`);
+  console.log(`[user_interactions] 种子 ${docs.length} 条：新增 ${r.upsertedCount}，更新 ${r.modifiedCount}`);
 }
 
 await run(async (db) => {
-  const questionIDs = COMMENTS.filter((c) => c.target_type === 1).map((c) => c.target_id);
+  const all = [...COMMENTS, ...DEMO_COMMENTS];
+  const questionIDs = all.filter((c) => c.target_type === 1).map((c) => c.target_id);
   await assertRefsExist(db, 'question', 'question_id', questionIDs, '请先执行 node insert_question.js');
 
-  await seedCollection(db, 'comments', 'comment_id', COMMENTS);
+  await seedCollection(db, 'comments', 'comment_id', all);
   await seedInteractions(db);
 });
