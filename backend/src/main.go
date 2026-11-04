@@ -14,6 +14,7 @@ import (
 	"offer-hub/data"
 	"offer-hub/ngin"
 	rt "offer-hub/router"
+	"offer-hub/tools"
 )
 
 // shutdownTimeout 为排空在途请求、关闭数据连接各自留出的最长时间。
@@ -30,6 +31,16 @@ func run() error {
 	if err := config.Init(""); err != nil {
 		return fmt.Errorf("init config: %w", err)
 	}
+
+	// 敏感词库：启动时必须加载成功，之后后台定时检查文件，变了就热更新。
+	// watchCtx 在 run 返回时取消，检查的 goroutine 随之退出
+	sensitive := config.Conf.Sensitive
+	if err := tools.LoadSensitiveWords(sensitive.WordsFile); err != nil {
+		return fmt.Errorf("load sensitive words: %w", err)
+	}
+	watchCtx, stopWatch := context.WithCancel(context.Background())
+	defer stopWatch()
+	go tools.WatchSensitiveWords(watchCtx, sensitive.WordsFile, time.Duration(sensitive.ReloadIntervalSeconds)*time.Second)
 
 	d, err := data.NewData(config.Conf)
 	if err != nil {

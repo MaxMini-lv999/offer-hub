@@ -36,3 +36,9 @@ max_requests = 120
 enable = true
 window_seconds = 60
 max_requests = 10
+
+# 评论敏感词库，一行一个词；文件改了不用重启，每 reload_interval_seconds 秒检查一次。
+# 不写这一段时默认读启动目录下的 sensitive_words.txt、5 秒检查一次
+[Sensitive]
+words_file = "sensitive_words.txt"
+reload_interval_seconds = 5

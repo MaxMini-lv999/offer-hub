@@ -198,7 +198,8 @@ func AddComment(ctx context.Context, req *model.AddCommentReq, userID string) (m
 		}
 	}
 
-	// ④ 写入评论：内容先过滤敏感词；question_id 只有评论对象是题目时才填
+	// ④ 写入评论：内容先过滤敏感词（和 UpdateComment ④ 同一个函数，词库热更新后两边同时生效）；
+	//    question_id 只有评论对象是题目时才填
 	now := time.Now()
 	c := data.Comment{
 		CommentID:  uuid.NewString(),
@@ -305,7 +306,7 @@ func UpdateComment(ctx context.Context, req *model.UpdateCommentReq, userID stri
 		return model.UpdateCommentData{}, ErrCommentForbidden
 	}
 
-	// ④ 新内容先过滤敏感词再写入。②到④之间评论被删掉时，这里匹配不到，同样按不存在处理
+	// ④ 新内容先过滤敏感词再写入，规则和 AddComment ④ 相同。②到④之间评论被删掉时，这里匹配不到，同样按不存在处理
 	if err := data.UpdateCommentContent(ctx, c.CommentID, tools.FilterSensitiveWords(req.Content)); err != nil {
 		if errors.Is(err, data.ErrCommentNotFound) {
 			return model.UpdateCommentData{}, ErrCommentNotFound
