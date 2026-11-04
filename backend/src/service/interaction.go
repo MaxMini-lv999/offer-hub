@@ -55,9 +55,10 @@ func incLikeThumbsUp(ctx context.Context, targetType int, targetID string, delta
 }
 
 // Like 以 userID 的身份点赞题目或评论，返回点赞后的状态和目标当前的点赞数。
-// 幂等：重复点赞不会重复计数，点赞数只在点赞状态真的从无到有时 +1
+// 幂等：重复点赞不会重复计数，点赞数只在点赞状态真的从无到有时 +1。
+// count 一律取自计数字段，服务端不自己 ±1，见 ③
 func Like(ctx context.Context, req *model.LikeReq, userID string) (model.LikeData, error) {
-	// ① 查点赞对象：不存在或不是正常状态的不能点赞；顺便拿到当前点赞数，重复点赞时直接返回它
+	// ① 查点赞对象：不存在或不是正常状态的不能点赞；顺便拿到当前点赞数，重复点赞或 ③ +1 失败时返回它
 	count, err := getLikeThumbsUp(ctx, req.TargetType, req.TargetID)
 	if err != nil {
 		if errors.Is(err, ErrLikeTargetNotFound) {
@@ -72,23 +73,26 @@ func Like(ctx context.Context, req *model.LikeReq, userID string) (model.LikeDat
 		return model.LikeData{}, fmt.Errorf("upsert like Like: %w", err)
 	}
 
-	// ③ 状态真的变了才给目标点赞数 +1。点赞记录已经写进去了，这里失败只记日志不报错：
-	//    返回失败的话前端会把按钮恢复成未点赞，和库里的记录对不上；
-	//    点赞数只是冗余计数，差 1 不影响点赞状态，返回值按 +1 之后的数算
+	// ③ 状态真的变了才给目标点赞数 +1。count 只认库里的计数字段，服务端不自己 ±1：
+	//    +1 成功：count 换成 $inc 之后的值
+	//    +1 失败：只记日志，count 保持 ① 读到的值（$inc 没写进去，库里还是这个数）。
+	//    估算成 +1 的话前端这次显示 51、刷新又变回 50；少算的这 1 是冗余计数的代价，只记日志。
+	//    点赞记录已经写进去了，所以仍返回成功，否则前端会把按钮恢复成未点赞，和库里的记录对不上
 	if changed {
 		newCount, err := incLikeThumbsUp(ctx, req.TargetType, req.TargetID, 1)
 		if err != nil {
 			log.Printf("inc thumbs up Like: %v", err)
-			newCount = count + 1
+		} else {
+			count = newCount
 		}
-		count = newCount
 	}
 
 	return model.LikeData{Liked: true, Count: count}, nil
 }
 
-// Unlike 以 userID 的身份取消点赞题目或评论，返回目标当前的点赞数。
-// 幂等：没点过赞或已经取消过时什么都不改，点赞数只在点赞状态真的从有到无时 -1，最小为 0
+// Unlike 以 userID 的身份取消点赞题目或评论，返回取消点赞后的状态和目标当前的点赞数。
+// 幂等：没点过赞或已经取消过时什么都不改，点赞数只在点赞状态真的从有到无时 -1，最小为 0。
+// count 一律取自计数字段，服务端不自己 ±1，见 Like ③
 func Unlike(ctx context.Context, req *model.UnlikeReq, userID string) (model.UnlikeData, error) {
 	// ① 查点赞对象，同 Like ①
 	count, err := getLikeThumbsUp(ctx, req.TargetType, req.TargetID)
@@ -105,17 +109,17 @@ func Unlike(ctx context.Context, req *model.UnlikeReq, userID string) (model.Unl
 		return model.UnlikeData{}, fmt.Errorf("cancel like Unlike: %w", err)
 	}
 
-	// ③ 状态真的变了才给目标点赞数 -1，失败只记日志，理由同 Like ③
+	// ③ 状态真的变了才给目标点赞数 -1，count 的取法和失败的处理同 Like ③
 	if changed {
 		newCount, err := incLikeThumbsUp(ctx, req.TargetType, req.TargetID, -1)
 		if err != nil {
 			log.Printf("dec thumbs up Unlike: %v", err)
-			newCount = max(count-1, 0)
+		} else {
+			count = newCount
 		}
-		count = newCount
 	}
 
-	return model.UnlikeData{Count: count}, nil
+	return model.UnlikeData{Liked: false, Count: count}, nil
 }
 
 // TagQuestion 以 userID 的身份标记题目的掌握状态，重复标记时覆盖之前的状态，tag 为 0 表示取消标记

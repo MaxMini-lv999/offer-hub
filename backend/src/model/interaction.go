@@ -6,10 +6,10 @@ type LikeReq struct {
 	TargetID   string `json:"target_id" binding:"required"`
 }
 
-// LikeData 点赞响应 data
+// LikeData 点赞响应 data，前端以这两个值校准缓存
 type LikeData struct {
 	Liked bool `json:"liked"` // 操作后的点赞状态
-	Count int  `json:"count"` // 目标当前的总点赞数
+	Count int  `json:"count"` // 目标当前的总点赞数，取自题目 thumbs_up_count / 评论 thumbs_up 字段
 }
 
 // LikeResp POST /api/v1/interaction/like 点赞响应
@@ -22,10 +22,8 @@ type LikeResp struct {
 // UnlikeReq POST /api/v1/interaction/unlike 取消点赞请求，参数与点赞相同
 type UnlikeReq = LikeReq
 
-// UnlikeData 取消点赞响应 data
-type UnlikeData struct {
-	Count int `json:"count"` // 取消点赞后目标的总点赞数
-}
+// UnlikeData 取消点赞响应 data，结构与点赞相同，liked 恒为 false
+type UnlikeData = LikeData
 
 // UnlikeResp POST /api/v1/interaction/unlike 取消点赞响应
 type UnlikeResp struct {
