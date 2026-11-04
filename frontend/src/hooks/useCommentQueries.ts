@@ -6,13 +6,15 @@ import {
 } from '@tanstack/react-query'
 import { SUB_COMMENT_PAGE_SIZE } from '@/constants/comment'
 import { LIKE_TARGET_COMMENT } from '@/constants/interaction'
+import { cancelInFlight } from '@/lib/query'
+import { isUncertainError } from '@/lib/request'
 import {
   getCommentList,
   postAddComment,
   postDeleteComment,
   postUpdateComment,
 } from '@/services/comment'
-import { toggleLike } from '@/services/interaction'
+import { predictToggleLike, toggleLike } from '@/services/interaction'
 import type {
   AddCommentParams,
   CommentItem,
@@ -22,6 +24,7 @@ import type {
   DeleteCommentParams,
   UpdateCommentParams,
 } from '@/types/comment'
+import type { LikeData } from '@/types/interaction'
 
 /** 评论列表的参数，不含 page：页码由 useInfiniteQuery 管 */
 export type CommentListQuery = Omit<CommentListParams, 'page'>
@@ -138,31 +141,42 @@ function patchComment(
 }
 
 /**
- * 给评论点赞或取消点赞，按 user_liked 决定调哪个接口。悲观更新：接口成功后才用返回的总数改缓存里的
- * thumbs_up 和 user_liked，不重新拉列表；同一条评论可能同时出现在顶层列表附带的子评论和子评论列表里，都改
+ * 给评论点赞或取消点赞，按 user_liked 决定调哪个接口。乐观更新，过程同题目点赞（useLikeQuestion）：
+ * 点击时按预测值改 user_liked 和 thumbs_up，成功换成接口返回的值，失败改回点击前的值，结果说不准时重新拉列表。
+ * 成功后不重新拉列表：按点赞数排序时评论不会在眼前跳位置。
+ * 同一条评论可能同时出现在顶层列表附带的子评论和子评论列表里，所有评论列表都改
  */
 export function useThumbsUpComment() {
   const queryClient = useQueryClient()
+  const patchLists = (commentId: string, { liked, count }: LikeData) =>
+    queryClient.setQueriesData<InfiniteData<CommentListData>>(
+      { queryKey: queryKeys.lists() },
+      old =>
+        old
+          ? {
+              ...old,
+              pages: old.pages.map(page => ({
+                ...page,
+                list: patchComment(page.list, commentId, { user_liked: liked, thumbs_up: count }),
+              })),
+            }
+          : old
+    )
   return useMutation({
     mutationFn: (comment: CommentItem) =>
       toggleLike(LIKE_TARGET_COMMENT, comment.comment_id, !comment.user_liked),
-    onSuccess: ({ liked, count }, comment) => {
-      queryClient.setQueriesData<InfiniteData<CommentListData>>(
-        { queryKey: queryKeys.lists() },
-        old =>
-          old
-            ? {
-                ...old,
-                pages: old.pages.map(page => ({
-                  ...page,
-                  list: patchComment(page.list, comment.comment_id, {
-                    user_liked: liked,
-                    thumbs_up: count,
-                  }),
-                })),
-              }
-            : old
-      )
+    onMutate: async comment => {
+      const cancelled = await cancelInFlight(queryClient, queryKeys.lists())
+      patchLists(comment.comment_id, predictToggleLike(comment.user_liked, comment.thumbs_up))
+      return { cancelled }
+    },
+    onSuccess: (data, comment) => patchLists(comment.comment_id, data),
+    onError: (_, comment) =>
+      patchLists(comment.comment_id, { liked: comment.user_liked, count: comment.thumbs_up }),
+    onSettled: (_, error, _comment, context) => {
+      if (context?.cancelled || (!!error && isUncertainError(error))) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
+      }
     },
   })
 }

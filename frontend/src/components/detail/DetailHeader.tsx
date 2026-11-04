@@ -30,7 +30,8 @@ const HOVER_CLOSE_DELAY = 150
 /**
  * 题目详情的页头：标题和掌握状态徽章、模拟面试入口；下面一行难度、标签、浏览量、时间，再下面一行点赞和标记掌握状态。
  * 操作单独一行而不是跟在元信息后面，标签多少不一样时按钮的位置也不变。
- * 点赞和标记都是悲观更新，接口成功后才改缓存；游客点赞先打开登录弹窗，标记菜单只有登录后才显示。
+ * 点赞是乐观更新，点下去马上变，失败再改回去；标记是悲观更新，接口成功后才改缓存。
+ * 游客点赞先打开登录弹窗，标记菜单只有登录后才显示。
  * 换题时由父组件用 key 重新挂载，上一题的操作报错不带过来
  */
 export function DetailHeader({
@@ -56,9 +57,11 @@ export function DetailHeader({
       setShowLoginDialog(true)
       return
     }
-    // 不用 disabled：按钮变灰会打断按下的动效，请求进行中的点击直接忽略
+    // 不用 disabled：按钮变灰会打断动效，请求进行中的点击直接忽略
     if (like.isPending) return
-    like.mutate(question, { onSuccess: data => playLikeEffect(data.liked) })
+    // 乐观更新，按钮马上变，动效跟着点击播；失败时 useLikeQuestion 把缓存改回去，下面显示报错
+    playLikeEffect(!question.user_liked)
+    like.mutate(question)
   }
 
   const actionError = like.isError
@@ -117,7 +120,7 @@ export function DetailHeader({
           className={cn('group', liked && 'border-foreground')}
         >
           {/* h-8 按钮里图标离上边框 8px，±1 再往上留 4px，从边框外面冒出来 */}
-          <LikeContent liked={liked} pending={like.isPending} effect={likeEffect} floatGap={12}>
+          <LikeContent liked={liked} effect={likeEffect} floatGap={12}>
             {question.thumbs_up_count}
           </LikeContent>
         </Button>

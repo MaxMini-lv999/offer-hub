@@ -13,6 +13,14 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * 写请求的结果说不准：断网、超时（code -1）、HTTP 5xx，或者不是接口抛的错。服务端可能已经改了，只是响应没回来，
+ * 乐观更新回滚之后要重新拉一次数据，以服务端为准；400、401、429 这类业务错误说明服务端没改，回滚就够了
+ */
+export function isUncertainError(err: unknown) {
+  return !(err instanceof ApiError) || err.code < 0 || err.code >= 500
+}
+
 /** 拆开后端的 { code, msg, data }：code 为 0 返回 data，否则抛出 ApiError */
 async function unwrap<T>(req: Promise<AxiosResponse<ApiResponse<T>>>) {
   let res: AxiosResponse<ApiResponse<T>>

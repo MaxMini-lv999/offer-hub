@@ -8,8 +8,8 @@ export interface LikeEffect {
 }
 
 /**
- * 点赞动效的触发器，配合 LikeContent 使用。play 放在点赞 mutation 的 onSuccess 里调用：
- * 动效只在接口成功、状态真的变了之后播，失败或登录后重新拉取数据时都不播
+ * 点赞动效的触发器，配合 LikeContent 使用。play 在点击、调 mutate 的同时调用：点赞是乐观更新，
+ * 按钮马上变，动效跟着点击播；登录后重新拉取数据时 liked 变了也不播。失败时缓存改回去，不再播反向动效
  */
 export function useLikeEffect() {
   const [effect, setEffect] = useState<LikeEffect | null>(null)

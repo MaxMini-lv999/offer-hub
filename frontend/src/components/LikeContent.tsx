@@ -6,21 +6,19 @@ import { cn } from '@/lib/utils'
 
 /**
  * 点赞按钮的内容：图标 + 数字 + 动效层，题目和评论的点赞按钮共用。按钮要加 group 类，图标才能跟着悬停、按下动。
- * - 点赞前：没点过赞时悬停，大拇指往上翘一点；按下和等接口返回时图标缩小，像被按下去
+ * - 点赞前：没点过赞时悬停，大拇指往上翘一点；按下时图标缩小，像被按下去
  * - 点赞后：图标弹一下变实心，外面一圈方形墨线向外扩散，上方浮现 +1 并飘走，数字从下面滑进来
  * - 取消后：图标往里收一下变空心，浮现 -1 往下沉，数字从上面滑进来
+ * 点赞是乐观更新，点下去 liked 和数字马上变，动效跟着点击播，不等接口返回。
  * effect 来自 useLikeEffect，每播一次换一个 key，让对应元素重新挂载、动画从头播放
  */
 export function LikeContent({
   liked,
-  pending,
   effect,
   floatGap = 4,
   children,
 }: {
   liked: boolean
-  /** 请求进行中，图标保持按下的样子，接口返回后再弹起 */
-  pending: boolean
   effect: LikeEffect | null
   /** ±1 底边离图标顶端的距离（px）。带边框的按钮要让 ±1 从边框外面冒出来，不压在边框线上 */
   floatGap?: number
@@ -35,7 +33,6 @@ export function LikeContent({
           className={cn(
             'inline-flex transition-transform duration-micro ease-standard group-active:scale-75',
             !liked && 'group-hover:-rotate-12',
-            pending && 'scale-75',
             effect && (effect.liked ? 'animate-like-pop' : 'animate-like-settle')
           )}
         >

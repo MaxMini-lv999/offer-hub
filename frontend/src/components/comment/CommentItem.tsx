@@ -120,12 +120,13 @@ export function CommentItem({
               </>
             ) : (
               <>
-                {/* 不用 disabled：变灰会打断按下的动效，请求进行中的点击直接忽略 */}
+                {/* 不用 disabled：变灰会打断动效，请求进行中的点击直接忽略。乐观更新，动效跟着点击播 */}
                 <ActionButton
                   onClick={() =>
                     requireLogin(() => {
                       if (thumbsUp.isPending) return
-                      thumbsUp.mutate(comment, { onSuccess: data => playLikeEffect(data.liked) })
+                      playLikeEffect(!comment.user_liked)
+                      thumbsUp.mutate(comment)
                     })
                   }
                   aria-pressed={comment.user_liked}
@@ -133,11 +134,7 @@ export function CommentItem({
                   aria-label={`点赞，当前 ${comment.thumbs_up} 个赞`}
                   className={cn('group', comment.user_liked && 'text-foreground')}
                 >
-                  <LikeContent
-                    liked={comment.user_liked}
-                    pending={thumbsUp.isPending}
-                    effect={likeEffect}
-                  >
+                  <LikeContent liked={comment.user_liked} effect={likeEffect}>
                     {comment.thumbs_up > 0 ? comment.thumbs_up : '赞'}
                   </LikeContent>
                 </ActionButton>

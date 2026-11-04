@@ -6,7 +6,9 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import { LIKE_TARGET_QUESTION } from '@/constants/interaction'
-import { toggleLike } from '@/services/interaction'
+import { cancelInFlight } from '@/lib/query'
+import { isUncertainError } from '@/lib/request'
+import { predictToggleLike, toggleLike } from '@/services/interaction'
 import {
   getAllQuestionList,
   getHotQuestionList,
@@ -15,6 +17,7 @@ import {
   getQuestionMetaList,
   tagQuestion,
 } from '@/services/question'
+import type { LikeData } from '@/types/interaction'
 import type {
   HotQuestionListParams,
   JobQuestionGroup,
@@ -119,20 +122,42 @@ export function useHotQuestions(params?: HotQuestionListParams, enabled: boolean
 }
 
 /**
- * 给题目点赞或取消点赞，按 user_liked 决定调哪个接口。悲观更新：接口成功后才改详情缓存里的 user_liked 和 thumbs_up_count，
- * 点赞数用接口返回的总数（别人同时点的赞也算进去），不重新拉详情。
- * 题目列表能按点赞数排序，一并标记过期，回到列表时重新请求
+ * 给题目点赞或取消点赞，按 user_liked 决定调哪个接口。乐观更新，只动详情缓存里的 user_liked 和 thumbs_up_count：
+ * - 点击时：先按预测值改（点赞数 ±1），按钮马上变
+ * - 成功：换成接口返回的 liked 和 count。count 是后端点赞数字段的值，别人同时点的赞也算进去，不用重新拉详情
+ * - 失败：改回点击前的值；断网、超时、5xx 时服务端可能已经改了，再重新拉一次详情，以服务端为准
+ * 回滚只改这两个字段、不整个恢复快照：请求期间标记掌握状态写进缓存的 user_tag 不会被冲掉。
+ * 点赞数可能变了时（成功或结果说不准），题目列表能按点赞数排序，一并标记过期，回到列表时重新请求
  */
 export function useLikeQuestion() {
   const queryClient = useQueryClient()
+  const patchDetail = (questionId: string, { liked, count }: LikeData) =>
+    queryClient.setQueryData<Question>(queryKeys.detail(questionId), old =>
+      old ? { ...old, user_liked: liked, thumbs_up_count: count } : old
+    )
   return useMutation({
     mutationFn: (question: Question) =>
       toggleLike(LIKE_TARGET_QUESTION, question.question_id, !question.user_liked),
-    onSuccess: ({ liked, count }, question) => {
-      queryClient.setQueryData<Question>(queryKeys.detail(question.question_id), old =>
-        old ? { ...old, user_liked: liked, thumbs_up_count: count } : old
+    onMutate: async question => {
+      const cancelled = await cancelInFlight(queryClient, queryKeys.detail(question.question_id))
+      patchDetail(
+        question.question_id,
+        predictToggleLike(question.user_liked, question.thumbs_up_count)
       )
-      void queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
+      return { cancelled }
+    },
+    onSuccess: (data, question) => patchDetail(question.question_id, data),
+    onError: (_, question) =>
+      patchDetail(question.question_id, {
+        liked: question.user_liked,
+        count: question.thumbs_up_count,
+      }),
+    onSettled: (_, error, question, context) => {
+      const uncertain = !!error && isUncertainError(error)
+      if (uncertain || context?.cancelled) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.detail(question.question_id) })
+      }
+      if (!error || uncertain) void queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
     },
   })
 }
