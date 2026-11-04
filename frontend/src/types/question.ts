@@ -86,6 +86,12 @@ export interface Question {
   update_time: string
 }
 
+/** 题目详情，比列表多一个题目解析 */
+export interface QuestionDetail extends Question {
+  /** 题目解析（答案），游客为空字符串 */
+  analysis_content: string
+}
+
 export interface QuestionListData {
   total: number
   list: Question[]
@@ -103,6 +109,41 @@ export interface QuestionMeta {
 export interface QuestionMetaListData {
   total: number
   list: QuestionMeta[]
+}
+
+/** GET /api/v1/question/random/list 请求参数 */
+export interface RandomQuestionListParams {
+  /** 随机种子，同一个种子顺序固定；不传时后端生成，随响应返回 */
+  seed?: number
+  /** 默认 1 */
+  page?: number
+  /** 默认 20，最大 50 */
+  page_size?: number
+}
+
+/** 按种子打乱后的一页题目，只有 ID 和标题 */
+export interface RandomQuestionListData {
+  /** 这次用的种子，翻下一页时带上 */
+  seed: number
+  total: number
+  list: QuestionMeta[]
+}
+
+/** GET /api/v1/question/tag/list 请求参数 */
+export interface QuestionTagListParams {
+  /** 只统计这个题库的题，不传统计全部 */
+  bank_id?: string
+}
+
+/** 标签和带这个标签的题目数 */
+export interface QuestionTagCount {
+  tag: string
+  count: number
+}
+
+export interface QuestionTagListData {
+  /** 按题目数从多到少排 */
+  list: QuestionTagCount[]
 }
 
 /** GET /api/v1/question/detail 请求参数 */

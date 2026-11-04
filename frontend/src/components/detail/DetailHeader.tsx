@@ -1,11 +1,11 @@
-import { useRef, useState, type PointerEvent } from 'react'
+import { useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import IconChevronDown from '~icons/solar/alt-arrow-down-linear'
 import IconChecklist from '~icons/solar/checklist-minimalistic-linear'
 import IconClock from '~icons/solar/clock-circle-linear'
 import IconEye from '~icons/solar/eye-linear'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { LikeContent } from '@/components/LikeContent'
-import { Button } from '@/components/ui/button'
+import { Button, type ButtonProps } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -130,18 +130,29 @@ function UserTagBadge({ tag }: { tag: Exclude<UserTag, 0> }) {
 }
 
 /**
- * 标记掌握状态的下拉菜单。鼠标悬停展开、移开收起（按钮和菜单之间留 HOVER_CLOSE_DELAY 的过渡时间）；
+ * 标记掌握状态的下拉菜单，详情页页头和沉浸式刷题的操作栏共用。鼠标悬停展开、移开收起（按钮和菜单之间留 HOVER_CLOSE_DELAY 的过渡时间）；
  * 触屏点按、键盘 Enter / 空格 / ↓ 照常打开。菜单打开时会把焦点移进去，悬停打开的在收起时把焦点还给原来的元素
- * （比如正在写的评论框），而不是交给按钮，鼠标路过不会抢走焦点
+ * （比如正在写的评论框），而不是交给按钮，鼠标路过不会抢走焦点。
+ * 不传 children 时按钮是「标记 ▾」；传了就用 children 当按钮内容，配合 variant、triggerClassName 换样式
  */
-function TagMenu({
+export function TagMenu({
   current,
   pending,
   onChange,
+  side = 'bottom',
+  align = 'start',
+  variant = 'outline',
+  triggerClassName,
+  children,
 }: {
   current: UserTag
   pending: boolean
   onChange: (tag: UserTag) => void
+  side?: 'top' | 'right' | 'bottom' | 'left'
+  align?: 'start' | 'center' | 'end'
+  variant?: ButtonProps['variant']
+  triggerClassName?: string
+  children?: ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -188,7 +199,7 @@ function TagMenu({
       <DropdownMenuTrigger asChild>
         <Button
           ref={triggerRef}
-          variant="outline"
+          variant={variant}
           size="sm"
           disabled={pending}
           aria-label={`标记掌握状态，当前：${currentLabel}`}
@@ -198,15 +209,20 @@ function TagMenu({
           onPointerDown={e => {
             if (e.pointerType === 'mouse' && open) e.preventDefault()
           }}
-          className="data-[state=open]:border-foreground"
+          className={cn('data-[state=open]:border-foreground', triggerClassName)}
         >
-          <IconChecklist />
-          {pending ? '保存中…' : '标记'}
-          <IconChevronDown />
+          {children ?? (
+            <>
+              <IconChecklist />
+              {pending ? '保存中…' : '标记'}
+              <IconChevronDown />
+            </>
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align="start"
+        side={side}
+        align={align}
         className="w-40"
         onPointerEnter={handlePointerEnter}
         onPointerLeave={handlePointerLeave}

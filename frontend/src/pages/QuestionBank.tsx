@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import IconPlay from '~icons/solar/play-linear'
 import IconRefresh from '~icons/solar/refresh-linear'
 import { BankLogo } from '@/components/BankLogo'
 import { HotContent } from '@/components/HotContent'
@@ -9,6 +10,7 @@ import { useBankInfo, useQuestionList } from '@/hooks/useQuestionQueries'
 import { cn } from '@/lib/utils'
 import type { QuestionBank } from '@/types/question'
 import { NotFoundPage } from '@/pages/not-found'
+import { feedPath } from '@/utils/route'
 
 /**
  * 题库页：检索工作台，和全部题目页同一套布局。页头两行：面包屑、题库名和简介；
@@ -77,11 +79,12 @@ function Breadcrumb({ jobName }: { jobName: string }) {
   )
 }
 
+/** 题库名和简介；右边是沉浸刷题入口，进去按分类模式只刷这个题库 */
 function BankSummary({ bank }: { bank: QuestionBank }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
       <BankLogo name={bank.bank_name} />
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <h1 className="truncate font-title text-title font-semibold" title={bank.bank_name}>
           {bank.bank_name}
         </h1>
@@ -89,6 +92,12 @@ function BankSummary({ bank }: { bank: QuestionBank }) {
           共 {bank.count} 题{bank.desc && ` · ${bank.desc}`}
         </p>
       </div>
+      <Button variant="outline" size="sm" asChild className="shrink-0">
+        <Link to={feedPath({ bankId: bank.bank_id })}>
+          <IconPlay />
+          沉浸刷题
+        </Link>
+      </Button>
     </div>
   )
 }

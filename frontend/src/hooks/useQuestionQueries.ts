@@ -15,6 +15,7 @@ import {
   getQuestionDetail,
   getQuestionList,
   getQuestionMetaList,
+  getQuestionTagList,
   tagQuestion,
 } from '@/services/question'
 import type { LikeData } from '@/types/interaction'
@@ -40,6 +41,9 @@ export const queryKeys = {
   bankList: (bankId: string, keyword?: string) =>
     [...queryKeys.all, 'bank-list', { bankId, keyword }] as const,
   hot: (params?: HotQuestionListParams) => [...queryKeys.all, 'hot', params] as const,
+  tags: (bankId?: string) => [...queryKeys.all, 'tags', { bankId }] as const,
+  /** 沉浸式刷题的题目队列。不在 lists() 下面：标记掌握状态后列表缓存失效，刷题队列不能跟着变 */
+  feed: (source: object) => [...queryKeys.all, 'feed', source] as const,
 }
 
 /** 题库全量列表，按职位方向 → 系列 → 题库分组 */
@@ -117,6 +121,15 @@ export function useHotQuestions(params?: HotQuestionListParams, enabled: boolean
   return useQuery({
     queryKey: queryKeys.hot(params),
     queryFn: () => getHotQuestionList(params),
+    enabled,
+  })
+}
+
+/** 标签列表（带题目数），bankId 为空时统计全部题目 */
+export function useQuestionTags(bankId?: string, enabled: boolean = true) {
+  return useQuery({
+    queryKey: queryKeys.tags(bankId),
+    queryFn: () => getQuestionTagList({ bank_id: bankId }),
     enabled,
   })
 }

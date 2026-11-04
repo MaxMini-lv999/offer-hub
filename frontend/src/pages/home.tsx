@@ -1,6 +1,7 @@
 import type { ComponentType, SVGProps } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import IconChecklist from '~icons/solar/checklist-minimalistic-linear'
+import IconPlay from '~icons/solar/play-linear'
 import IconLibrary from '~icons/solar/library-linear'
 import IconLightbulb from '~icons/solar/lightbulb-linear'
 import { ArtImage } from '@/components/art'
@@ -29,7 +30,7 @@ export function HomePage() {
 }
 
 /**
- * Hero：墨线框左边是标题、简介和概况数字，右边是书房场景 + 澜汐的半身立绘（独立容器，文字不压在图上）。
+ * Hero：墨线框左边是标题、简介、沉浸刷题和题库目录两个入口、概况数字，右边是书房场景 + 澜汐的半身立绘（独立容器，文字不压在图上）。
  * 立绘从右边淡入、之后轻微呼吸；手机端只留文字，不加载插画。一屏最多一个角色，下面各区块都只用图标
  */
 function HeroSection() {
@@ -43,6 +44,17 @@ function HeroSection() {
         <div className="space-y-2">
           <h1 className="font-title text-title font-semibold md:text-display">成为技术面试高手</h1>
           <p className="text-muted-foreground">按职位方向整理的面试真题，每道题配解析和讨论。</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild>
+            <Link to="/feed">
+              <IconPlay />
+              沉浸刷题
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/collections">浏览题库</Link>
+          </Button>
         </div>
         <StatsSection />
         {/* 左下角一小片网点，往右上渐隐，压在文字下面 */}

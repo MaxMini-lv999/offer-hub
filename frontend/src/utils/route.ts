@@ -13,3 +13,8 @@ export function questionPath(questionId: string, bankId?: string) {
   const query = createSearchParams(bankId ? { bankId } : {}).toString()
   return query ? `${path}?${query}` : path
 }
+
+/** 沉浸式刷题地址；带了 bankId 就进分类模式，只刷这个题库 */
+export function feedPath({ bankId }: { bankId?: string } = {}) {
+  return bankId ? `/feed?${createSearchParams({ mode: 'category', bank: bankId })}` : '/feed'
+}

@@ -7,12 +7,12 @@ import type { Difficulty, QuestionFilters, UserTag } from '@/types/question'
 export const PAGE_SIZE = 20
 
 /** URL 里的 difficulty 只认 1/2/3，其他值当作不过滤 */
-function parseDifficulty(raw: string | null): Difficulty | undefined {
+export function parseDifficulty(raw: string | null): Difficulty | undefined {
   return raw === '1' || raw === '2' || raw === '3' ? (Number(raw) as Difficulty) : undefined
 }
 
 /** URL 里的 mastery（掌握状态）只认 1/2/3，其他值当作不过滤 */
-function parseUserTag(raw: string | null): Exclude<UserTag, 0> | undefined {
+export function parseUserTag(raw: string | null): Exclude<UserTag, 0> | undefined {
   return raw === '1' || raw === '2' || raw === '3'
     ? (Number(raw) as Exclude<UserTag, 0>)
     : undefined

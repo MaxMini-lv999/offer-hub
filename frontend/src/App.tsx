@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { Layout } from '@/components/layout'
+import { Layout, type RouteHandle } from '@/components/layout'
 import { LoginProvider } from '@/components/provider/LoginProvider'
 import { QueryProvider } from '@/components/provider/query-provider'
 import { RouteLoading } from '@/components/RouteLoading'
@@ -44,6 +44,12 @@ const router = createBrowserRouter(
             { path: 'questions', element: <QuestionsPage /> },
             { path: 'collections', element: <BankCatalogPage /> },
             { path: 'hot', element: <HotContentPage /> },
+            {
+              // 沉浸式刷题：内容区占满导航栏下面的整屏，没有页脚（见 layout.tsx）。带着 markdown 渲染，按需加载
+              path: 'feed',
+              handle: { immersive: true } satisfies RouteHandle,
+              lazy: async () => ({ Component: (await import('@/pages/Feed')).FeedPage }),
+            },
             {
               path: 'question/:questionId',
               lazy: async () => ({ Component: (await loadQuestionDetail()).QuestionDetailPage }),

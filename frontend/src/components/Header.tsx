@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigation } from 'react-router-dom'
 import IconChevronDown from '~icons/solar/alt-arrow-down-linear'
 import IconLogout from '~icons/solar/logout-linear'
@@ -18,16 +18,27 @@ import { setTheme, useTheme } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 import type { UserInfo } from '@/types/auth'
 
-/** 顶部导航项；题库页从题库目录进入，所以也算在「题库」下 */
-const NAV_ITEMS = [
-  { to: '/', label: '首页', isActive: (path: string) => path === '/' },
+/** 顶部导航项；题库页从题库目录进入，所以也算在「题库」下。shortLabel 是手机上的短名 */
+const NAV_ITEMS: {
+  to: string
+  label: string
+  shortLabel?: string
+  isActive: (path: string) => boolean
+}[] = [
+  { to: '/', label: '首页', isActive: path => path === '/' },
+  { to: '/feed', label: '刷题', isActive: path => path === '/feed' },
   {
     to: '/collections',
     label: '题库',
-    isActive: (path: string) => path === '/collections' || path.startsWith('/bank/'),
+    isActive: path => path === '/collections' || path.startsWith('/bank/'),
   },
-  { to: '/questions', label: '全部题目', isActive: (path: string) => path === '/questions' },
-  { to: '/hot', label: '热门', isActive: (path: string) => path === '/hot' },
+  {
+    to: '/questions',
+    label: '全部题目',
+    shortLabel: '题目',
+    isActive: path => path === '/questions',
+  },
+  { to: '/hot', label: '热门', isActive: path => path === '/hot' },
 ]
 
 /** 站点标识：两本书夹一枚樱红书签。墨色和纸白跟随主题 token，暗色下自动反色；favicon 是同一个图形（public/favicon.svg） */
@@ -45,6 +56,24 @@ function BrandMark() {
 export function Header() {
   const { pathname } = useLocation()
   const theme = useTheme()
+  const navRef = useRef<HTMLElement>(null)
+
+  // 导航横向滑动时，把当前页面的那一项滚进视野。网页字体加载完、右边的头像昵称出现后宽度会变，变了再对一次
+  useEffect(() => {
+    const nav = navRef.current
+    const current = nav?.querySelector<HTMLElement>('[aria-current="page"]')
+    if (!nav || !current) return
+    const reveal = () => {
+      if (current.offsetLeft < nav.scrollLeft) nav.scrollLeft = current.offsetLeft
+      else if (current.offsetLeft + current.offsetWidth > nav.scrollLeft + nav.clientWidth)
+        nav.scrollLeft = current.offsetLeft + current.offsetWidth - nav.clientWidth
+    }
+    reveal()
+    const observer = new ResizeObserver(reveal)
+    observer.observe(nav)
+    observer.observe(current)
+    return () => observer.disconnect()
+  }, [pathname])
   // 进入按需加载的页面（题目详情、登录）要先下载代码，这段时间旧页面还留在屏幕上，导航栏底边出加载条
   const navigating = useNavigation().state !== 'idle'
 
@@ -64,9 +93,12 @@ export function Header() {
           </span>
         </Link>
 
+        {/* 窄屏登录后右边的头像和昵称占地方，导航放不下时横向滑动（不显示滚动条），不压住右边的按钮。
+            高度比导航栏多 1px、压在底边线上：横向滚动会裁掉溢出的部分，下划线得画在导航自己的范围里 */}
         <nav
+          ref={navRef}
           aria-label="主导航"
-          className="flex h-full gap-4 justify-self-center whitespace-nowrap sm:gap-6"
+          className="relative flex h-[calc(100%+1px)] min-w-0 max-w-full gap-3 self-start justify-self-center overflow-x-auto overflow-y-hidden whitespace-nowrap [scrollbar-width:none] sm:gap-6 [&::-webkit-scrollbar]:hidden"
         >
           {NAV_ITEMS.map(item => {
             const active = item.isActive(pathname)
@@ -80,12 +112,19 @@ export function Header() {
                   active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                {item.label}
+                {item.shortLabel ? (
+                  <>
+                    <span className="sm:hidden">{item.shortLabel}</span>
+                    <span className="hidden sm:inline">{item.label}</span>
+                  </>
+                ) : (
+                  item.label
+                )}
                 {/* 2px 下划线压在导航栏底边上 */}
                 <span
                   aria-hidden
                   className={cn(
-                    'absolute inset-x-0 -bottom-px h-0.5',
+                    'absolute inset-x-0 bottom-0 h-0.5',
                     active ? 'bg-foreground' : 'bg-transparent group-hover:bg-muted-foreground'
                   )}
                 />
