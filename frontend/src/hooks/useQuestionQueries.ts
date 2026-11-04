@@ -1,4 +1,10 @@
-import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import { LIKE_TARGET_QUESTION } from '@/constants/interaction'
 import { toggleLike } from '@/services/interaction'
 import {
@@ -42,10 +48,13 @@ export function useQuestionBanks(jobName?: string) {
 }
 
 /** 在全量列表里按 bankId 找题库，连同它所属的职位方向一起返回；找不到时为 null */
-function findBank(groups: JobQuestionGroup[], bankId: string): { bank: QuestionBank; jobName: string } | null {
+function findBank(
+  groups: JobQuestionGroup[],
+  bankId: string
+): { bank: QuestionBank; jobName: string } | null {
   for (const group of groups) {
     for (const series of group.series_list) {
-      const bank = series.bank_list.find((b) => b.bank_id === bankId)
+      const bank = series.bank_list.find(b => b.bank_id === bankId)
       if (bank) return { bank, jobName: group.job_name }
     }
   }
@@ -57,7 +66,7 @@ export function useBankInfo(bankId: string) {
   return useQuery({
     queryKey: queryKeys.banks(undefined),
     queryFn: () => getAllQuestionList({ job_name: undefined }),
-    select: (groups) => findBank(groups, bankId),
+    select: groups => findBank(groups, bankId),
   })
 }
 
@@ -87,7 +96,12 @@ export function useBankQuestionList(bankId: string, keyword?: string, enabled: b
   return useInfiniteQuery({
     queryKey: queryKeys.bankList(bankId, kw),
     queryFn: ({ pageParam }) =>
-      getQuestionMetaList({ bank_id: bankId, keyword: kw, page: pageParam, page_size: NAV_PAGE_SIZE }),
+      getQuestionMetaList({
+        bank_id: bankId,
+        keyword: kw,
+        page: pageParam,
+        page_size: NAV_PAGE_SIZE,
+      }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) =>
       allPages.length * NAV_PAGE_SIZE < lastPage.total ? allPages.length + 1 : undefined,
@@ -112,10 +126,11 @@ export function useHotQuestions(params?: HotQuestionListParams, enabled: boolean
 export function useLikeQuestion() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (question: Question) => toggleLike(LIKE_TARGET_QUESTION, question.question_id, !question.user_liked),
+    mutationFn: (question: Question) =>
+      toggleLike(LIKE_TARGET_QUESTION, question.question_id, !question.user_liked),
     onSuccess: ({ liked, count }, question) => {
-      queryClient.setQueryData<Question>(queryKeys.detail(question.question_id), (old) =>
-        old ? { ...old, user_liked: liked, thumbs_up_count: count } : old,
+      queryClient.setQueryData<Question>(queryKeys.detail(question.question_id), old =>
+        old ? { ...old, user_liked: liked, thumbs_up_count: count } : old
       )
       void queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
     },
@@ -131,7 +146,9 @@ export function useTagQuestion() {
   return useMutation({
     mutationFn: ({ question_id, tag }: TagQuestionParams) => tagQuestion(question_id, tag),
     onSuccess: (_, { question_id, tag }) => {
-      queryClient.setQueryData<Question>(queryKeys.detail(question_id), (old) => (old ? { ...old, user_tag: tag } : old))
+      queryClient.setQueryData<Question>(queryKeys.detail(question_id), old =>
+        old ? { ...old, user_tag: tag } : old
+      )
       void queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
     },
   })

@@ -42,7 +42,8 @@ export function QuestionDetailPage() {
 
   // 优先用 URL 里的 bankId；没带（如从热门题目进来）或题目不属于它时，用题目所属的第一个题库
   const urlBankId = searchParams.get('bankId') ?? ''
-  const bankId = question && !question.bank_list.includes(urlBankId) ? (question.bank_list[0] ?? '') : urlBankId
+  const bankId =
+    question && !question.bank_list.includes(urlBankId) ? (question.bank_list[0] ?? '') : urlBankId
 
   // 后端题目不存在（含隐藏、删除）时返回 HTTP 200 + code 400
   const notFound = isError && error instanceof ApiError && error.code === 400
@@ -51,18 +52,19 @@ export function QuestionDetailPage() {
 
   // 记进本机的「最近浏览」，首页「继续上次」用
   useEffect(() => {
-    if (question) recordVisit({ id: question.question_id, title: question.title, bankId: bankId || undefined })
+    if (question)
+      recordVisit({ id: question.question_id, title: question.title, bankId: bankId || undefined })
   }, [question, bankId])
 
   function setInterview(on: boolean) {
     setSearchParams(
-      (prev) => {
+      prev => {
         const next = new URLSearchParams(prev)
         if (on) next.set('mode', 'interview')
         else next.delete('mode')
         return next
       },
-      { preventScrollReset: true },
+      { preventScrollReset: true }
     )
   }
 
@@ -77,12 +79,19 @@ export function QuestionDetailPage() {
       }
     />
   )
-  const errorState = isError && !notFound && <ErrorState message={error.message} onRetry={() => refetch()} />
+  const errorState = isError && !notFound && (
+    <ErrorState message={error.message} onRetry={() => refetch()} />
+  )
 
   if (interview) {
     return (
       <>
-        {isPending && <div aria-hidden className="h-[calc(100dvh-13rem)] min-h-[460px] skeleton border bg-skeleton" />}
+        {isPending && (
+          <div
+            aria-hidden
+            className="h-[calc(100dvh-13rem)] min-h-[460px] skeleton border bg-skeleton"
+          />
+        )}
         {notFoundState}
         {errorState}
         {question && (
@@ -130,7 +139,9 @@ export function QuestionDetailPage() {
   return (
     <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
       {/* 吸顶在导航栏（56px）+ 内容区上边距（32px）下面，高度占满剩余视口，内部单独滚动 */}
-      <aside className="sticky top-[88px] hidden h-[calc(100vh-120px)] lg:block">{renderNav()}</aside>
+      <aside className="sticky top-[88px] hidden h-[calc(100vh-120px)] lg:block">
+        {renderNav()}
+      </aside>
 
       <div className="min-w-0">
         <div className="mb-6 lg:hidden">
@@ -141,7 +152,11 @@ export function QuestionDetailPage() {
                 题目列表
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" aria-describedby={undefined} className="flex w-[300px] max-w-[85vw] flex-col p-0 pt-12">
+            <SheetContent
+              side="left"
+              aria-describedby={undefined}
+              className="flex w-[300px] max-w-[85vw] flex-col p-0 pt-12"
+            >
               <SheetTitle className="sr-only">题目列表</SheetTitle>
               {renderNav('border-0 border-t', () => setDrawerOpen(false))}
             </SheetContent>
@@ -183,7 +198,11 @@ function QuestionArticle({
   return (
     <article className="max-w-[72ch]">
       {/* 换题时重新挂载，上一题点赞、标记的报错不带过来。key 加前缀：和下面的 Comments 是兄弟节点，key 不能相同 */}
-      <DetailHeader key={`header-${question.question_id}`} question={question} onInterview={onInterview} />
+      <DetailHeader
+        key={`header-${question.question_id}`}
+        question={question}
+        onInterview={onInterview}
+      />
 
       {/* 游客遮罩高 200px，绝对定位叠在正文底部：下面 120px 是给按钮留的空白，
           渐变在上面 80px 内从透明变到背景色，只盖住正文最后约 3 行，不然游客能看的 150 字会被淡掉一大半 */}
@@ -255,7 +274,10 @@ function NeighborLink({
   return (
     <Link
       to={questionPath(question.question_id, bankId)}
-      className={cn('flex min-w-0 flex-col gap-1 border p-4 transition-colors hover:border-foreground', align)}
+      className={cn(
+        'flex min-w-0 flex-col gap-1 border p-4 transition-colors hover:border-foreground',
+        align
+      )}
     >
       {caption}
       <span className="line-clamp-2">{question.title}</span>
@@ -270,7 +292,7 @@ function DetailSkeleton() {
       <div className="border-b pb-4">
         <div className="h-9 w-2/3 bg-skeleton" />
         <div className="mt-3 flex gap-4">
-          {[0, 1, 2, 3].map((i) => (
+          {[0, 1, 2, 3].map(i => (
             <div key={i} className="h-5 w-16 bg-skeleton" />
           ))}
         </div>

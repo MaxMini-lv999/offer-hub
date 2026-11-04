@@ -25,7 +25,10 @@ export function QuestionsPage() {
           {/* 加载中不放占位文字：手机上占位文字一长，标题行会先换行再缩回来 */}
           <p className="truncate text-meta tabular-nums text-muted-foreground">
             {/* 改条件后新数据回来前，data 还是上一次的结果，总数对不上，先显示加载中 */}
-            {data && (isPlaceholderData ? '加载中…' : `${filters.hasFilter ? '符合条件的' : '共'} ${data.total} 题`)}
+            {data &&
+              (isPlaceholderData
+                ? '加载中…'
+                : `${filters.hasFilter ? '符合条件的' : '共'} ${data.total} 题`)}
           </p>
         </div>
         <InterviewEntryLink

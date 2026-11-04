@@ -66,7 +66,7 @@ const router = createBrowserRouter(
       v7_partialHydration: true,
       v7_skipActionErrorRevalidation: true,
     },
-  },
+  }
 )
 
 export default function App() {

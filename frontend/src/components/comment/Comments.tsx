@@ -46,7 +46,7 @@ export function Comments({
 
   const value = useMemo<CommentsContextValue>(
     () => ({ targetType, targetId, replyingTo, editingComment, setReplyingTo, setEditingComment }),
-    [targetType, targetId, replyingTo, editingComment, setReplyingTo, setEditingComment],
+    [targetType, targetId, replyingTo, editingComment, setReplyingTo, setEditingComment]
   )
 
   return (
@@ -56,7 +56,9 @@ export function Comments({
           <h2 id={headingId} className="font-title text-heading font-semibold">
             评论
           </h2>
-          {total !== undefined && <span className="text-meta text-muted-foreground">{total} 条</span>}
+          {total !== undefined && (
+            <span className="text-meta text-muted-foreground">{total} 条</span>
+          )}
           {refreshing && <LoadingBar label="正在刷新评论" />}
         </div>
         <CommentInput className="mt-4" />

@@ -86,69 +86,177 @@
   }
 }
 
-@keyframes ohm-frames-wave{
-0.00000%{background-position:0.000000% 0}
-23.33333%{background-position:14.285714% 0}
-30.00000%{background-position:28.571429% 0}
-40.00000%{background-position:42.857143% 0}
-50.00000%{background-position:57.142857% 0}
-60.00000%{background-position:71.428571% 0}
-70.00000%{background-position:85.714286% 0}
-80.00000%{background-position:100.000000% 0}
-100%{background-position:100% 0}
+@keyframes ohm-frames-wave {
+  0.00000% {
+    background-position: 0% 0;
+  }
+  23.33333% {
+    background-position: 14.285714% 0;
+  }
+  30.00000% {
+    background-position: 28.571429% 0;
+  }
+  40.00000% {
+    background-position: 42.857143% 0;
+  }
+  50.00000% {
+    background-position: 57.142857% 0;
+  }
+  60.00000% {
+    background-position: 71.428571% 0;
+  }
+  70.00000% {
+    background-position: 85.714286% 0;
+  }
+  80.00000% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
 }
-@keyframes ohm-frames-thinking{
-0.00000%{background-position:0.000000% 0}
-20.83333%{background-position:14.285714% 0}
-31.25000%{background-position:28.571429% 0}
-41.66667%{background-position:42.857143% 0}
-54.16667%{background-position:57.142857% 0}
-66.66667%{background-position:71.428571% 0}
-77.08333%{background-position:85.714286% 0}
-87.50000%{background-position:100.000000% 0}
-100%{background-position:100% 0}
+@keyframes ohm-frames-thinking {
+  0.00000% {
+    background-position: 0% 0;
+  }
+  20.83333% {
+    background-position: 14.285714% 0;
+  }
+  31.25000% {
+    background-position: 28.571429% 0;
+  }
+  41.66667% {
+    background-position: 42.857143% 0;
+  }
+  54.16667% {
+    background-position: 57.142857% 0;
+  }
+  66.66667% {
+    background-position: 71.428571% 0;
+  }
+  77.08333% {
+    background-position: 85.714286% 0;
+  }
+  87.50000% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
 }
-@keyframes ohm-frames-typing{
-0.00000%{background-position:0.000000% 0}
-12.50000%{background-position:14.285714% 0}
-25.00000%{background-position:28.571429% 0}
-37.50000%{background-position:42.857143% 0}
-50.00000%{background-position:57.142857% 0}
-62.50000%{background-position:71.428571% 0}
-75.00000%{background-position:85.714286% 0}
-87.50000%{background-position:100.000000% 0}
-100%{background-position:100% 0}
+@keyframes ohm-frames-typing {
+  0.00000% {
+    background-position: 0% 0;
+  }
+  12.50000% {
+    background-position: 14.285714% 0;
+  }
+  25.00000% {
+    background-position: 28.571429% 0;
+  }
+  37.50000% {
+    background-position: 42.857143% 0;
+  }
+  50.00000% {
+    background-position: 57.142857% 0;
+  }
+  62.50000% {
+    background-position: 71.428571% 0;
+  }
+  75.00000% {
+    background-position: 85.714286% 0;
+  }
+  87.50000% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
 }
-@keyframes ohm-frames-explain{
-0.00000%{background-position:0.000000% 0}
-16.30435%{background-position:14.285714% 0}
-26.08696%{background-position:28.571429% 0}
-35.86957%{background-position:42.857143% 0}
-52.17391%{background-position:57.142857% 0}
-65.21739%{background-position:71.428571% 0}
-75.00000%{background-position:85.714286% 0}
-84.78261%{background-position:100.000000% 0}
-100%{background-position:100% 0}
+@keyframes ohm-frames-explain {
+  0.00000% {
+    background-position: 0% 0;
+  }
+  16.30435% {
+    background-position: 14.285714% 0;
+  }
+  26.08696% {
+    background-position: 28.571429% 0;
+  }
+  35.86957% {
+    background-position: 42.857143% 0;
+  }
+  52.17391% {
+    background-position: 57.142857% 0;
+  }
+  65.21739% {
+    background-position: 71.428571% 0;
+  }
+  75.00000% {
+    background-position: 85.714286% 0;
+  }
+  84.78261% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
 }
-@keyframes ohm-frames-celebrate{
-0.00000%{background-position:0.000000% 0}
-11.84211%{background-position:14.285714% 0}
-21.05263%{background-position:28.571429% 0}
-31.57895%{background-position:42.857143% 0}
-46.05263%{background-position:57.142857% 0}
-60.52632%{background-position:71.428571% 0}
-71.05263%{background-position:85.714286% 0}
-80.26316%{background-position:100.000000% 0}
-100%{background-position:100% 0}
+@keyframes ohm-frames-celebrate {
+  0.00000% {
+    background-position: 0% 0;
+  }
+  11.84211% {
+    background-position: 14.285714% 0;
+  }
+  21.05263% {
+    background-position: 28.571429% 0;
+  }
+  31.57895% {
+    background-position: 42.857143% 0;
+  }
+  46.05263% {
+    background-position: 57.142857% 0;
+  }
+  60.52632% {
+    background-position: 71.428571% 0;
+  }
+  71.05263% {
+    background-position: 85.714286% 0;
+  }
+  80.26316% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
 }
-@keyframes ohm-frames-repair{
-0.00000%{background-position:0.000000% 0}
-14.28571%{background-position:14.285714% 0}
-23.80952%{background-position:28.571429% 0}
-38.09524%{background-position:42.857143% 0}
-47.61905%{background-position:57.142857% 0}
-61.90476%{background-position:71.428571% 0}
-71.42857%{background-position:85.714286% 0}
-85.71429%{background-position:100.000000% 0}
-100%{background-position:100% 0}
+@keyframes ohm-frames-repair {
+  0.00000% {
+    background-position: 0% 0;
+  }
+  14.28571% {
+    background-position: 14.285714% 0;
+  }
+  23.80952% {
+    background-position: 28.571429% 0;
+  }
+  38.09524% {
+    background-position: 42.857143% 0;
+  }
+  47.61905% {
+    background-position: 57.142857% 0;
+  }
+  61.90476% {
+    background-position: 71.428571% 0;
+  }
+  71.42857% {
+    background-position: 85.714286% 0;
+  }
+  85.71429% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
 }

@@ -15,7 +15,11 @@ export function Backlog({
 }) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" aria-describedby={undefined} className="flex w-full flex-col gap-0 p-0 sm:max-w-[720px]">
+      <SheetContent
+        side="right"
+        aria-describedby={undefined}
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-[720px]"
+      >
         <div className="border-b px-6 py-4 pr-12">
           <SheetTitle className="font-title">回看日志</SheetTitle>
           {subtitle && <p className="mt-1 text-meta text-muted-foreground">{subtitle}</p>}

@@ -17,7 +17,8 @@ function splitBlocks(markdown: string): Block[] {
     lines = []
     if (!source) return
     if (/^(```|~~~)/.test(source)) blocks.push({ kind: 'code', source })
-    else if (/^#{1,6}\s/.test(source) && !source.includes('\n')) blocks.push({ kind: 'heading', source })
+    else if (/^#{1,6}\s/.test(source) && !source.includes('\n'))
+      blocks.push({ kind: 'heading', source })
     else if (/^\|.*\|\s*\n\|?\s*:?-{3,}/.test(source)) blocks.push({ kind: 'table', source })
     else blocks.push({ kind: 'text', source })
   }
@@ -63,7 +64,10 @@ export function toSegments(markdown: string): Segment[] {
         last.panel = block.source
       } else {
         const lead = block.kind === 'code' ? '来看这段代码。' : '整理成表格对比一下。'
-        segments.push({ text: pendingHeading ? `${pendingHeading}\n\n${lead}` : lead, panel: block.source })
+        segments.push({
+          text: pendingHeading ? `${pendingHeading}\n\n${lead}` : lead,
+          panel: block.source,
+        })
         pendingHeading = ''
       }
       continue

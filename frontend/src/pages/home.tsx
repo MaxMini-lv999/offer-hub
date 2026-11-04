@@ -43,7 +43,9 @@ function HeroSection() {
         <PanelCaption>Offer Hub · 面试题库</PanelCaption>
         <div className="space-y-2">
           <h1 className="font-title text-title font-semibold md:text-display">成为技术面试高手</h1>
-          <p className="text-muted-foreground">按职位方向整理的面试真题，每道题配解析和讨论，还能来一场模拟面试。</p>
+          <p className="text-muted-foreground">
+            按职位方向整理的面试真题，每道题配解析和讨论，还能来一场模拟面试。
+          </p>
         </div>
         <StatsSection />
         {/* 左下角一小片网点，往右上渐隐，压在文字下面 */}
@@ -81,7 +83,7 @@ function StatsSection() {
   const questions = useQuestionList({ page_size: 1 })
   const bankCount = banks.data?.reduce(
     (sum, group) => sum + group.series_list.reduce((n, series) => n + series.bank_list.length, 0),
-    0,
+    0
   )
 
   return (
@@ -98,7 +100,13 @@ function StatItem({ unit, value, isError }: { unit: string; value?: number; isEr
   return (
     <li className="border-l pl-4 pt-4 first:border-l-0 first:pl-0">
       <span className="block font-title text-title font-semibold tabular-nums">
-        {value !== undefined ? value : isError ? '—' : <span aria-hidden className="skeleton block h-[1.3em] w-12 bg-skeleton" />}
+        {value !== undefined ? (
+          value
+        ) : isError ? (
+          '—'
+        ) : (
+          <span aria-hidden className="skeleton block h-[1.3em] w-12 bg-skeleton" />
+        )}
       </span>
       <span className="block text-meta text-muted-foreground">{unit}</span>
     </li>
@@ -124,10 +132,26 @@ function HotContentSection() {
 }
 
 const FEATURES: { icon: ComponentType<SVGProps<SVGSVGElement>>; title: string; desc: string }[] = [
-  { icon: IconLibrary, title: '海量真题', desc: '按职位方向、技术系列、题库三级整理的面试真题，按方向找题不迷路。' },
-  { icon: IconLightbulb, title: '精选解析', desc: '每道题配图文解析和代码示例，评论区还能看到其他人的思路。' },
-  { icon: IconChecklist, title: '掌握状态追踪', desc: '登录后把题目标成已掌握、晚点再刷或未掌握，复习时心里有数。' },
-  { icon: IconAcademicCap, title: '模拟面试', desc: '澜汐当面试官逐题提问，你先想再看讲解，最后自评掌握程度。' },
+  {
+    icon: IconLibrary,
+    title: '海量真题',
+    desc: '按职位方向、技术系列、题库三级整理的面试真题，按方向找题不迷路。',
+  },
+  {
+    icon: IconLightbulb,
+    title: '精选解析',
+    desc: '每道题配图文解析和代码示例，评论区还能看到其他人的思路。',
+  },
+  {
+    icon: IconChecklist,
+    title: '掌握状态追踪',
+    desc: '登录后把题目标成已掌握、晚点再刷或未掌握，复习时心里有数。',
+  },
+  {
+    icon: IconAcademicCap,
+    title: '模拟面试',
+    desc: '澜汐当面试官逐题提问，你先想再看讲解，最后自评掌握程度。',
+  },
 ]
 
 /** 平台特性：四格共用 1px 分隔线（外框画左边和上边，每格画右边和下边），平板两列、桌面四列 */
@@ -164,7 +188,10 @@ function CTASection() {
   }
 
   return (
-    <BentoCard aria-labelledby="cta-title" className="gap-4 md:flex-row md:items-center md:justify-between">
+    <BentoCard
+      aria-labelledby="cta-title"
+      className="gap-4 md:flex-row md:items-center md:justify-between"
+    >
       <div className="space-y-1">
         <h2 id="cta-title" className="font-title text-heading font-semibold">
           {isLoggedIn ? '继续今天的练习' : '注册账号，开始系统刷题'}

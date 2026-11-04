@@ -7,7 +7,13 @@ import { PanelCaption } from '@/components/bento'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { Markdown } from '@/components/Markdown'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Backlog } from '@/components/vn/Backlog'
 import { ChoiceList, type Choice } from '@/components/vn/ChoiceList'
 import { DialogueBox } from '@/components/vn/DialogueBox'
@@ -59,9 +65,18 @@ interface Pose {
 const RESTING: Pose = { portrait: ART.portraitWelcome, motion: 'wave' }
 
 const REACTIONS: Record<Mastery, { line: string; pose: Pose }> = {
-  1: { line: '很好！这道题可以放心了。', pose: { portrait: ART.portraitWelcome, motion: 'celebrate', play: true } },
-  2: { line: '思路差不多了，过两天再来巩固一下就稳了。', pose: { portrait: ART.portraitThinking, motion: 'thinking' } },
-  3: { line: '没关系，把解析再过一遍，明天再来试试。', pose: { portrait: ART.portraitExplain, motion: 'explain' } },
+  1: {
+    line: '很好！这道题可以放心了。',
+    pose: { portrait: ART.portraitWelcome, motion: 'celebrate', play: true },
+  },
+  2: {
+    line: '思路差不多了，过两天再来巩固一下就稳了。',
+    pose: { portrait: ART.portraitThinking, motion: 'thinking' },
+  },
+  3: {
+    line: '没关系，把解析再过一遍，明天再来试试。',
+    pose: { portrait: ART.portraitExplain, motion: 'explain' },
+  },
 }
 
 /** 文字速度记在本机，下次进来还是这个设置 */
@@ -74,7 +89,7 @@ interface VNSettings {
 function readSettings(): VNSettings {
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '') as Partial<VNSettings>
-    return { speed: SPEEDS.find((s) => s.value === saved.speed)?.value ?? 40 }
+    return { speed: SPEEDS.find(s => s.value === saved.speed)?.value ?? 40 }
   } catch {
     return { speed: 40 }
   }
@@ -122,7 +137,12 @@ export function InterviewMode({
     if (isDesktop) preloadArt(ART.portraitExplain, ART.portraitThinking)
   }, [isDesktop])
 
-  const stepKey = step.kind === 'answer' ? `answer-${step.index}` : step.kind === 'reaction' ? `reaction-${step.mastery}` : step.kind
+  const stepKey =
+    step.kind === 'answer'
+      ? `answer-${step.index}`
+      : step.kind === 'reaction'
+        ? `reaction-${step.mastery}`
+        : step.kind
   const typer = useTypewriter<HTMLDivElement>(stepKey, settings.speed)
 
   const afterAnswers = (): Step => (truncated ? { kind: 'truncated' } : { kind: 'rate' })
@@ -131,7 +151,8 @@ export function InterviewMode({
   useEffect(() => {
     if (!truncated && step.kind === 'truncated') setStep({ kind: 'rate' })
   }, [truncated, step.kind])
-  const firstAnswer = (): Step => (segments.length > 0 ? { kind: 'answer', index: 0 } : afterAnswers())
+  const firstAnswer = (): Step =>
+    segments.length > 0 ? { kind: 'answer', index: 0 } : afterAnswers()
   const nextLabel = next ? '下一题' : '回到题库'
 
   function goNext() {
@@ -177,7 +198,11 @@ export function InterviewMode({
       line = <Markdown content={segment.text} plain />
       panel = segment.panel
       advance = () =>
-        setStep(step.index + 1 < segments.length ? { kind: 'answer', index: step.index + 1 } : afterAnswers())
+        setStep(
+          step.index + 1 < segments.length
+            ? { kind: 'answer', index: step.index + 1 }
+            : afterAnswers()
+        )
       break
     }
     case 'truncated':
@@ -201,7 +226,9 @@ export function InterviewMode({
       line = (
         <>
           <p>{REACTIONS[step.mastery].line}</p>
-          <p className="font-sans text-meta font-normal">掌握程度已经记在本机，登录后会同步到账号。</p>
+          <p className="font-sans text-meta font-normal">
+            掌握程度已经记在本机，登录后会同步到账号。
+          </p>
         </>
       )
       choices = [
@@ -228,13 +255,13 @@ export function InterviewMode({
   useVNKeys(
     {
       onAdvance: () => handleAdvance?.(),
-      onChoose: (index) => showChoices && choices[index]?.onSelect(),
+      onChoose: index => showChoices && choices[index]?.onSelect(),
       onFastForward: setFastForward,
       onBacklog: () => setBacklogOpen(true),
       onExit,
     },
     // 回看日志或登录弹窗打开时停用，Esc 只关它们，数字键不会点到背后的选项
-    !backlogOpen && !showLoginDialog,
+    !backlogOpen && !showLoginDialog
   )
 
   return (
@@ -247,13 +274,13 @@ export function InterviewMode({
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <Select
             value={String(settings.speed)}
-            onValueChange={(value) => setSettings({ speed: Number(value) })}
+            onValueChange={value => setSettings({ speed: Number(value) })}
           >
             <SelectTrigger aria-label="文字速度" className="w-auto px-2 sm:min-w-32 sm:px-3">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {SPEEDS.map((speed) => (
+              {SPEEDS.map(speed => (
                 <SelectItem key={speed.value} value={String(speed.value)}>
                   {speed.label}
                 </SelectItem>
@@ -261,11 +288,21 @@ export function InterviewMode({
             </SelectContent>
           </Select>
           {/* 手机上只留图标，工具栏保持一行 */}
-          <Button variant="outline" onClick={() => setBacklogOpen(true)} aria-label="回看" className="px-2.5 sm:px-4">
+          <Button
+            variant="outline"
+            onClick={() => setBacklogOpen(true)}
+            aria-label="回看"
+            className="px-2.5 sm:px-4"
+          >
             <IconHistory />
             <span className="hidden sm:inline">回看</span>
           </Button>
-          <Button variant="outline" onClick={onExit} aria-label="阅读模式" className="px-2.5 sm:px-4">
+          <Button
+            variant="outline"
+            onClick={onExit}
+            aria-label="阅读模式"
+            className="px-2.5 sm:px-4"
+          >
             <IconDocumentText />
             <span className="hidden sm:inline">阅读模式</span>
           </Button>
@@ -282,7 +319,7 @@ export function InterviewMode({
             <span className="bg-background px-2">
               <DifficultyLabel difficulty={question.difficulty} />
             </span>
-            {question.tags.map((tag) => (
+            {question.tags.map(tag => (
               <span key={tag} className="bg-dialogue/[0.88] px-2 text-dialogue-foreground">
                 {tag}
               </span>
@@ -298,7 +335,9 @@ export function InterviewMode({
                 <Markdown content={panel} />
               </div>
             )}
-            {showChoices && isDesktop && <ChoiceList choices={choices} className="w-full max-w-md md:ml-[6%]" />}
+            {showChoices && isDesktop && (
+              <ChoiceList choices={choices} className="w-full max-w-md md:ml-[6%]" />
+            )}
           </div>
 
           <DialogueBox
@@ -319,7 +358,9 @@ export function InterviewMode({
             {line}
           </DialogueBox>
 
-          {showChoices && !isDesktop && <ChoiceList choices={choices} drawer className="-mx-3 -mb-3 mt-3" />}
+          {showChoices && !isDesktop && (
+            <ChoiceList choices={choices} drawer className="-mx-3 -mb-3 mt-3" />
+          )}
         </div>
       </VNStage>
 

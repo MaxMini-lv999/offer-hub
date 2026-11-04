@@ -29,16 +29,25 @@ export function VNStage({
   const isDesktop = useIsDesktop()
 
   return (
-    <section className={cn('relative isolate flex flex-col overflow-hidden border border-foreground bg-dialogue', className)}>
+    <section
+      className={cn(
+        'relative isolate flex flex-col overflow-hidden border border-foreground bg-dialogue',
+        className
+      )}
+    >
       {/* 放大 3% 再模糊，免得边缘透出底色 */}
-      <ArtImage art={scene} priority className="absolute inset-0 -z-20 h-full w-full scale-[1.03] object-cover blur-[1.5px]" />
+      <ArtImage
+        art={scene}
+        priority
+        className="absolute inset-0 -z-20 h-full w-full scale-[1.03] object-cover blur-[1.5px]"
+      />
       {dim && <div aria-hidden className="absolute inset-0 -z-20 bg-dialogue/50" />}
       {character && isDesktop && (
         // 入场、呼吸、换姿势淡入都用 transform 或 opacity，分三层免得互相覆盖；翻转用独立的 scale 属性
         <div
           className={cn(
             'ohm-character-enter pointer-events-none absolute bottom-0 -z-10 h-[96%]',
-            characterSide === 'right' ? 'right-[4%]' : 'left-[4%]',
+            characterSide === 'right' ? 'right-[4%]' : 'left-[4%]'
           )}
         >
           <div className="ohm-breathe h-full">
@@ -48,7 +57,7 @@ export function VNStage({
               priority
               className={cn(
                 'h-full w-auto max-w-none animate-in fade-in duration-panel',
-                characterSide === 'left' && '[scale:-1_1]',
+                characterSide === 'left' && '[scale:-1_1]'
               )}
             />
           </div>

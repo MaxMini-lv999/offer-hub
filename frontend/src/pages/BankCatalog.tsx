@@ -19,7 +19,7 @@ export function BankCatalogPage() {
 
   // 当前方向放在 URL 的 job 参数里，从题库页返回时还停在原来的方向；缺失或不认识时回退到第一个
   const jobParam = searchParams.get('job')
-  const activeGroup = data?.find((group) => group.job_name === jobParam) ?? data?.[0]
+  const activeGroup = data?.find(group => group.job_name === jobParam) ?? data?.[0]
   const bankCount = data?.reduce((sum, group) => sum + countBanks(group), 0)
 
   function switchJob(jobName: string) {
@@ -53,7 +53,9 @@ export function BankCatalogPage() {
             />
           )}
 
-          {data && activeGroup && <BankIndex groups={data} active={activeGroup} onSelect={switchJob} />}
+          {data && activeGroup && (
+            <BankIndex groups={data} active={activeGroup} onSelect={switchJob} />
+          )}
         </div>
 
         {/* 题库列表出错或为空时 activeGroup 是 undefined，退回全站热门 */}
@@ -91,7 +93,7 @@ function BankIndex({
           aria-label="职位方向"
           className="scrollbar-none -mb-px flex gap-6 overflow-x-auto lg:-ml-px lg:mb-0 lg:flex-col lg:gap-0 lg:overflow-visible"
         >
-          {groups.map((group) => {
+          {groups.map(group => {
             const selected = group === active
             return (
               <button
@@ -106,7 +108,7 @@ function BankIndex({
                   'flex shrink-0 items-baseline justify-between gap-2 border-b-2 pb-3 font-medium transition-colors focus-visible:outline-offset-[-2px] lg:border-b-0 lg:border-l-2 lg:py-2 lg:pl-4 lg:text-left',
                   selected
                     ? 'border-foreground text-foreground'
-                    : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground',
+                    : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground'
                 )}
               >
                 {group.job_name}
@@ -140,21 +142,31 @@ function SeriesIndex({ group }: { group: JobQuestionGroup }) {
   }
 
   return (
-    <div id="bank-index" role="tabpanel" aria-label={group.job_name} className="mt-6 space-y-6 lg:mt-0">
-      {group.series_list.map((series) => (
+    <div
+      id="bank-index"
+      role="tabpanel"
+      aria-label={group.job_name}
+      className="mt-6 space-y-6 lg:mt-0"
+    >
+      {group.series_list.map(series => (
         <section key={series.series_id} aria-label={series.series_name}>
-          <h2 className="border-b border-foreground pb-2 font-title font-semibold">{series.series_name}</h2>
+          <h2 className="border-b border-foreground pb-2 font-title font-semibold">
+            {series.series_name}
+          </h2>
           {series.bank_list.length === 0 ? (
             <p className="py-3 text-meta text-muted-foreground">
               这个系列还没有题库，先去
-              <Link to="/questions" className="mx-1 underline underline-offset-4 hover:text-foreground">
+              <Link
+                to="/questions"
+                className="mx-1 underline underline-offset-4 hover:text-foreground"
+              >
                 全部题目
               </Link>
               看看。
             </p>
           ) : (
             <ul className="grid md:grid-cols-2 md:gap-x-8">
-              {series.bank_list.map((bank) => (
+              {series.bank_list.map(bank => (
                 <BankIndexRow key={bank.bank_id} bank={bank} />
               ))}
             </ul>
@@ -169,13 +181,21 @@ function SeriesIndex({ group }: { group: JobQuestionGroup }) {
 function BankIndexRow({ bank }: { bank: QuestionBank }) {
   return (
     <li className="border-b">
-      <Link to={bankPath(bank.bank_id)} className="flex items-center gap-3 px-2 py-3 transition-colors hover:bg-muted">
+      <Link
+        to={bankPath(bank.bank_id)}
+        className="flex items-center gap-3 px-2 py-3 transition-colors hover:bg-muted"
+      >
         <BankLogo name={bank.bank_name} className="h-8 w-8" />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
             <span className="truncate font-medium">{bank.bank_name}</span>
-            <span aria-hidden className="min-w-4 flex-1 border-b border-dotted border-muted-foreground" />
-            <span className="shrink-0 text-meta tabular-nums text-muted-foreground">{bank.count} 题</span>
+            <span
+              aria-hidden
+              className="min-w-4 flex-1 border-b border-dotted border-muted-foreground"
+            />
+            <span className="shrink-0 text-meta tabular-nums text-muted-foreground">
+              {bank.count} 题
+            </span>
           </div>
           <p className="truncate text-meta text-muted-foreground">{bank.desc || '暂无描述'}</p>
         </div>
@@ -190,21 +210,24 @@ function IndexSkeleton() {
     <div aria-hidden className="skeleton lg:grid lg:grid-cols-[160px_minmax(0,1fr)] lg:gap-8">
       <div className="border-b lg:self-start lg:border-b-0 lg:border-l">
         <div className="-mb-px flex gap-6 lg:-ml-px lg:mb-0 lg:flex-col lg:gap-0">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="border-b-2 border-transparent pb-3 lg:border-b-0 lg:border-l-2 lg:py-2 lg:pl-4">
+          {[0, 1, 2].map(i => (
+            <div
+              key={i}
+              className="border-b-2 border-transparent pb-3 lg:border-b-0 lg:border-l-2 lg:py-2 lg:pl-4"
+            >
               <div className="h-[1.7em] w-20 bg-skeleton" />
             </div>
           ))}
         </div>
       </div>
       <div className="mt-6 space-y-6 lg:mt-0">
-        {[0, 1].map((i) => (
+        {[0, 1].map(i => (
           <div key={i}>
             <div className="border-b border-foreground pb-2">
               <div className="h-[1.7em] w-20 bg-skeleton" />
             </div>
             <div className="grid md:grid-cols-2 md:gap-x-8">
-              {[0, 1, 2].map((j) => (
+              {[0, 1, 2].map(j => (
                 <div key={j} className="flex items-center gap-3 border-b px-2 py-3">
                   <div className="h-8 w-8 shrink-0 bg-skeleton" />
                   <div className="min-w-0 flex-1">

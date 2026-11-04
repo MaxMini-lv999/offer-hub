@@ -25,7 +25,7 @@ function getTheme(): Theme {
 
 function apply() {
   document.documentElement.classList.toggle('dark', getTheme() === 'dark')
-  listeners.forEach((listener) => listener())
+  listeners.forEach(listener => listener())
 }
 
 // 没手动选过时，系统切换深浅色跟着切

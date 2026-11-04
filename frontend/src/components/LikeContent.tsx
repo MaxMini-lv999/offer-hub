@@ -36,7 +36,7 @@ export function LikeContent({
             'inline-flex transition-transform duration-micro ease-standard group-active:scale-75',
             !liked && 'group-hover:-rotate-12',
             pending && 'scale-75',
-            effect && (effect.liked ? 'animate-like-pop' : 'animate-like-settle'),
+            effect && (effect.liked ? 'animate-like-pop' : 'animate-like-settle')
           )}
         >
           {liked ? <IconThumbsUpFilled /> : <IconThumbsUp />}
@@ -55,7 +55,9 @@ export function LikeContent({
             aria-hidden
             className={cn(
               'pointer-events-none absolute -inset-x-4 bottom-full text-center text-meta font-medium leading-none tabular-nums',
-              effect.liked ? 'animate-like-float-up text-foreground' : 'animate-like-float-down text-muted-foreground',
+              effect.liked
+                ? 'animate-like-float-up text-foreground'
+                : 'animate-like-float-down text-muted-foreground'
             )}
             style={{ marginBottom: floatGap }}
           >
@@ -65,7 +67,10 @@ export function LikeContent({
       </span>
       <span
         key={effect ? `count-${effect.key}` : 'count'}
-        className={cn('inline-block tabular-nums', effect && (effect.liked ? 'animate-like-count-up' : 'animate-like-count-down'))}
+        className={cn(
+          'inline-block tabular-nums',
+          effect && (effect.liked ? 'animate-like-count-up' : 'animate-like-count-down')
+        )}
       >
         {children}
       </span>

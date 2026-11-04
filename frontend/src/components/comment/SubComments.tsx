@@ -9,13 +9,18 @@ import type { CommentItem as CommentItemData } from '@/types/comment'
  */
 export function SubComments({ parent }: { parent: CommentItemData }) {
   const { targetType, targetId } = useCommentsContext()
-  const { data, isPending, isError, error, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } = useSubComments(
-    targetType,
-    targetId,
-    parent,
-  )
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    refetch,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useSubComments(targetType, targetId, parent)
 
-  const replies = data?.pages.flatMap((page) => page.list) ?? []
+  const replies = data?.pages.flatMap(page => page.list) ?? []
   const total = data?.pages.at(-1)?.total ?? parent.sub_comment_total
 
   return (
@@ -29,13 +34,17 @@ export function SubComments({ parent }: { parent: CommentItemData }) {
 
       {replies.length > 0 && (
         <ul className="divide-y">
-          {replies.map((reply) => (
+          {replies.map(reply => (
             <li key={reply.comment_id}>
               <CommentItem
                 comment={reply}
                 isSub
                 // 直接回复顶层评论作者的不用标，回复的是楼里其他人才显示「回复 @xx」
-                replyTargetName={reply.reply_to && reply.reply_to !== parent.user_id ? reply.reply_to_name : undefined}
+                replyTargetName={
+                  reply.reply_to && reply.reply_to !== parent.user_id
+                    ? reply.reply_to_name
+                    : undefined
+                }
               />
             </li>
           ))}

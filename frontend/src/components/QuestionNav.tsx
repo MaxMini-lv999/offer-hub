@@ -30,9 +30,17 @@ export function QuestionNav({
   className?: string
 }) {
   const { data: bankInfo } = useBankInfo(bankId)
-  const { data, isPending, isError, error, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useBankQuestionList(bankId, keyword)
-  const list = useMemo(() => data?.pages.flatMap((page) => page.list) ?? [], [data])
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    refetch,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useBankQuestionList(bankId, keyword)
+  const list = useMemo(() => data?.pages.flatMap(page => page.list) ?? [], [data])
   const total = data?.pages[0]?.total ?? 0
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -44,7 +52,9 @@ export function QuestionNav({
   useEffect(() => {
     const container = scrollRef.current
     if (!container || container.clientHeight === 0 || scrolledIdRef.current === currentId) return
-    const item = container.querySelector<HTMLElement>(`[data-question-id="${CSS.escape(currentId)}"]`)
+    const item = container.querySelector<HTMLElement>(
+      `[data-question-id="${CSS.escape(currentId)}"]`
+    )
     if (!item) return
 
     scrolledIdRef.current = currentId
@@ -62,17 +72,20 @@ export function QuestionNav({
     if (!root || !target || !hasNextPage) return
 
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0].isIntersecting && !isFetchingNextPage) fetchNextPage()
       },
-      { root, rootMargin: '200px' },
+      { root, rootMargin: '200px' }
     )
     observer.observe(target)
     return () => observer.disconnect()
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   return (
-    <nav aria-label="题目列表" className={cn('flex h-full min-h-0 flex-col border border-foreground', className)}>
+    <nav
+      aria-label="题目列表"
+      className={cn('flex h-full min-h-0 flex-col border border-foreground', className)}
+    >
       <div className="space-y-3 border-b p-4">
         <div className="flex items-baseline justify-between gap-2">
           <Link
@@ -94,11 +107,19 @@ export function QuestionNav({
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         {isPending && <NavListSkeleton />}
 
-        {isError && <ErrorState message={error.message} onRetry={() => refetch()} className="border-0" />}
+        {isError && (
+          <ErrorState message={error.message} onRetry={() => refetch()} className="border-0" />
+        )}
 
         {data && list.length === 0 && (
           <EmptyState
-            icon={keyword ? <IconMagnifierClose className="size-8" /> : <IconFileText className="size-8" />}
+            icon={
+              keyword ? (
+                <IconMagnifierClose className="size-8" />
+              ) : (
+                <IconFileText className="size-8" />
+              )
+            }
             title={keyword ? '没有匹配的题目' : '这个题库还没有题目'}
             className="border-0"
             action={
@@ -127,13 +148,13 @@ export function QuestionNav({
                     aria-current={active ? 'page' : undefined}
                     className={cn(
                       'flex items-baseline gap-3 px-4 py-2 transition-colors',
-                      active ? 'bg-foreground text-background' : 'hover:bg-muted',
+                      active ? 'bg-foreground text-background' : 'hover:bg-muted'
                     )}
                   >
                     <span
                       className={cn(
                         'w-6 shrink-0 text-right text-meta tabular-nums',
-                        active ? 'text-background/70' : 'text-muted-foreground',
+                        active ? 'text-background/70' : 'text-muted-foreground'
                       )}
                     >
                       {index + 1}
@@ -177,7 +198,12 @@ function NavListSkeleton() {
       {Array.from({ length: 12 }, (_, i) => (
         <div key={i} className="flex gap-3 px-4 py-2">
           <div className="h-6 w-6 shrink-0 bg-skeleton" />
-          <div className={cn('h-6 bg-skeleton', i % 3 === 0 ? 'w-full' : i % 3 === 1 ? 'w-4/5' : 'w-3/5')} />
+          <div
+            className={cn(
+              'h-6 bg-skeleton',
+              i % 3 === 0 ? 'w-full' : i % 3 === 1 ? 'w-4/5' : 'w-3/5'
+            )}
+          />
         </div>
       ))}
     </div>

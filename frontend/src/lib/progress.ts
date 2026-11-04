@@ -43,14 +43,14 @@ function save(next: Progress) {
   } catch {
     // 写不进去（隐私模式、空间满）时只在本次打开期间生效
   }
-  listeners.forEach((listener) => listener())
+  listeners.forEach(listener => listener())
 }
 
 // 另一个标签页改了记录时同步过来
-window.addEventListener('storage', (e) => {
+window.addEventListener('storage', e => {
   if (e.key !== STORAGE_KEY) return
   progress = read()
-  listeners.forEach((listener) => listener())
+  listeners.forEach(listener => listener())
 })
 
 export function setMastery(questionId: string, mastery: Mastery) {
@@ -60,7 +60,7 @@ export function setMastery(questionId: string, mastery: Mastery) {
 /** 打开题目详情时记一笔；同一道题只留最新一条 */
 export function recordVisit(question: RecentQuestion) {
   if (progress.recent[0]?.id === question.id && progress.recent[0]?.title === question.title) return
-  const rest = progress.recent.filter((item) => item.id !== question.id)
+  const rest = progress.recent.filter(item => item.id !== question.id)
   save({ ...progress, recent: [question, ...rest].slice(0, RECENT_LIMIT) })
 }
 
@@ -78,7 +78,7 @@ export function useProgress() {
 /** 三种掌握程度各有多少题 */
 export function countMastery(mastery: Record<string, Mastery>) {
   const counts: Record<Mastery, number> = { 1: 0, 2: 0, 3: 0 }
-  Object.values(mastery).forEach((value) => {
+  Object.values(mastery).forEach(value => {
     counts[value] += 1
   })
   return counts

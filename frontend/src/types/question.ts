@@ -8,7 +8,8 @@ export type QuestionStatus = 1 | 2 | 3
 export type UserTag = 0 | 1 | 2 | 3
 
 /** 题目列表排序字段，order 是后端默认排序，文档未列出 */
-export type QuestionSortBy = 'order' | 'create_time' | 'view_count' | 'thumbs_up_count' | 'dislike_count'
+export type QuestionSortBy =
+  'order' | 'create_time' | 'view_count' | 'thumbs_up_count' | 'dislike_count'
 
 export type SortOrder = 'asc' | 'desc'
 

@@ -10,7 +10,7 @@ export function BentoCard({ className, ...props }: ComponentPropsWithoutRef<'sec
     <section
       className={cn(
         'relative flex min-w-0 flex-col overflow-hidden border border-foreground bg-card p-4 text-card-foreground md:p-6',
-        className,
+        className
       )}
       {...props}
     />
@@ -23,7 +23,7 @@ export function PanelCaption({ children, className }: { children: ReactNode; cla
     <span
       className={cn(
         'inline-flex w-fit shrink-0 items-center gap-1 bg-foreground px-2 text-meta font-medium text-background',
-        className,
+        className
       )}
     >
       {children}

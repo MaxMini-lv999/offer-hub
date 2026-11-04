@@ -9,10 +9,10 @@ import { useLogin } from '@/hooks/useLogin'
 const loadAuthForm = () => import('@/components/auth/AuthForm')
 const AuthForm = lazy(() =>
   loadAuthForm().then(
-    (m) => ({ default: m.AuthForm }),
+    m => ({ default: m.AuthForm }),
     // 下载失败（断网、发版后旧文件没了）时在弹窗里提示刷新，不让错误冒到路由的出错页
-    () => ({ default: AuthFormLoadError }),
-  ),
+    () => ({ default: AuthFormLoadError })
+  )
 )
 
 /**
@@ -26,7 +26,9 @@ export function LoginDialog() {
   // 打开的那一刻记下焦点所在的按钮（layout effect 先于弹窗内部的自动聚焦），关闭时还回去
   const returnFocusRef = useRef<HTMLElement | null>(null)
   useLayoutEffect(() => {
-    if (open) returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    if (open)
+      returnFocusRef.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null
   }, [open])
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export function LoginDialog() {
     <Dialog open={open} onOpenChange={setShowLoginDialog}>
       <DialogContent
         className="max-w-[420px]"
-        onCloseAutoFocus={(e) => {
+        onCloseAutoFocus={e => {
           // 登录成功后入口按钮可能已经不在了（换成了昵称），那就不抢焦点
           e.preventDefault()
           if (returnFocusRef.current?.isConnected) returnFocusRef.current.focus()
@@ -92,14 +94,14 @@ function AuthFormSkeleton() {
   return (
     <div aria-hidden className="skeleton space-y-5">
       <div className="grid grid-cols-2 border-b pb-3 pt-2">
-        {[0, 1].map((i) => (
+        {[0, 1].map(i => (
           <div key={i} className="flex h-[26.5px] items-center justify-center">
             <span className="h-4 w-8 bg-skeleton" />
           </div>
         ))}
       </div>
       <div className="space-y-4">
-        {[0, 1].map((i) => (
+        {[0, 1].map(i => (
           <div key={i} className="space-y-2">
             <div className="flex h-[25.5px] items-center">
               <span className="h-4 w-12 bg-skeleton" />
@@ -116,7 +118,9 @@ function AuthFormSkeleton() {
 function AuthFormLoadError() {
   return (
     <div role="alert" className="space-y-4 border-t pt-5">
-      <p className="text-meta text-muted-foreground">登录表单没加载出来，可能是网络断了或网站刚更新过。</p>
+      <p className="text-meta text-muted-foreground">
+        登录表单没加载出来，可能是网络断了或网站刚更新过。
+      </p>
       <Button variant="outline" className="w-full" onClick={() => window.location.reload()}>
         刷新页面
       </Button>

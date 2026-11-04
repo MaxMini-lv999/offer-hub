@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { LoginContext, type LoginContextValue } from '@/hooks/useLogin'
 import { getToken, setToken, subscribeToken } from '@/lib/axios'
@@ -37,7 +44,7 @@ export function LoginProvider({ children }: { children: ReactNode }) {
       // 题目内容和掌握状态按登录态返回，缓存里的游客版本要重新拉
       void queryClient.invalidateQueries()
     },
-    [queryClient],
+    [queryClient]
   )
 
   const logout = useCallback(async () => {
@@ -65,7 +72,7 @@ export function LoginProvider({ children }: { children: ReactNode }) {
       setShowLoginDialog,
       refreshUserInfo,
     }),
-    [token, userInfo, login, logout, showLoginDialog, refreshUserInfo],
+    [token, userInfo, login, logout, showLoginDialog, refreshUserInfo]
   )
 
   return <LoginContext.Provider value={value}>{children}</LoginContext.Provider>

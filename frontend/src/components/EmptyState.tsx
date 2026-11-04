@@ -32,7 +32,9 @@ export function EmptyState({
   const isDesktop = useIsDesktop()
 
   return (
-    <div className={cn('flex flex-col items-center gap-4 border px-4 py-12 text-center', className)}>
+    <div
+      className={cn('flex flex-col items-center gap-4 border px-4 py-12 text-center', className)}
+    >
       {pose ? (
         <CharacterSprite name={pose} size={isDesktop ? 160 : 120} still />
       ) : (

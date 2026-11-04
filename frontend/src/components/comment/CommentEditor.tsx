@@ -66,7 +66,7 @@ export function CommentEditor({
   return (
     <form
       className={cn('space-y-2', className)}
-      onSubmit={(e) => {
+      onSubmit={e => {
         e.preventDefault()
         void submit()
       }}
@@ -74,8 +74,8 @@ export function CommentEditor({
       <textarea
         ref={textareaRef}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => {
+        onChange={e => setValue(e.target.value)}
+        onKeyDown={e => {
           if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault()
             void submit()
@@ -92,7 +92,13 @@ export function CommentEditor({
         className="block min-h-[88px] w-full resize-y border border-input bg-transparent px-3 py-2 text-base transition-colors placeholder:text-muted-foreground focus-visible:border-foreground focus-visible:outline-none aria-[invalid=true]:border-foreground md:text-body"
       />
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span id={countId} className={cn('text-meta text-muted-foreground', tooLong && 'font-medium text-foreground')}>
+        <span
+          id={countId}
+          className={cn(
+            'text-meta text-muted-foreground',
+            tooLong && 'font-medium text-foreground'
+          )}
+        >
           {length} / {COMMENT_MAX_LENGTH}
           {tooLong && '，超出字数'}
           <span className="hidden sm:inline"> · Ctrl + Enter 发送</span>

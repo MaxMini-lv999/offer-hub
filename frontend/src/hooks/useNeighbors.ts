@@ -7,8 +7,8 @@ import { useBankQuestionList } from '@/hooks/useQuestionQueries'
  */
 export function useNeighbors(bankId: string, currentId: string) {
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useBankQuestionList(bankId)
-  const list = data?.pages.flatMap((page) => page.list) ?? []
-  const index = list.findIndex((q) => q.question_id === currentId)
+  const list = data?.pages.flatMap(page => page.list) ?? []
+  const index = list.findIndex(q => q.question_id === currentId)
 
   // 当前题目排在已加载的页之后（题库超过 100 题）时，接着取下一页直到找到它
   useEffect(() => {

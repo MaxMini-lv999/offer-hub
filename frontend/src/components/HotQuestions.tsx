@@ -23,23 +23,23 @@ export function HotQuestions({ max, showMore = false }: { max?: number; showMore
   const { data: groups, isPending: groupsPending } = useQuestionBanks()
   const [searchParams, setSearchParams] = useSearchParams()
   const jobParam = searchParams.get('job')
-  const activeJob = (groups?.find((group) => group.job_name === jobParam) ?? groups?.[0])?.job_name
+  const activeJob = (groups?.find(group => group.job_name === jobParam) ?? groups?.[0])?.job_name
   const panelId = useId()
 
   // 职位方向查出来之前不发请求，免得先查一次全站热门
   const { data, isPending, isError, error, refetch } = useHotQuestions(
     { limit: HOT_RANKING_LIMIT, job_name: activeJob },
-    !groupsPending,
+    !groupsPending
   )
   const list = data?.list.slice(0, max)
 
   function switchJob(jobName: string) {
     setSearchParams(
-      (prev) => {
+      prev => {
         prev.set('job', jobName)
         return prev
       },
-      { replace: true, preventScrollReset: true },
+      { replace: true, preventScrollReset: true }
     )
   }
 
@@ -48,15 +48,19 @@ export function HotQuestions({ max, showMore = false }: { max?: number; showMore
       <div className="flex items-end justify-between gap-4 border-b">
         {groupsPending ? (
           <div aria-hidden className="skeleton flex gap-6 pb-3">
-            {[0, 1, 2].map((i) => (
+            {[0, 1, 2].map(i => (
               <div key={i} className="h-[1.7em] w-16 bg-skeleton" />
             ))}
           </div>
         ) : (
           groups &&
           groups.length > 0 && (
-            <div role="tablist" aria-label="职位方向" className="scrollbar-none -mb-px flex min-w-0 gap-6 overflow-x-auto">
-              {groups.map((group) => {
+            <div
+              role="tablist"
+              aria-label="职位方向"
+              className="scrollbar-none -mb-px flex min-w-0 gap-6 overflow-x-auto"
+            >
+              {groups.map(group => {
                 const selected = group.job_name === activeJob
                 return (
                   <button
@@ -71,7 +75,7 @@ export function HotQuestions({ max, showMore = false }: { max?: number; showMore
                       'shrink-0 border-b-2 pb-3 font-medium transition-colors focus-visible:outline-offset-[-2px]',
                       selected
                         ? 'border-foreground text-foreground'
-                        : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground',
+                        : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground'
                     )}
                   >
                     {group.job_name}
@@ -83,7 +87,10 @@ export function HotQuestions({ max, showMore = false }: { max?: number; showMore
         )}
         {showMore && (
           <Link
-            to={{ pathname: '/hot', search: activeJob ? `?${createSearchParams({ job: activeJob })}` : '' }}
+            to={{
+              pathname: '/hot',
+              search: activeJob ? `?${createSearchParams({ job: activeJob })}` : '',
+            }}
             className="ml-auto shrink-0 pb-3 text-meta text-muted-foreground decoration-2 underline-offset-4 hover:text-foreground hover:underline"
           >
             完整榜单 →
@@ -94,7 +101,9 @@ export function HotQuestions({ max, showMore = false }: { max?: number; showMore
       <div id={panelId} role={activeJob ? 'tabpanel' : undefined} aria-label={activeJob}>
         {isPending && <RankingSkeleton rows={max ?? HOT_RANKING_LIMIT} />}
 
-        {isError && <ErrorState message={error.message} onRetry={() => refetch()} className="mt-4" />}
+        {isError && (
+          <ErrorState message={error.message} onRetry={() => refetch()} className="mt-4" />
+        )}
 
         {list && list.length === 0 && (
           <EmptyState
@@ -131,7 +140,10 @@ function RankingRow({ question, rank }: { question: HotQuestion; rank: number })
       >
         <RankBadge rank={rank} />
         <span className="line-clamp-2 min-w-0 flex-1 md:truncate">{question.title}</span>
-        <span className="shrink-0 text-meta tabular-nums text-muted-foreground" title={`${question.view_count} 次浏览`}>
+        <span
+          className="shrink-0 text-meta tabular-nums text-muted-foreground"
+          title={`${question.view_count} 次浏览`}
+        >
           <span className="sr-only">{question.view_count} 次浏览</span>
           <span aria-hidden>{formatViewCount(question.view_count)} 浏览</span>
         </span>

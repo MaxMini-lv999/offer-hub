@@ -13,6 +13,9 @@ export interface LikeEffect {
  */
 export function useLikeEffect() {
   const [effect, setEffect] = useState<LikeEffect | null>(null)
-  const play = useCallback((liked: boolean) => setEffect((prev) => ({ key: (prev?.key ?? 0) + 1, liked })), [])
+  const play = useCallback(
+    (liked: boolean) => setEffect(prev => ({ key: (prev?.key ?? 0) + 1, liked })),
+    []
+  )
   return [effect, play] as const
 }

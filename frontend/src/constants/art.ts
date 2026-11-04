@@ -28,8 +28,16 @@ const PORTRAIT = { width: 512, height: 768 }
 export const ART = {
   sceneDay: { file: 'fallbacks/interview-day.webp', ...SCENE, alt: '洒满阳光的书房' },
   sceneNight: { file: 'fallbacks/interview-night.webp', ...SCENE, alt: '夜里亮着壁灯的书房' },
-  portraitWelcome: { file: 'fallbacks/portrait-welcome.webp', ...PORTRAIT, alt: '澜汐，蓝色长发的鲸尾女仆，伸手示意' },
-  portraitThinking: { file: 'fallbacks/portrait-thinking.webp', ...PORTRAIT, alt: '澜汐托着下巴思考' },
+  portraitWelcome: {
+    file: 'fallbacks/portrait-welcome.webp',
+    ...PORTRAIT,
+    alt: '澜汐，蓝色长发的鲸尾女仆，伸手示意',
+  },
+  portraitThinking: {
+    file: 'fallbacks/portrait-thinking.webp',
+    ...PORTRAIT,
+    alt: '澜汐托着下巴思考',
+  },
   portraitExplain: { file: 'fallbacks/portrait-explain.webp', ...PORTRAIT, alt: '澜汐捧着书讲解' },
 } satisfies Record<string, ArtAsset>
 

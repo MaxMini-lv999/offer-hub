@@ -86,7 +86,7 @@ export function CommentItem({
             submitLabel="保存"
             initialValue={comment.content}
             autoFocus
-            onSubmit={async (content) => {
+            onSubmit={async content => {
               await updateComment.mutateAsync({ comment_id: id, content })
               setEditingComment(null)
             }}
@@ -103,7 +103,12 @@ export function CommentItem({
               <>
                 <span className="text-foreground">确定删除这条评论？</span>
                 <ActionButton
-                  onClick={() => deleteComment.mutate({ comment_id: id }, { onError: () => setConfirmingDelete(false) })}
+                  onClick={() =>
+                    deleteComment.mutate(
+                      { comment_id: id },
+                      { onError: () => setConfirmingDelete(false) }
+                    )
+                  }
                   disabled={deleteComment.isPending}
                   className="font-medium text-foreground"
                 >
@@ -120,7 +125,7 @@ export function CommentItem({
                   onClick={() =>
                     requireLogin(() => {
                       if (thumbsUp.isPending) return
-                      thumbsUp.mutate(comment, { onSuccess: (data) => playLikeEffect(data.liked) })
+                      thumbsUp.mutate(comment, { onSuccess: data => playLikeEffect(data.liked) })
                     })
                   }
                   aria-pressed={comment.user_liked}
@@ -128,7 +133,11 @@ export function CommentItem({
                   aria-label={`点赞，当前 ${comment.thumbs_up} 个赞`}
                   className={cn('group', comment.user_liked && 'text-foreground')}
                 >
-                  <LikeContent liked={comment.user_liked} pending={thumbsUp.isPending} effect={likeEffect}>
+                  <LikeContent
+                    liked={comment.user_liked}
+                    pending={thumbsUp.isPending}
+                    effect={likeEffect}
+                  >
                     {comment.thumbs_up > 0 ? comment.thumbs_up : '赞'}
                   </LikeContent>
                 </ActionButton>
@@ -170,12 +179,16 @@ export function CommentItem({
           <>
             <button
               type="button"
-              onClick={() => setExpanded((v) => !v)}
+              onClick={() => setExpanded(v => !v)}
               aria-expanded={expanded}
               className="mt-2 inline-flex items-center gap-1 text-meta font-medium text-foreground underline-offset-4 hover:underline"
             >
               {expanded ? '收起回复' : `查看 ${comment.sub_comment_total} 条回复`}
-              {expanded ? <IconAltArrowUp className="size-3.5" /> : <IconAltArrowDown className="size-3.5" />}
+              {expanded ? (
+                <IconAltArrowUp className="size-3.5" />
+              ) : (
+                <IconAltArrowDown className="size-3.5" />
+              )}
             </button>
             {expanded && <SubComments parent={comment} />}
           </>
@@ -196,7 +209,7 @@ function ActionButton({
       type="button"
       className={cn(
         'inline-flex min-h-6 items-center gap-1 transition-colors duration-micro hover:text-foreground disabled:opacity-50 [&_svg]:size-3.5',
-        className,
+        className
       )}
       {...props}
     >
@@ -214,7 +227,10 @@ function Avatar({ src, name, small }: { src: string; name: string; small: boolea
     return (
       <span
         aria-hidden
-        className={cn('flex shrink-0 items-center justify-center border bg-muted font-title text-meta text-muted-foreground', size)}
+        className={cn(
+          'flex shrink-0 items-center justify-center border bg-muted font-title text-meta text-muted-foreground',
+          size
+        )}
       >
         {[...name][0]}
       </span>

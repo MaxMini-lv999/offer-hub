@@ -14,7 +14,7 @@ export function RankBadge({ rank, className }: { rank: number; className?: strin
       className={cn(
         'inline-flex size-[1.5em] shrink-0 items-center justify-center tabular-nums',
         medal ? cn(medal, 'font-semibold text-medal-foreground') : 'text-muted-foreground',
-        className,
+        className
       )}
     >
       {rank}

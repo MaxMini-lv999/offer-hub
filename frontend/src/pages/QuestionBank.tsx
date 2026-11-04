@@ -34,8 +34,15 @@ export function QuestionBankPage() {
     <div className="space-y-4">
       <header className="space-y-2">
         <div className="flex items-baseline justify-between gap-4">
-          {info ? <Breadcrumb jobName={info.jobName} /> : <div aria-hidden className="h-[1.5em] w-28 skeleton bg-skeleton text-meta" />}
-          <InterviewEntryLink to={first && questionPath(first.question_id, bankId, 'interview')} label="从第一题开始" />
+          {info ? (
+            <Breadcrumb jobName={info.jobName} />
+          ) : (
+            <div aria-hidden className="h-[1.5em] w-28 skeleton bg-skeleton text-meta" />
+          )}
+          <InterviewEntryLink
+            to={first && questionPath(first.question_id, bankId, 'interview')}
+            label="从第一题开始"
+          />
         </div>
         {isPending && <BankSummarySkeleton />}
         {isError && (
@@ -64,7 +71,10 @@ export function QuestionBankPage() {
 function Breadcrumb({ jobName }: { jobName: string }) {
   return (
     <nav aria-label="面包屑" className="flex min-w-0 gap-2 text-meta text-muted-foreground">
-      <Link to="/collections" className="shrink-0 decoration-2 underline-offset-4 hover:text-foreground hover:underline">
+      <Link
+        to="/collections"
+        className="shrink-0 decoration-2 underline-offset-4 hover:text-foreground hover:underline"
+      >
         题库目录
       </Link>
       <span aria-hidden>/</span>

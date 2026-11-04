@@ -35,7 +35,7 @@ export function StageNotice({
 
   useVNKeys({
     onAdvance: typer.done ? undefined : typer.finish,
-    onChoose: (index) => choices[index]?.onSelect(),
+    onChoose: index => choices[index]?.onSelect(),
   })
 
   return (
@@ -46,10 +46,15 @@ export function StageNotice({
     >
       <div className="flex min-h-0 flex-1 flex-col p-3 md:p-6">
         <div className="flex flex-col items-start gap-2">
-          <p aria-hidden className="bg-background px-3 py-1 font-title text-title font-semibold md:text-display">
+          <p
+            aria-hidden
+            className="bg-background px-3 py-1 font-title text-title font-semibold md:text-display"
+          >
             {code}
           </p>
-          <h1 className="bg-dialogue/[0.88] px-3 py-1 text-heading font-semibold text-dialogue-foreground">{title}</h1>
+          <h1 className="bg-dialogue/[0.88] px-3 py-1 text-heading font-semibold text-dialogue-foreground">
+            {title}
+          </h1>
         </div>
 
         <div className="flex min-h-0 flex-1 items-end justify-between gap-4 pt-3">

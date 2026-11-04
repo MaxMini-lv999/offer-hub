@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react'
-import { ART_BASE, artSrc, MOTIONS, type ArtAsset, type MotionName, type VectorName } from '@/constants/art'
+import {
+  ART_BASE,
+  artSrc,
+  MOTIONS,
+  type ArtAsset,
+  type MotionName,
+  type VectorName,
+} from '@/constants/art'
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery'
 import { useTheme } from '@/lib/theme'
 import { cn } from '@/lib/utils'
@@ -90,7 +97,9 @@ export function CharacterSprite({
   useEffect(() => {
     const el = ref.current
     if (!el || !playable) return
-    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.1 })
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      threshold: 0.1,
+    })
     observer.observe(el)
     return () => observer.disconnect()
   }, [playable, runKey])
@@ -107,14 +116,15 @@ export function CharacterSprite({
         if (!cancelled) setLoadedSheet(sheet)
       },
       // 下载失败就一直显示封面
-      () => {},
+      () => {}
     )
     return () => {
       cancelled = true
     }
   }, [wantSheet, sheet])
 
-  const active = playable && pageVisible && inView && loadedSheet === sheet && finishedKey !== runKey
+  const active =
+    playable && pageVisible && inView && loadedSheet === sheet && finishedKey !== runKey
   const style: CSSProperties = {
     width: size,
     backgroundImage: `url(${active ? sheet : poster})`,
@@ -134,7 +144,7 @@ export function CharacterSprite({
       data-active={active}
       className={cn('ohm-sprite', className)}
       style={style}
-      onAnimationEnd={(e) => {
+      onAnimationEnd={e => {
         if (e.target === e.currentTarget && !repeat) setFinishedKey(runKey)
       }}
     />

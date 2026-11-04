@@ -1,5 +1,11 @@
 import { get, post } from '@/lib/request'
-import type { LogoutData, PasswordAuthUserDTO, PasswordLoginData, UserInfo, UserProfile } from '@/types/auth'
+import type {
+  LogoutData,
+  PasswordAuthUserDTO,
+  PasswordLoginData,
+  UserInfo,
+  UserProfile,
+} from '@/types/auth'
 
 // code 非 0 时 get / post 会抛出 ApiError（继承 Error，message 是后端的 msg），这里不用再判断
 

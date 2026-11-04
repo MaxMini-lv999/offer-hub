@@ -38,7 +38,7 @@ export function SearchBox({
     <form
       role="search"
       className="relative"
-      onSubmit={(e) => {
+      onSubmit={e => {
         e.preventDefault()
         onSearch(text.trim())
       }}
@@ -46,7 +46,7 @@ export function SearchBox({
       <IconMagnifier className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={e => setText(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
         enterKeyHint="search"

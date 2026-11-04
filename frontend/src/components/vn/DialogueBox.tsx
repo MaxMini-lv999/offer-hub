@@ -47,7 +47,7 @@ export function DialogueBox({
       className={cn(
         'relative mt-5 shrink-0 border border-dialogue-foreground/30 bg-dialogue/[0.88] text-dialogue-foreground backdrop-blur-md',
         onAdvance && 'cursor-pointer',
-        className,
+        className
       )}
     >
       <div className="absolute left-3 top-0 -translate-y-1/2 md:left-6">
@@ -66,7 +66,7 @@ export function DialogueBox({
             '[&_code]:bg-dialogue-foreground/15 [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.85em] [&_li]:ml-5 [&_ol]:list-decimal [&_ol]:space-y-1 [&_p+*]:mt-3 [&_ul]:list-disc [&_ul]:space-y-1',
             '[&_strong]:underline [&_strong]:decoration-dialogue-foreground/50 [&_strong]:underline-offset-4',
             // 解析里的小标题像章节说明，用小字
-            '[&_:is(h1,h2,h3,h4)]:font-sans [&_:is(h1,h2,h3,h4)]:text-meta [&_:is(h1,h2,h3,h4)]:tracking-widest [&_:is(h1,h2,h3,h4)]:opacity-80',
+            '[&_:is(h1,h2,h3,h4)]:font-sans [&_:is(h1,h2,h3,h4)]:text-meta [&_:is(h1,h2,h3,h4)]:tracking-widest [&_:is(h1,h2,h3,h4)]:opacity-80'
           )}
         >
           {children}
@@ -75,7 +75,7 @@ export function DialogueBox({
       {onAdvance && (
         <button
           type="button"
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation()
             onAdvance()
           }}

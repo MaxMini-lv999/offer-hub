@@ -33,7 +33,13 @@ const HOVER_CLOSE_DELAY = 150
  * 点赞和标记都是悲观更新，接口成功后才改缓存；游客点赞先打开登录弹窗，标记菜单只有登录后才显示。
  * 换题时由父组件用 key 重新挂载，上一题的操作报错不带过来
  */
-export function DetailHeader({ question, onInterview }: { question: Question; onInterview: () => void }) {
+export function DetailHeader({
+  question,
+  onInterview,
+}: {
+  question: Question
+  onInterview: () => void
+}) {
   const { isLoggedIn, setShowLoginDialog } = useLogin()
   const like = useLikeQuestion()
   const [likeEffect, playLikeEffect] = useLikeEffect()
@@ -52,7 +58,7 @@ export function DetailHeader({ question, onInterview }: { question: Question; on
     }
     // 不用 disabled：按钮变灰会打断按下的动效，请求进行中的点击直接忽略
     if (like.isPending) return
-    like.mutate(question, { onSuccess: (data) => playLikeEffect(data.liked) })
+    like.mutate(question, { onSuccess: data => playLikeEffect(data.liked) })
   }
 
   const actionError = like.isError
@@ -76,10 +82,14 @@ export function DetailHeader({ question, onInterview }: { question: Question; on
 
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-meta text-muted-foreground">
         <DifficultyLabel difficulty={question.difficulty} />
-        {localMark && <span className="border border-brand px-2 text-brand">本机标记：{MASTERY_LABELS[localMark]}</span>}
+        {localMark && (
+          <span className="border border-brand px-2 text-brand">
+            本机标记：{MASTERY_LABELS[localMark]}
+          </span>
+        )}
         {question.tags.length > 0 && (
           <span className="flex flex-wrap gap-2">
-            {question.tags.map((t) => (
+            {question.tags.map(t => (
               <span key={t} className="border px-2">
                 {t}
               </span>
@@ -115,7 +125,7 @@ export function DetailHeader({ question, onInterview }: { question: Question; on
           <TagMenu
             current={userTag}
             pending={tag.isPending}
-            onChange={(next) => tag.mutate({ question_id: question.question_id, tag: next })}
+            onChange={next => tag.mutate({ question_id: question.question_id, tag: next })}
           />
         )}
       </div>
@@ -131,9 +141,11 @@ export function DetailHeader({ question, onInterview }: { question: Question; on
 
 /** 标题右侧的掌握状态徽章：已掌握绿 / 晚点再刷橙 / 未掌握红，未标记不显示 */
 function UserTagBadge({ tag }: { tag: Exclude<UserTag, 0> }) {
-  const option = USER_TAG_OPTIONS.find((opt) => opt.value === tag)
+  const option = USER_TAG_OPTIONS.find(opt => opt.value === tag)
   if (!option) return null
-  return <span className={cn('shrink-0 border px-2 text-meta', option.className)}>{option.label}</span>
+  return (
+    <span className={cn('shrink-0 border px-2 text-meta', option.className)}>{option.label}</span>
+  )
 }
 
 /**
@@ -156,7 +168,7 @@ function TagMenu({
   // 悬停打开前的焦点，收起时还回去
   const focusBeforeHover = useRef<Element | null>(null)
   const closeTimer = useRef<number>()
-  const currentLabel = USER_TAG_OPTIONS.find((opt) => opt.value === current)?.label ?? '未标记'
+  const currentLabel = USER_TAG_OPTIONS.find(opt => opt.value === current)?.label ?? '未标记'
 
   function cancelClose() {
     window.clearTimeout(closeTimer.current)
@@ -202,7 +214,7 @@ function TagMenu({
           onPointerEnter={handlePointerEnter}
           onPointerLeave={handlePointerLeave}
           // 悬停已经展开了，再点一下不要收起：阻止默认行为后菜单组件就不切换开关（还要配合下面的 onPointerDownOutside）
-          onPointerDown={(e) => {
+          onPointerDown={e => {
             if (e.pointerType === 'mouse' && open) e.preventDefault()
           }}
           className="data-[state=open]:border-foreground"
@@ -218,17 +230,19 @@ function TagMenu({
         onPointerEnter={handlePointerEnter}
         onPointerLeave={handlePointerLeave}
         // 按钮在菜单外面，非模态菜单默认会把按下按钮当成「点外面」收起；按钮的开关交给上面的 onPointerDown
-        onPointerDownOutside={(e) => {
-          if (triggerRef.current?.contains(e.detail.originalEvent.target as Node)) e.preventDefault()
+        onPointerDownOutside={e => {
+          if (triggerRef.current?.contains(e.detail.originalEvent.target as Node))
+            e.preventDefault()
         }}
-        onCloseAutoFocus={(e) => {
+        onCloseAutoFocus={e => {
           if (!openedByHover.current) return
           e.preventDefault()
-          if (focusBeforeHover.current instanceof HTMLElement) focusBeforeHover.current.focus({ preventScroll: true })
+          if (focusBeforeHover.current instanceof HTMLElement)
+            focusBeforeHover.current.focus({ preventScroll: true })
         }}
       >
         <DropdownMenuRadioGroup value={String(current)} onValueChange={select}>
-          {USER_TAG_OPTIONS.map((opt) => (
+          {USER_TAG_OPTIONS.map(opt => (
             <DropdownMenuRadioItem key={opt.value} value={String(opt.value)} className="gap-2">
               <span aria-hidden className={cn('h-1.5 w-1.5 shrink-0', opt.dotClassName)} />
               {opt.label}

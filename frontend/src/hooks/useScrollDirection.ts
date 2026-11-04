@@ -6,7 +6,11 @@ export type ScrollDirection = 'up' | 'down'
  * 监听整页的滚动方向，每累计滚动超过 threshold 像素回调一次，触控板的细小抖动不会来回切换；
  * 回到页面顶部时算作向上。enabled 为 false 时不监听
  */
-export function useScrollDirection(onChange: (direction: ScrollDirection) => void, enabled = true, threshold = 8) {
+export function useScrollDirection(
+  onChange: (direction: ScrollDirection) => void,
+  enabled = true,
+  threshold = 8
+) {
   // 回调放 ref 里，父组件每次渲染传新函数也不用重新订阅
   const callbackRef = useRef(onChange)
   useEffect(() => {

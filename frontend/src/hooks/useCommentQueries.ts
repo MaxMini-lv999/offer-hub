@@ -1,7 +1,17 @@
-import { useInfiniteQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query'
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+  type InfiniteData,
+} from '@tanstack/react-query'
 import { SUB_COMMENT_PAGE_SIZE } from '@/constants/comment'
 import { LIKE_TARGET_COMMENT } from '@/constants/interaction'
-import { getCommentList, postAddComment, postDeleteComment, postUpdateComment } from '@/services/comment'
+import {
+  getCommentList,
+  postAddComment,
+  postDeleteComment,
+  postUpdateComment,
+} from '@/services/comment'
 import { toggleLike } from '@/services/interaction'
 import type {
   AddCommentParams,
@@ -52,7 +62,11 @@ export function useComments(params: CommentListQuery, enabled: boolean = true) {
  * 某条顶层评论下的子评论，按时间正序，每页 SUB_COMMENT_PAGE_SIZE 条。
  * 顶层评论列表里已经附带了第一页（请求时 sub_comment_size 用的同一个数），直接当作第一页，展开时不用再请求
  */
-export function useSubComments(targetType: CommentTargetType, targetId: string, parent: CommentItem) {
+export function useSubComments(
+  targetType: CommentTargetType,
+  targetId: string,
+  parent: CommentItem
+) {
   const firstPage: CommentListData = { total: parent.sub_comment_total, list: parent.sub_comments }
   return useInfiniteQuery({
     queryKey: queryKeys.list({
@@ -72,7 +86,8 @@ export function useSubComments(targetType: CommentTargetType, targetId: string, 
     initialPageParam: 1,
     getNextPageParam: getNextPage,
     // 附带的子评论是空的就不用它，正常请求
-    initialData: parent.sub_comments.length > 0 ? { pages: [firstPage], pageParams: [1] } : undefined,
+    initialData:
+      parent.sub_comments.length > 0 ? { pages: [firstPage], pageParams: [1] } : undefined,
   })
 }
 
@@ -82,7 +97,9 @@ export function useAddComment() {
   return useMutation({
     mutationFn: (data: AddCommentParams) => postAddComment(data),
     onSuccess: (_, variables) =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.target(variables.target_type, variables.target_id) }),
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.target(variables.target_type, variables.target_id),
+      }),
   })
 }
 
@@ -108,8 +125,12 @@ export function useDeleteComment() {
 }
 
 /** 在列表里找到 commentId（顶层或嵌在 sub_comments 里的子评论）并合并 patch，其余评论保持原引用 */
-function patchComment(list: CommentItem[], commentId: string, patch: Partial<CommentItem>): CommentItem[] {
-  return list.map((comment) => {
+function patchComment(
+  list: CommentItem[],
+  commentId: string,
+  patch: Partial<CommentItem>
+): CommentItem[] {
+  return list.map(comment => {
     if (comment.comment_id === commentId) return { ...comment, ...patch }
     if (comment.sub_comments.length === 0) return comment
     return { ...comment, sub_comments: patchComment(comment.sub_comments, commentId, patch) }
@@ -123,18 +144,24 @@ function patchComment(list: CommentItem[], commentId: string, patch: Partial<Com
 export function useThumbsUpComment() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (comment: CommentItem) => toggleLike(LIKE_TARGET_COMMENT, comment.comment_id, !comment.user_liked),
+    mutationFn: (comment: CommentItem) =>
+      toggleLike(LIKE_TARGET_COMMENT, comment.comment_id, !comment.user_liked),
     onSuccess: ({ liked, count }, comment) => {
-      queryClient.setQueriesData<InfiniteData<CommentListData>>({ queryKey: queryKeys.lists() }, (old) =>
-        old
-          ? {
-              ...old,
-              pages: old.pages.map((page) => ({
-                ...page,
-                list: patchComment(page.list, comment.comment_id, { user_liked: liked, thumbs_up: count }),
-              })),
-            }
-          : old,
+      queryClient.setQueriesData<InfiniteData<CommentListData>>(
+        { queryKey: queryKeys.lists() },
+        old =>
+          old
+            ? {
+                ...old,
+                pages: old.pages.map(page => ({
+                  ...page,
+                  list: patchComment(page.list, comment.comment_id, {
+                    user_liked: liked,
+                    thumbs_up: count,
+                  }),
+                })),
+              }
+            : old
       )
     },
   })

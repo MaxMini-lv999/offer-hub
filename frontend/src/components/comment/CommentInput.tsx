@@ -20,7 +20,7 @@ export function CommentInput({ className }: { className?: string }) {
         onClick={() => setShowLoginDialog(true)}
         className={cn(
           'flex min-h-[88px] w-full items-start justify-between gap-4 border border-input px-3 py-2 text-left text-body text-muted-foreground transition-colors duration-micro hover:border-foreground',
-          className,
+          className
         )}
       >
         <span>写下你的想法…</span>
@@ -34,7 +34,9 @@ export function CommentInput({ className }: { className?: string }) {
       label="发表评论"
       placeholder="写下你的想法…"
       submitLabel="发表"
-      onSubmit={(content) => addComment.mutateAsync({ target_type: targetType, target_id: targetId, content })}
+      onSubmit={content =>
+        addComment.mutateAsync({ target_type: targetType, target_id: targetId, content })
+      }
       className={className}
     />
   )

@@ -15,7 +15,10 @@ export interface VNKeyHandlers {
 
 /** 焦点在输入框里时不抢按键 */
 function isEditable(target: EventTarget | null) {
-  return target instanceof HTMLElement && !!target.closest('input, textarea, select, [contenteditable="true"]')
+  return (
+    target instanceof HTMLElement &&
+    !!target.closest('input, textarea, select, [contenteditable="true"]')
+  )
 }
 
 /** 焦点在按钮、链接上时空格和回车交给它们自己处理 */

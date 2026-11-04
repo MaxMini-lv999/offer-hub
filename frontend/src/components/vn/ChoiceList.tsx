@@ -9,15 +9,24 @@ export interface Choice {
  * VN 选项：真实按钮，前面标出数字键；悬停和键盘聚焦时用天青高亮。
  * drawer 为 true 时（手机端）从底部滑入，触控区不小于 44px
  */
-export function ChoiceList({ choices, drawer = false, className }: { choices: Choice[]; drawer?: boolean; className?: string }) {
+export function ChoiceList({
+  choices,
+  drawer = false,
+  className,
+}: {
+  choices: Choice[]
+  drawer?: boolean
+  className?: string
+}) {
   return (
     <ol
       aria-label="选项"
       className={cn(
         'flex flex-col gap-2',
-        drawer && 'border-t border-dialogue-foreground/30 bg-dialogue/[0.88] p-3 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-panel',
+        drawer &&
+          'border-t border-dialogue-foreground/30 bg-dialogue/[0.88] p-3 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-panel',
         !drawer && 'animate-in fade-in slide-in-from-bottom-2 duration-panel',
-        className,
+        className
       )}
     >
       {choices.map((choice, index) => (

@@ -12,7 +12,9 @@ function CodeBlock({ children }: { children?: ReactNode }) {
   const [copied, setCopied] = useState(false)
 
   // rehype-highlight 会在 <code> 上加 language-xxx 的 class
-  const codeClass = isValidElement<{ className?: string }>(children) ? (children.props.className ?? '') : ''
+  const codeClass = isValidElement<{ className?: string }>(children)
+    ? (children.props.className ?? '')
+    : ''
   const language = /language-([\w+#-]+)/.exec(codeClass)?.[1]
 
   useEffect(() => {
@@ -81,7 +83,15 @@ const components: Components = {
  * 正文最大宽度约 72 个字符；代码高亮配色在 index.css，跟随亮暗主题。
  * plain 时不套文章排版，字体颜色都继承外层，给 VN 对话框里的台词用
  */
-export function Markdown({ content, plain = false, className }: { content: string; plain?: boolean; className?: string }) {
+export function Markdown({
+  content,
+  plain = false,
+  className,
+}: {
+  content: string
+  plain?: boolean
+  className?: string
+}) {
   if (plain) {
     return (
       <div className={className}>
@@ -100,10 +110,14 @@ export function Markdown({ content, plain = false, className }: { content: strin
         'prose-code:bg-muted prose-code:px-1 prose-code:font-normal prose-code:before:content-none prose-code:after:content-none',
         'prose-table:border prose-th:whitespace-nowrap prose-th:border prose-th:bg-muted prose-th:px-3 prose-th:py-2 prose-td:border prose-td:px-3 prose-td:py-2',
         'prose-img:rounded-none',
-        className,
+        className
       )}
     >
-      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]} components={components}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeHighlight]}
+        components={components}
+      >
         {content}
       </ReactMarkdown>
     </div>

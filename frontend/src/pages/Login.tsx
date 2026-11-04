@@ -44,7 +44,7 @@ export function LoginPage({ mode }: { mode: AuthMode }) {
         <p className="text-meta text-muted-foreground">登录后可查看完整题解、同步掌握情况</p>
       </header>
 
-      <AuthForm mode={mode} onModeChange={(next) => navigate(`/${next}`, { replace: true })} />
+      <AuthForm mode={mode} onModeChange={next => navigate(`/${next}`, { replace: true })} />
     </div>
   )
 

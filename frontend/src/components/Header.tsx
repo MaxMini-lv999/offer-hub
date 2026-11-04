@@ -21,7 +21,11 @@ import type { UserInfo } from '@/types/auth'
 /** 顶部导航项；题库页从题库目录进入，所以也算在「题库」下 */
 const NAV_ITEMS = [
   { to: '/', label: '首页', isActive: (path: string) => path === '/' },
-  { to: '/collections', label: '题库', isActive: (path: string) => path === '/collections' || path.startsWith('/bank/') },
+  {
+    to: '/collections',
+    label: '题库',
+    isActive: (path: string) => path === '/collections' || path.startsWith('/bank/'),
+  },
   { to: '/questions', label: '全部题目', isActive: (path: string) => path === '/questions' },
   { to: '/hot', label: '热门', isActive: (path: string) => path === '/hot' },
 ]
@@ -48,14 +52,23 @@ export function Header() {
     <header className="sticky top-0 z-40 h-14 border-b bg-background">
       {/* 手机上两侧按内容宽度、导航在剩余空间居中；宽屏两侧等宽，导航正好在页面正中 */}
       <div className="mx-auto grid h-full max-w-[1200px] grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:grid-cols-[1fr_auto_1fr]">
-        <Link to="/" aria-label="Offer Hub 首页" className="flex items-center gap-2 justify-self-start whitespace-nowrap">
+        <Link
+          to="/"
+          aria-label="Offer Hub 首页"
+          className="flex items-center gap-2 justify-self-start whitespace-nowrap"
+        >
           <BrandMark />
           {/* 手机上放不下，只留标识 */}
-          <span className="hidden font-title text-heading font-semibold leading-none sm:inline">Offer Hub</span>
+          <span className="hidden font-title text-heading font-semibold leading-none sm:inline">
+            Offer Hub
+          </span>
         </Link>
 
-        <nav aria-label="主导航" className="flex h-full gap-4 justify-self-center whitespace-nowrap sm:gap-6">
-          {NAV_ITEMS.map((item) => {
+        <nav
+          aria-label="主导航"
+          className="flex h-full gap-4 justify-self-center whitespace-nowrap sm:gap-6"
+        >
+          {NAV_ITEMS.map(item => {
             const active = item.isActive(pathname)
             return (
               <Link
@@ -64,7 +77,7 @@ export function Header() {
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'group relative flex h-full items-center font-medium transition-colors',
-                  active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+                  active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 {item.label}
@@ -73,7 +86,7 @@ export function Header() {
                   aria-hidden
                   className={cn(
                     'absolute inset-x-0 -bottom-px h-0.5',
-                    active ? 'bg-foreground' : 'bg-transparent group-hover:bg-muted-foreground',
+                    active ? 'bg-foreground' : 'bg-transparent group-hover:bg-muted-foreground'
                   )}
                 />
               </Link>
@@ -89,7 +102,11 @@ export function Header() {
             title={theme === 'dark' ? '切换到亮色主题' : '切换到暗色主题'}
             className="flex h-9 w-9 shrink-0 items-center justify-center transition-colors duration-micro ease-standard hover:bg-muted"
           >
-            {theme === 'dark' ? <IconSun className="size-[18px]" /> : <IconMoon className="size-[18px]" />}
+            {theme === 'dark' ? (
+              <IconSun className="size-[18px]" />
+            ) : (
+              <IconMoon className="size-[18px]" />
+            )}
           </button>
           <AccountEntry />
         </div>
@@ -111,7 +128,7 @@ function AccountEntry() {
   if (!isLoggedIn) {
     return (
       <button
-        ref={(el) => {
+        ref={el => {
           if (el && focusLoginRef.current) {
             focusLoginRef.current = false
             el.focus()
@@ -174,7 +191,7 @@ function UserMenu({ userInfo, onLogout }: { userInfo: UserInfo; onLogout: () => 
         <DropdownMenuSeparator />
         <DropdownMenuItem
           disabled={leaving}
-          onSelect={(e) => {
+          onSelect={e => {
             // 不让菜单立刻关掉：登出接口返回前留着菜单显示进度，返回后整个菜单随登录状态卸载
             e.preventDefault()
             setLeaving(true)

@@ -1,11 +1,26 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { forwardRef, useId, useRef, useState, type ComponentProps, type FormEvent, type KeyboardEvent } from 'react'
+import {
+  forwardRef,
+  useId,
+  useRef,
+  useState,
+  type ComponentProps,
+  type FormEvent,
+  type KeyboardEvent,
+} from 'react'
 import { useForm } from 'react-hook-form'
 import IconEye from '~icons/solar/eye-linear'
 import IconEyeClosed from '~icons/solar/eye-closed-linear'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import type { AuthMode } from '@/constants/auth'
 import { useLogin } from '@/hooks/useLogin'
@@ -28,10 +43,13 @@ function createSchema(mode: AuthMode) {
       password: z
         .string()
         .min(6, '密码至少 6 位')
-        .refine((value) => encoder.encode(value).length <= PASSWORD_MAX_BYTES, '密码太长了，最多 72 个英文字符'),
+        .refine(
+          value => encoder.encode(value).length <= PASSWORD_MAX_BYTES,
+          '密码太长了，最多 72 个英文字符'
+        ),
       confirm: z.string(),
     })
-    .refine((values) => mode === 'login' || values.password === values.confirm, {
+    .refine(values => mode === 'login' || values.password === values.confirm, {
       message: '两次输入的密码不一致',
       path: ['confirm'],
     })
@@ -82,12 +100,12 @@ export function AuthForm({
   return (
     <div className="space-y-5">
       <div role="tablist" aria-label="登录或注册" className="grid grid-cols-2 border-b">
-        {MODES.map((item) => {
+        {MODES.map(item => {
           const selected = item === mode
           return (
             <button
               key={item}
-              ref={(el) => {
+              ref={el => {
                 tabRefs.current[item] = el
               }}
               type="button"
@@ -102,7 +120,7 @@ export function AuthForm({
                 '-mb-px border-b-2 pb-3 pt-2 text-center font-medium transition-colors duration-micro ease-standard',
                 selected
                   ? 'border-foreground text-foreground'
-                  : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground',
+                  : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground'
               )}
             >
               {MODE_LABELS[item]}
@@ -119,7 +137,15 @@ export function AuthForm({
   )
 }
 
-function ModeForm({ mode, autoFocus, onSuccess }: { mode: AuthMode; autoFocus: boolean; onSuccess?: () => void }) {
+function ModeForm({
+  mode,
+  autoFocus,
+  onSuccess,
+}: {
+  mode: AuthMode
+  autoFocus: boolean
+  onSuccess?: () => void
+}) {
   const { login } = useLogin()
   const form = useForm<AuthValues>({
     resolver: zodResolver(createSchema(mode)),
@@ -141,7 +167,9 @@ function ModeForm({ mode, autoFocus, onSuccess }: { mode: AuthMode; autoFocus: b
     } catch (err) {
       const reason = err instanceof ApiError ? err.message : '出了点问题，请稍后再试'
       if (registered) {
-        form.setError('root', { message: `注册成功，但自动登录失败：${reason}。请切到「登录」再试一次` })
+        form.setError('root', {
+          message: `注册成功，但自动登录失败：${reason}。请切到「登录」再试一次`,
+        })
         return
       }
       form.setError('root', { message: reason })
@@ -212,7 +240,11 @@ function ModeForm({ mode, autoFocus, onSuccess }: { mode: AuthMode; autoFocus: b
               <FormItem>
                 <FormLabel>确认密码</FormLabel>
                 <FormControl>
-                  <PasswordInput autoComplete="new-password" placeholder="再输入一次密码" {...field} />
+                  <PasswordInput
+                    autoComplete="new-password"
+                    placeholder="再输入一次密码"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -230,7 +262,11 @@ function ModeForm({ mode, autoFocus, onSuccess }: { mode: AuthMode; autoFocus: b
 
         {/* 接口报错不用红色，墨色竖线 + 抖一下；每次提交失败换 key 重播 */}
         {errors.root && (
-          <p key={submitCount} role="alert" className="ohm-retry border-l-2 border-foreground pl-3 text-meta">
+          <p
+            key={submitCount}
+            role="alert"
+            className="ohm-retry border-l-2 border-foreground pl-3 text-meta"
+          >
             {errors.root.message}
           </p>
         )}
@@ -245,10 +281,15 @@ const PasswordInput = forwardRef<HTMLInputElement, Omit<ComponentProps<'input'>,
     const [visible, setVisible] = useState(false)
     return (
       <div className="relative">
-        <Input ref={ref} type={visible ? 'text' : 'password'} className={cn('pr-10', className)} {...props} />
+        <Input
+          ref={ref}
+          type={visible ? 'text' : 'password'}
+          className={cn('pr-10', className)}
+          {...props}
+        />
         <button
           type="button"
-          onClick={() => setVisible((v) => !v)}
+          onClick={() => setVisible(v => !v)}
           aria-label="显示密码"
           aria-pressed={visible}
           className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors duration-micro ease-standard hover:text-foreground"
@@ -257,6 +298,6 @@ const PasswordInput = forwardRef<HTMLInputElement, Omit<ComponentProps<'input'>,
         </button>
       </div>
     )
-  },
+  }
 )
 PasswordInput.displayName = 'PasswordInput'

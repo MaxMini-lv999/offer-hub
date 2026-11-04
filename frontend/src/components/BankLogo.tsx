@@ -40,11 +40,17 @@ const BANK_ICONS: {
 
 /** 题库图标：方形，默认 40px，按题库名显示对应的品牌 logo 或图标，匹配不上时用书本 */
 export function BankLogo({ name, className }: { name: string; className?: string }) {
-  const rule = BANK_ICONS.find((r) => r.pattern.test(name))
+  const rule = BANK_ICONS.find(r => r.pattern.test(name))
   const Icon = rule?.icon ?? IconBook
 
   return (
-    <span aria-hidden className={cn('flex h-10 w-10 shrink-0 items-center justify-center border bg-muted', className)}>
+    <span
+      aria-hidden
+      className={cn(
+        'flex h-10 w-10 shrink-0 items-center justify-center border bg-muted',
+        className
+      )}
+    >
       {/* 图标默认占方框边长的一半：卡片里 40px → 20px，题库页头部 56px → 28px */}
       <Icon className={rule?.wide ? 'size-3/4' : 'size-1/2'} style={{ color: rule?.color }} />
     </span>

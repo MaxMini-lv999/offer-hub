@@ -13,7 +13,9 @@ function parseDifficulty(raw: string | null): Difficulty | undefined {
 
 /** URL 里的 mastery（掌握状态）只认 1/2/3，其他值当作不过滤 */
 function parseUserTag(raw: string | null): Exclude<UserTag, 0> | undefined {
-  return raw === '1' || raw === '2' || raw === '3' ? (Number(raw) as Exclude<UserTag, 0>) : undefined
+  return raw === '1' || raw === '2' || raw === '3'
+    ? (Number(raw) as Exclude<UserTag, 0>)
+    : undefined
 }
 
 /** URL 里的 page 缺失或不是正整数时回退到第 1 页 */
@@ -24,7 +26,7 @@ function parsePage(raw: string | null) {
 
 /** URL 里的 sort 不认识时回退到默认排序 */
 function parseSort(raw: string | null) {
-  return SORT_OPTIONS.find((opt) => opt.value === raw) ?? SORT_OPTIONS[0]
+  return SORT_OPTIONS.find(opt => opt.value === raw) ?? SORT_OPTIONS[0]
 }
 
 /**
@@ -58,54 +60,59 @@ export function useQuestionFilters(bankId?: string) {
   const updateFilters = useCallback(
     (mutate: (next: URLSearchParams) => void) => {
       setSearchParams(
-        (prev) => {
+        prev => {
           const next = new URLSearchParams(prev)
           mutate(next)
           next.delete('page')
           return next
         },
-        { replace: true, preventScrollReset: true },
+        { replace: true, preventScrollReset: true }
       )
     },
-    [setSearchParams],
+    [setSearchParams]
   )
 
   // SearchBox 的防抖 effect 依赖 onSearch，要保持引用不变
   const setKeyword = useCallback(
-    (value: string) => updateFilters((next) => (value ? next.set('keyword', value) : next.delete('keyword'))),
-    [updateFilters],
+    (value: string) =>
+      updateFilters(next => (value ? next.set('keyword', value) : next.delete('keyword'))),
+    [updateFilters]
   )
 
   function setDifficulty(value?: Difficulty) {
-    updateFilters((next) => (value ? next.set('difficulty', String(value)) : next.delete('difficulty')))
+    updateFilters(next =>
+      value ? next.set('difficulty', String(value)) : next.delete('difficulty')
+    )
   }
 
   function setUserTag(value?: Exclude<UserTag, 0>) {
-    updateFilters((next) => (value ? next.set('mastery', String(value)) : next.delete('mastery')))
+    updateFilters(next => (value ? next.set('mastery', String(value)) : next.delete('mastery')))
   }
 
   function setSort(value: string) {
-    updateFilters((next) => (value === SORT_OPTIONS[0].value ? next.delete('sort') : next.set('sort', value)))
+    updateFilters(next =>
+      value === SORT_OPTIONS[0].value ? next.delete('sort') : next.set('sort', value)
+    )
   }
 
   function addTag(tag: string) {
     if (tags.includes(tag)) return
-    updateFilters((next) => next.append('tag', tag))
+    updateFilters(next => next.append('tag', tag))
   }
 
   function removeTag(tag: string) {
-    updateFilters((next) => {
+    updateFilters(next => {
       next.delete('tag')
-      tags.filter((t) => t !== tag).forEach((t) => next.append('tag', t))
+      tags.filter(t => t !== tag).forEach(t => next.append('tag', t))
     })
   }
 
   function clearTags() {
-    updateFilters((next) => next.delete('tag'))
+    updateFilters(next => next.delete('tag'))
   }
 
   function clearFilters() {
-    updateFilters((next) => {
+    updateFilters(next => {
       next.delete('keyword')
       next.delete('difficulty')
       next.delete('tag')
@@ -115,7 +122,7 @@ export function useQuestionFilters(bankId?: string) {
 
   function setPage(target: number) {
     setSearchParams(
-      (prev) => {
+      prev => {
         const next = new URLSearchParams(prev)
         if (target > 1) {
           next.set('page', String(target))
@@ -124,7 +131,7 @@ export function useQuestionFilters(bankId?: string) {
         }
         return next
       },
-      { replace: true, preventScrollReset: true },
+      { replace: true, preventScrollReset: true }
     )
   }
 

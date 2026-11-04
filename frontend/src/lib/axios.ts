@@ -14,7 +14,7 @@ export function setToken(token: string | null) {
   } else {
     localStorage.removeItem(TOKEN_KEY)
   }
-  tokenListeners.forEach((listener) => listener())
+  tokenListeners.forEach(listener => listener())
 }
 
 /** 订阅 token 变化，给 useSyncExternalStore 用；其他标签页登录或登出时也会触发 */
@@ -44,7 +44,7 @@ const http = axios.create({
   paramsSerializer: { indexes: null },
 })
 
-http.interceptors.request.use((config) => {
+http.interceptors.request.use(config => {
   const token = getToken()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -53,7 +53,7 @@ http.interceptors.request.use((config) => {
 })
 
 http.interceptors.response.use(
-  (res) => {
+  res => {
     // 后端约定 token 失效时 HTTP 仍是 200，靠 body 里的 code 401 区分
     if (res.data?.code === 401) {
       setToken(null)
@@ -65,7 +65,7 @@ http.interceptors.response.use(
       setToken(null)
     }
     return Promise.reject(err)
-  },
+  }
 )
 
 export default http
