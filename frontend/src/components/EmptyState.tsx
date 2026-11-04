@@ -16,16 +16,19 @@ export function EmptyState({
   icon,
   pose,
   poseSize,
+  animate = false,
   title,
   hint,
   action,
   className,
 }: {
   icon?: ReactNode
-  /** 澜汐的姿势，只显示静态封面：空状态和出错都不是进行中的状态，不放循环动画 */
+  /** 澜汐的姿势。默认只显示静态封面：空状态和出错都不是进行中的状态，不放循环动画 */
   pose?: MotionName
   /** 不传时桌面 160px、手机 120px */
   poseSize?: number
+  /** 播放动作：只给真的在进行中的状态用（如重试请求发出去了），状态结束就改回 false */
+  animate?: boolean
   title: string
   /** 标题下面一行补充说明 */
   hint?: ReactNode
@@ -39,7 +42,7 @@ export function EmptyState({
       className={cn('flex flex-col items-center gap-4 border px-4 py-12 text-center', className)}
     >
       {pose ? (
-        <CharacterSprite name={pose} size={poseSize ?? (isDesktop ? 160 : 120)} still />
+        <CharacterSprite name={pose} size={poseSize ?? (isDesktop ? 160 : 120)} still={!animate} />
       ) : (
         <span className="text-muted-foreground">{icon}</span>
       )}
@@ -53,31 +56,41 @@ export function EmptyState({
 }
 
 /**
- * 出错状态：错误信息 + 重试按钮。withArt 时配澜汐拿扳手修理的 Q 版（静态）；
- * 点重试后查询回到加载中，由各处的骨架屏接手。天青只用在系统提示那一行，重试按钮仍是墨色
+ * 出错状态：错误信息 + 重试按钮。withArt 时配澜汐拿扳手修理的 Q 版：平时是静态封面，
+ * retrying（重试请求进行中、出错状态还留在屏幕上时）循环播修理，请求结束就停。
+ * 大多数查询点重试后会回到加载中，由各处的骨架屏接手，用不上 retrying。天青只用在系统提示那一行，重试按钮仍是墨色
  */
 export function ErrorState({
   message,
   onRetry,
   withArt = false,
+  retrying = false,
   className,
 }: {
   message: string
   onRetry: () => void
   withArt?: boolean
+  retrying?: boolean
   className?: string
 }) {
   return (
     <EmptyState
       icon={<IconAlertCircle className="size-8" />}
       pose={withArt ? 'repair' : undefined}
+      animate={retrying}
       title={`加载失败：${message}`}
-      hint={withArt && <span className="text-system">请检查网络连接后重试</span>}
+      hint={
+        withArt && (
+          <span className="text-system">
+            {retrying ? '正在重新连接……' : '请检查网络连接后重试'}
+          </span>
+        )
+      }
       className={className}
       action={
-        <Button variant="outline" size="sm" onClick={onRetry}>
+        <Button variant="outline" size="sm" onClick={onRetry} disabled={retrying}>
           <IconRefresh className="size-4" />
-          重试
+          {retrying ? '重试中…' : '重试'}
         </Button>
       }
     />

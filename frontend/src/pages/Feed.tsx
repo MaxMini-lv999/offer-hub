@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import IconRefresh from '~icons/solar/refresh-linear'
+import { CharacterSprite } from '@/components/art'
 import { Comments } from '@/components/comment/Comments'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
 import { CardSkeleton, FEED_COLUMN, FeedQuestionCard } from '@/components/feed/FeedCard'
@@ -27,12 +28,15 @@ import {
   rebuildRecommendSession,
   saveRecommendSession,
 } from '@/lib/feedSession'
+import { showGuideCue } from '@/lib/guideCue'
 import { cn } from '@/lib/utils'
 
 /** 离队尾还剩这么几题时加载下一批 */
 const PRELOAD_TAIL = 3
 /** 刷新、打开分享链接时，最多往后翻这么多页找 URL 里的题，找不到就把它放到队首 */
 const RESTORE_MAX_PAGES = 10
+/** 这一轮每看完这么多道题，澜汐在提示条里庆祝一次 */
+const MILESTONE_EVERY = 10
 const NO_EXCLUDE: string[] = []
 
 /**
@@ -242,6 +246,8 @@ type Position = { id: string } | { index: number }
  * - 预加载：舞台挂着当前题前后各 2 张卡片，详情跟着加载；离队尾还剩 PRELOAD_TAIL 题时取下一批
  * - 找回位置：URL 里的题不在已加载的队列里就往后翻页找，翻 RESTORE_MAX_PAGES 页还没有，交给 onMissing 放到队首
  * - 当前题写回 URL；onView 在每次换到一道题时调用（推荐模式记「看过」）
+ * - 里程碑：这一轮（这个队列挂载以来）每看完 MILESTONE_EVERY 道不同的题，澜汐庆祝一次。离开一道题才算看完，
+ *   来回翻同一道不重复算；每次切题不播任何角色动作
  */
 function FeedQueue({
   source,
@@ -312,12 +318,20 @@ function FeedQueue({
     if (index >= queue.length - PRELOAD_TAIL) void pages.fetchNextPage()
   }, [searching, index, queue.length, pages])
 
-  // 当前题写回 URL，记「看过」
+  // 当前题写回 URL，记「看过」；离开的那道算看完，满 MILESTONE_EVERY 道庆祝
   const currentId = current?.question_id
+  const leftId = useRef<string>()
+  const finished = useRef(new Set<string>())
   useEffect(() => {
     if (!currentId) return
     if (currentId !== urlId) setUrlId(currentId)
     onView?.(currentId)
+    const left = leftId.current
+    leftId.current = currentId
+    if (!left || left === currentId || finished.current.has(left)) return
+    finished.current.add(left)
+    const n = finished.current.size
+    if (n % MILESTONE_EVERY === 0) showGuideCue('celebrate', `这一轮已经刷完 ${n} 题，继续保持`)
     // 只在换题时执行；urlId 跟着这里变，不用依赖
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentId])
@@ -353,13 +367,22 @@ function FeedQueue({
     )
   }
 
-  const tailState: TailState = nextPageFailed ? 'error' : pages.hasNextPage ? 'loading' : 'end'
+  // 下一批加载失败后点了重试、请求还没回来：出错状态留在屏幕上，澜汐循环修理
+  const retryingNextPage = pages.isFetchNextPageError && pages.isFetchingNextPage
+  const tailState: TailState = nextPageFailed
+    ? 'error'
+    : retryingNextPage
+      ? 'retrying'
+      : pages.hasNextPage
+        ? 'loading'
+        : 'end'
   const count = queue.length + 1
 
   function edgeHint(dir: FeedDirection) {
     if (dir === -1) return '已经是第一题了'
     if (tailState === 'loading') return '下一批题目正在加载'
     if (tailState === 'error') return '下一批题目加载失败，点重试'
+    if (tailState === 'retrying') return '正在重新加载下一批题目'
     return queue.length > 0 ? '已经到底了' : '没有更多题目了'
   }
 
@@ -428,9 +451,12 @@ function FeedQueue({
   )
 }
 
-type TailState = 'loading' | 'error' | 'end'
+type TailState = 'loading' | 'error' | 'retrying' | 'end'
 
-/** 队尾卡片：加载中 / 加载失败 / 结束页 */
+/**
+ * 队尾卡片：加载中 / 加载失败 / 重试中 / 结束页。
+ * 加载中澜汐托腮思考、重试中拿扳手修理，都是循环动作，只在这张卡片是这个状态时挂着，请求结束就换掉
+ */
 function TailCard({
   state,
   message,
@@ -448,13 +474,21 @@ function TailCard({
         {state === 'loading' && (
           <div>
             <CardSkeleton />
-            <p role="status" className="mt-4 text-center text-meta text-muted-foreground">
-              正在加载下一批题目…
-            </p>
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <CharacterSprite name="thinking" size={64} />
+              <p role="status" className="text-meta text-muted-foreground">
+                正在加载下一批题目…
+              </p>
+            </div>
           </div>
         )}
-        {state === 'error' && (
-          <ErrorState message={message ?? '网络错误'} onRetry={onRetry} withArt />
+        {(state === 'error' || state === 'retrying') && (
+          <ErrorState
+            message={message ?? '网络错误'}
+            onRetry={onRetry}
+            withArt
+            retrying={state === 'retrying'}
+          />
         )}
         {state === 'end' && end}
       </div>

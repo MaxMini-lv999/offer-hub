@@ -6,6 +6,7 @@ import IconEye from '~icons/solar/eye-linear'
 import IconEyeClosed from '~icons/solar/eye-closed-linear'
 import IconFileText from '~icons/solar/file-text-linear'
 import IconRefresh from '~icons/solar/refresh-linear'
+import { CharacterSprite } from '@/components/art'
 import { GuestFade } from '@/components/auth/GuestFade'
 import { DifficultyLabel } from '@/components/DifficultyLabel'
 import { TagMenu } from '@/components/detail/DetailHeader'
@@ -225,14 +226,20 @@ function QuestionBody({
           </button>
         )}
         <div id={answerId} hidden={!revealed}>
-          <div className="flex items-baseline justify-between gap-4">
+          <div className="flex items-end gap-3">
+            {/* 每次展开都重新挂载，澜汐翻书讲解播一次，之后停在封面；收起时卸载 */}
+            {revealed && (
+              <span className="flex shrink-0 bg-dialogue-foreground">
+                <CharacterSprite name="explain" size={56} loop={false} />
+              </span>
+            )}
             <h3 className="font-title text-heading font-semibold">答案解析</h3>
             <button
               type="button"
               onClick={onToggleAnswer}
               aria-expanded={revealed}
               aria-controls={answerId}
-              className="text-meta text-muted-foreground decoration-2 underline-offset-4 hover:text-foreground hover:underline"
+              className="ml-auto text-meta text-muted-foreground decoration-2 underline-offset-4 hover:text-foreground hover:underline"
             >
               收起答案
             </button>
