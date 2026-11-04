@@ -20,6 +20,16 @@ import (
 // shutdownTimeout 为排空在途请求、关闭数据连接各自留出的最长时间。
 const shutdownTimeout = 10 * time.Second
 
+// HTTP 服务的超时。接口的请求体和响应体都很小，正常请求远用不到这么久
+const (
+	readHeaderTimeout = 5 * time.Second  // 读完请求头的最长时间，防慢速发送请求头占住连接
+	readTimeout       = 10 * time.Second // 读完整个请求（头 + 体）的最长时间
+	// writeTimeout 从读完请求头到写完响应的最长时间，超时后连接被关掉，客户端收不到响应。
+	// 要大于最慢的正常请求：注册登录的 bcrypt 加上几次数据库查询，远小于这个值
+	writeTimeout = 15 * time.Second
+	idleTimeout  = 60 * time.Second // keep-alive 连接空闲多久后关闭
+)
+
 func main() {
 	if err := run(); err != nil {
 		log.Fatal(err)
@@ -72,9 +82,14 @@ func run() error {
 	router := ngin.CreateGin()
 	rt.RegisterRouter(router)
 
+	// 不设超时的话，一个连接可以无限期地慢慢发请求头（Slowloris），或者连上之后什么都不发，一直占着连接和 goroutine
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.Conf.Common.Port),
-		Handler: router,
+		Addr:              fmt.Sprintf(":%d", config.Conf.Common.Port),
+		Handler:           router,
+		ReadHeaderTimeout: readHeaderTimeout,
+		ReadTimeout:       readTimeout,
+		WriteTimeout:      writeTimeout,
+		IdleTimeout:       idleTimeout,
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
