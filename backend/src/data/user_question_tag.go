@@ -37,6 +37,29 @@ func GetUserQuestionTag(ctx context.Context, userID, questionID string) (int, er
 	return t.Tag, nil
 }
 
+// ListQuestionIDsByUserTag 查询用户标成某种掌握状态的全部 question_id，题目列表按掌握状态筛选用。
+// 条件和返回字段都在 (user_id, tag, question_id) 索引里，只扫索引、不读文档
+func ListQuestionIDsByUserTag(ctx context.Context, userID string, tag int) ([]string, error) {
+	coll := GetData().MongoDB.Collection("user_question_tag")
+	filter := bson.M{"user_id": userID, "tag": tag}
+	opts := options.Find().SetProjection(bson.M{"question_id": 1, "_id": 0})
+
+	cur, err := coll.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, fmt.Errorf("find ListQuestionIDsByUserTag: %w", err)
+	}
+	var list []UserQuestionTag
+	if err := cur.All(ctx, &list); err != nil {
+		return nil, fmt.Errorf("decode ListQuestionIDsByUserTag: %w", err)
+	}
+
+	ids := make([]string, 0, len(list))
+	for _, t := range list {
+		ids = append(ids, t.QuestionID)
+	}
+	return ids, nil
+}
+
 // UpsertUserQuestionTag 写入用户对某道题的掌握状态：标记过就改 tag，没标记过就新建一条。
 // tag 0（取消标记）也照样写入，GetUserQuestionTag 读出来同样是 0。
 // 两个请求同时第一次标记同一道题时，user_question_tag 上的唯一索引保证只插入一条（见 EnsureMongoIndexes）

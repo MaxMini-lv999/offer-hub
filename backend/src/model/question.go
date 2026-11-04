@@ -70,6 +70,50 @@ type ListQuestionMetaResp struct {
 	Data ListQuestionMetaData `json:"data"`
 }
 
+// ListRandomQuestionReq GET /api/v1/question/random/list 随机题目列表请求
+type ListRandomQuestionReq struct {
+	Seed     int64 `json:"seed" form:"seed"`           // 随机种子，同一个种子顺序固定；不传或 ≤ 0 时由服务端生成
+	Page     int   `json:"page" form:"page"`           // 默认 1
+	PageSize int   `json:"page_size" form:"page_size"` // 默认 20，最大 50
+}
+
+// ListRandomQuestionData 随机题目列表响应 data
+type ListRandomQuestionData struct {
+	Seed  int64          `json:"seed"` // 这次用的种子，翻下一页时原样带上
+	Total int64          `json:"total"`
+	List  []QuestionMeta `json:"list"`
+}
+
+// ListRandomQuestionResp GET /api/v1/question/random/list 随机题目列表响应
+type ListRandomQuestionResp struct {
+	Code int                    `json:"code"`
+	Msg  string                 `json:"msg"`
+	Data ListRandomQuestionData `json:"data"`
+}
+
+// ListQuestionTagReq GET /api/v1/question/tag/list 标签列表请求
+type ListQuestionTagReq struct {
+	BankID string `json:"bank_id" form:"bank_id"` // 只统计这个题库的题，不传则统计全部
+}
+
+// QuestionTagInfo 标签，以及带这个标签的题目数
+type QuestionTagInfo struct {
+	Tag   string `json:"tag"`
+	Count int    `json:"count"`
+}
+
+// ListQuestionTagData 标签列表响应 data
+type ListQuestionTagData struct {
+	List []QuestionTagInfo `json:"list"`
+}
+
+// ListQuestionTagResp GET /api/v1/question/tag/list 标签列表响应
+type ListQuestionTagResp struct {
+	Code int                 `json:"code"`
+	Msg  string              `json:"msg"`
+	Data ListQuestionTagData `json:"data"`
+}
+
 // GetQuestionDetailReq GET /api/v1/question/detail 题目详情请求
 type GetQuestionDetailReq struct {
 	QuestionID string `json:"question_id" form:"question_id" binding:"required"`

@@ -48,6 +48,8 @@ type QuestionFilter struct {
 	Page       int
 	PageSize   int
 	MetaOnly   bool // true 时只取 question_id 和 title（meta/list 用）；默认 false，取全部字段
+	// QuestionIDs 不为 nil 时只在这些题里查（登录用户按掌握状态筛选）；nil 表示不按 ID 过滤
+	QuestionIDs []string
 }
 
 // QuestionBankSeries 对应 question_bank_series 集合
@@ -171,6 +173,9 @@ func FilterQuestions(ctx context.Context, f QuestionFilter) ([]Question, int64, 
 	if len(f.Tags) > 0 {
 		filter["tags"] = bson.M{"$all": f.Tags}
 	}
+	if f.QuestionIDs != nil {
+		filter["question_id"] = bson.M{"$in": f.QuestionIDs}
+	}
 	if len(f.Keywords) > 0 {
 		// 每个词各自是一个 "title 或 content 命中" 的 $or，再用 $and 要求所有词都命中。
 		// bson.M 的 key 不能重复，多个 "$or" 直接放进 filter 会互相覆盖，所以要套一层 $and：
@@ -273,6 +278,80 @@ func ListHotQuestions(ctx context.Context, jobName string, limit int64) ([]Quest
 		return []Question{}, fmt.Errorf("decode ListHotQuestions: %w", err)
 	}
 	return list, nil
+}
+
+// ListQuestionIDs 查询全部正常状态题目的 question_id，随机题目列表在 service 里排序
+func ListQuestionIDs(ctx context.Context) ([]string, error) {
+	coll := GetData().MongoDB.Collection("question")
+	filter := bson.M{"status": QuestionStatusNormal}
+	opts := options.Find().SetProjection(bson.M{"question_id": 1, "_id": 0})
+
+	cur, err := coll.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, fmt.Errorf("find ListQuestionIDs: %w", err)
+	}
+	var list []Question
+	if err := cur.All(ctx, &list); err != nil {
+		return nil, fmt.Errorf("decode ListQuestionIDs: %w", err)
+	}
+
+	ids := make([]string, 0, len(list))
+	for _, q := range list {
+		ids = append(ids, q.QuestionID)
+	}
+	return ids, nil
+}
+
+// ListQuestionMetaByIDs 按 question_id 批量查询正常状态题目的 ID 和标题。
+// 返回顺序和 ids 无关，查不到的（已隐藏、已删除）直接没有，调用方自己按需要的顺序排
+func ListQuestionMetaByIDs(ctx context.Context, ids []string) ([]Question, error) {
+	coll := GetData().MongoDB.Collection("question")
+	filter := bson.M{"question_id": bson.M{"$in": ids}, "status": QuestionStatusNormal}
+	opts := options.Find().SetProjection(bson.M{"question_id": 1, "title": 1, "_id": 0})
+
+	cur, err := coll.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, fmt.Errorf("find ListQuestionMetaByIDs: %w", err)
+	}
+	var list []Question
+	if err := cur.All(ctx, &list); err != nil {
+		return nil, fmt.Errorf("decode ListQuestionMetaByIDs: %w", err)
+	}
+	return list, nil
+}
+
+// QuestionTagCount 标签统计的一行：标签和带这个标签的题目数
+type QuestionTagCount struct {
+	Tag   string `bson:"_id"`
+	Count int    `bson:"count"`
+}
+
+// ListQuestionTags 统计正常状态题目的标签，按题目数从多到少排，一样多的按标签名排。
+// bankID 为空时统计全部题目
+func ListQuestionTags(ctx context.Context, bankID string) ([]QuestionTagCount, error) {
+	coll := GetData().MongoDB.Collection("question")
+	match := bson.M{"status": QuestionStatusNormal}
+	if bankID != "" {
+		match["bank_list"] = bankID
+	}
+	// 一道题有几个标签，$unwind 就拆成几行，再按标签分组计数：
+	// {tags: ["Redis", "缓存"]} → {tags: "Redis"}、{tags: "缓存"} → {_id: "Redis", count: 3}
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: match}},
+		{{Key: "$unwind", Value: "$tags"}},
+		{{Key: "$group", Value: bson.M{"_id": "$tags", "count": bson.M{"$sum": 1}}}},
+		{{Key: "$sort", Value: bson.D{{Key: "count", Value: -1}, {Key: "_id", Value: 1}}}},
+	}
+
+	cur, err := coll.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, fmt.Errorf("aggregate ListQuestionTags: %w", err)
+	}
+	var rows []QuestionTagCount
+	if err := cur.All(ctx, &rows); err != nil {
+		return nil, fmt.Errorf("decode ListQuestionTags: %w", err)
+	}
+	return rows, nil
 }
 
 // IncQuestionThumbsUp 把题目的 thumbs_up_count 加 delta（点赞传 1，取消点赞传 -1），返回改完后的点赞数。

@@ -4,6 +4,7 @@
 # 覆盖 router.go 里当前注册的全部题目接口（都是 GET）：
 #   /api/v1/question/all/list   /api/v1/question/list   /api/v1/question/meta/list
 #   /api/v1/question/detail     /api/v1/question/hot/list
+#   /api/v1/question/random/list  /api/v1/question/tag/list
 #
 # 依赖：bash 4+、curl、python3（只用标准库解析 JSON，不需要 jq）
 #
@@ -27,7 +28,7 @@
 # 游客 / 登录场景的拆分：
 #   本脚本只测游客：所有请求都不带 token，覆盖题目查询接口（软鉴权）的游客分支——
 #   列表和详情的 content 截断到 150 字、详情的 analysis_content 为空串、user_tag / user_liked 为零值、
-#   user_tag 过滤参数被忽略。
+#   user_tag 过滤参数被忽略（不在 0~3 的值仍然返回参数错误）。
 #   鉴权模块完成后，复制本文件为 question_user.sh，按下面改：
 #     1. 预检之后先 POST /api/v1/auth/login 拿到 token（或从环境变量 TOKEN 传入），
 #        在 request() 的 curl 参数里加上 -H "Authorization: Bearer $TOKEN"
@@ -402,7 +403,7 @@ step '2.6 题目列表：非法参数'
 printf 'a\0b' >"$TMP_DIR/keyword_nul.txt"
 for kv in sort_by=hot_degree sort_order=up page=abc page_size=abc difficulty=abc \
   page=502 page=9223372036854775807 "keyword=$(printf '题%.0s' {1..51})" $'keyword=\xff' \
-  "keyword@$TMP_DIR/keyword_nul.txt"; do
+  "keyword@$TMP_DIR/keyword_nul.txt" user_tag=4 user_tag=-1 user_tag=abc; do
   request bad_param "$API/list" "$kv"
   expect_err 400 参数错误
 done
@@ -519,6 +520,73 @@ check 'job_name=前端开发：结果都是前端题，数量为 min(10, 前端�
 request hot_none "$API/hot/list" job_name=不存在的方向
 expect_ok
 check '不存在的 job_name：list 为 []（不是 null）' 'L == []' 'd["data"]'
+
+# ==================== 6. 随机题目列表 /random/list ====================
+
+step '6.1 随机题目列表：同一个种子翻完所有页'
+request rand_p1 "$API/random/list" seed=42 page=1 page_size=20
+expect_ok
+check '带回传入的 seed，total 等于正常题总数' \
+  'd["data"]["seed"] == 42 and d["data"]["total"] == R("all_q")["data"]["total"]' 'd["data"]["seed"], d["data"]["total"]'
+check '每条只有 question_id 和 title' 'all(set(q) == META_FIELDS for q in L)' '[sorted(q) for q in L][:1]'
+request rand_p2 "$API/random/list" seed=42 page=2 page_size=20
+expect_ok
+request rand_p3 "$API/random/list" seed=42 page=3 page_size=20
+expect_ok
+check '翻完所有页不重不漏，正好是全部正常题' \
+  'sorted(ids(R("rand_p1")["data"]["list"] + R("rand_p2")["data"]["list"] + L)) == sorted(ids(R("all_q")["data"]["list"]))' \
+  'len(R("rand_p1")["data"]["list"] + R("rand_p2")["data"]["list"] + L)'
+check '标题和 /list 一致' \
+  'all(by_id("all_q")[q["question_id"]]["title"] == q["title"] for q in R("rand_p1")["data"]["list"] + R("rand_p2")["data"]["list"] + L)'
+check '顺序和默认的 order 顺序不同' \
+  'ids(R("rand_p1")["data"]["list"]) != ids(R("all_q")["data"]["list"])[:len(R("rand_p1")["data"]["list"])]'
+request rand_again "$API/random/list" seed=42 page=1 page_size=20
+expect_ok
+check '同一个种子再请求一次，顺序完全相同' 'ids(L) == ids(R("rand_p1")["data"]["list"])' 'ids(L)'
+request rand_other "$API/random/list" seed=43 page=1 page_size=20
+expect_ok
+check '换个种子顺序不同' 'ids(L) != ids(R("rand_p1")["data"]["list"])'
+request rand_far "$API/random/list" seed=42 page=99 page_size=20
+expect_ok
+check '页码超出范围：list 为 []（不是 null），total 不变' \
+  'L == [] and d["data"]["total"] == R("all_q")["data"]["total"]' 'd["data"]'
+
+step '6.2 随机题目列表：默认值和非法参数'
+request rand_default "$API/random/list"
+expect_ok
+check '不传 seed：服务端生成一个 1 ~ 2^53 的种子；默认 20 条' \
+  '1 <= d["data"]["seed"] <= 2**53 and len(L) == min(20, d["data"]["total"])' 'd["data"]["seed"], len(L)'
+SEED=$(py 'd["data"]["seed"]')
+request rand_reuse "$API/random/list" seed="$SEED"
+expect_ok
+check '带上生成的种子再请求，结果相同' 'ids(L) == ids(R("rand_default")["data"]["list"])' 'ids(L)'
+request rand_big "$API/random/list" seed=42 page_size=999
+expect_ok
+check 'page_size=999：最多 50 条' 'len(L) == min(50, d["data"]["total"])' 'len(L)'
+for kv in seed=abc page=abc page_size=abc page=502 page=9223372036854775807; do
+  request rand_bad "$API/random/list" "$kv"
+  expect_err 400 参数错误
+done
+
+# ==================== 7. 标签列表 /tag/list ====================
+
+step '7.1 标签列表：全部题目'
+request tag_all "$API/tag/list"
+expect_ok
+check '每条只有 tag 和 count' 'all(set(t) == {"tag", "count"} for t in L)' '[sorted(t) for t in L][:1]'
+check '每个标签的题目数和 /list 里数出来的一致' \
+  '{t["tag"]: t["count"] for t in L} == {t: sum(t in q["tags"] for q in R("all_q")["data"]["list"]) for q in R("all_q")["data"]["list"] for t in q["tags"]}'
+check '按题目数降序，一样多的按标签名升序' 'L == sorted(L, key=lambda t: (-t["count"], t["tag"]))' 'L[:5]'
+
+step '7.2 标签列表：bank_id'
+request list_b002 "$API/list" bank_id=b002 page_size=100
+request tag_b002 "$API/tag/list" bank_id=b002
+expect_ok
+check 'bank_id=b002：只统计这个题库的题' \
+  'L and {t["tag"]: t["count"] for t in L} == {t: sum(t in q["tags"] for q in R("list_b002")["data"]["list"]) for q in R("list_b002")["data"]["list"] for t in q["tags"]}' 'L'
+request tag_none "$API/tag/list" bank_id=不存在的题库
+expect_ok
+check '不存在的 bank_id：list 为 []（不是 null）' 'L == []' 'd["data"]'
 
 # ==================== 汇总 ====================
 

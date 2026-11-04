@@ -26,6 +26,8 @@ func RegisterRouter(r *gin.Engine) {
 	question.GET("/meta/list", questionCtrl.ListQuestionsMeta)
 	question.GET("/detail", questionCtrl.GetQuestionDetail)
 	question.GET("/hot/list", questionCtrl.GetHotQuestions)
+	question.GET("/random/list", questionCtrl.ListRandomQuestions)
+	question.GET("/tag/list", questionCtrl.ListQuestionTags)
 
 	// 开放接口：软鉴权，游客也能访问
 	open := v1.Group("/open", middleware.SoftJWTAuth(), rateLimit)

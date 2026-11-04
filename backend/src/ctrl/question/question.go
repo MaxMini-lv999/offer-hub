@@ -46,10 +46,15 @@ func GetAllQuestionList(c *gin.Context) {
 const (
 	defaultPageSize = 20
 	maxPageSize     = 100
+	// 随机题目列表每次要把全部题目 ID 排一遍，一页给少一点，上限也比题目列表小
+	defaultRandomPageSize = 20
+	maxRandomPageSize     = 50
 	// maxListOffset 分页最多跳过多少条。skip 越大，MongoDB 要先数过去的文档越多，再往后翻直接返回参数错误
 	maxListOffset = 10000
 	// maxKeywordLen 关键词最多多少个字符（按字符算，不是按字节），每个词都是一次正则匹配
 	maxKeywordLen = 50
+	// maxUserTag 掌握状态的最大值：0未标记（不过滤） / 1已掌握 / 2晚点再刷 / 3未掌握
+	maxUserTag = 3
 )
 
 // sortByDefaultOrder 允许的排序字段，以及没传 sort_order 时的默认方向：
@@ -62,20 +67,26 @@ var sortByDefaultOrder = map[string]string{
 	"dislike_count":   "desc",
 }
 
+// normalizePage 给分页参数补默认值：page 默认 1，page_size 默认 defaultSize、超过 maxSize 按 maxSize 处理。
+// 要跳过的条数超过 maxListOffset 时返回 false。题目列表和随机题目列表共用
+func normalizePage(page, pageSize *int, defaultSize, maxSize int) bool {
+	if *page <= 0 {
+		*page = 1
+	}
+	if *pageSize <= 0 {
+		*pageSize = defaultSize
+	}
+	if *pageSize > maxSize {
+		*pageSize = maxSize
+	}
+	// 等价于 (page-1)*page_size > maxListOffset。用除法比：page 特别大时乘法会溢出成负数，反而通过检查
+	return *page-1 <= maxListOffset / *pageSize
+}
+
 // normalizeListReq 给题目列表请求补默认值并校验，list 和 meta/list 共用。参数不合法时返回 false
 func normalizeListReq(req *model.ListQuestionReq) bool {
 	// ① 分页
-	if req.Page <= 0 {
-		req.Page = 1
-	}
-	if req.PageSize <= 0 {
-		req.PageSize = defaultPageSize
-	}
-	if req.PageSize > maxPageSize {
-		req.PageSize = maxPageSize
-	}
-	// 等价于 (page-1)*page_size > maxListOffset。用除法比：page 特别大时乘法会溢出成负数，反而通过检查
-	if req.Page-1 > maxListOffset/req.PageSize {
+	if !normalizePage(&req.Page, &req.PageSize, defaultPageSize, maxPageSize) {
 		return false
 	}
 
@@ -105,6 +116,11 @@ func normalizeListReq(req *model.ListQuestionReq) bool {
 		return false
 	}
 
+	// ④ 掌握状态：游客传了也忽略（service 里处理），但不在 0~3 的值一律算参数错误
+	if req.UserTag < 0 || req.UserTag > maxUserTag {
+		return false
+	}
+
 	return true
 }
 
@@ -123,8 +139,9 @@ func ListQuestions(c *gin.Context) {
 		return
 	}
 
-	// ③ 调 service
-	list, err := service.ListQuestions(c.Request.Context(), &req)
+	// ③ 调 service。user_id 由 SoftJWTAuth 写入 context，空串表示游客
+	userID := c.GetString(middleware.CtxKeyUserID)
+	list, err := service.ListQuestions(c.Request.Context(), &req, userID)
 	if err != nil {
 		log.Printf("service.ListQuestions: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -156,8 +173,9 @@ func ListQuestionsMeta(c *gin.Context) {
 		return
 	}
 
-	// ③ 调 service
-	list, err := service.ListQuestionsMeta(c.Request.Context(), &req)
+	// ③ 调 service。user_id 由 SoftJWTAuth 写入 context，空串表示游客
+	userID := c.GetString(middleware.CtxKeyUserID)
+	list, err := service.ListQuestionsMeta(c.Request.Context(), &req, userID)
 	if err != nil {
 		log.Printf("service.ListQuestionsMeta: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -246,6 +264,64 @@ func GetHotQuestions(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, model.GetHotQuestionListResp{
+		Code: 0,
+		Msg:  "success",
+		Data: list,
+	})
+}
+
+// ListRandomQuestions GET /api/v1/question/random/list 随机题目列表
+func ListRandomQuestions(c *gin.Context) {
+	// ① 读参数
+	var req model.ListRandomQuestionReq
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	// ② 补默认值 + 校验分页，seed 由 service 处理
+	if !normalizePage(&req.Page, &req.PageSize, defaultRandomPageSize, maxRandomPageSize) {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	// ③ 调 service
+	list, err := service.ListRandomQuestions(c.Request.Context(), &req)
+	if err != nil {
+		log.Printf("service.ListRandomQuestions: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "服务器内部错误",
+			"data": nil,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, model.ListRandomQuestionResp{
+		Code: 0,
+		Msg:  "success",
+		Data: list,
+	})
+}
+
+// ListQuestionTags GET /api/v1/question/tag/list 标签列表
+func ListQuestionTags(c *gin.Context) {
+	var req model.ListQuestionTagReq
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
+		return
+	}
+
+	list, err := service.ListQuestionTags(c.Request.Context(), &req)
+	if err != nil {
+		log.Printf("service.ListQuestionTags: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "服务器内部错误",
+			"data": nil,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, model.ListQuestionTagResp{
 		Code: 0,
 		Msg:  "success",
 		Data: list,

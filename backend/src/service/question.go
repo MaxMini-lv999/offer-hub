@@ -1,9 +1,15 @@
 package service
 
 import (
+	"cmp"
 	"context"
+	"crypto/sha256"
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"math/rand/v2"
+	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -105,6 +111,26 @@ func buildQuestionFilter(req *model.ListQuestionReq) data.QuestionFilter {
 	}
 }
 
+// buildUserQuestionFilter 在 buildQuestionFilter 的基础上加掌握状态筛选，list 和 meta/list 共用。
+// 登录用户传了 user_tag 时，先查出他标成这种状态的题，把查询限定在这些题里；游客传了也忽略（接口文档要求）。
+// 第二个返回值为 true 表示这个用户没有标成这种状态的题，结果一定为空，调用方直接返回空列表，不用再查题目
+func buildUserQuestionFilter(ctx context.Context, req *model.ListQuestionReq, userID string) (data.QuestionFilter, bool, error) {
+	filter := buildQuestionFilter(req)
+	if userID == "" || req.UserTag == 0 {
+		return filter, false, nil
+	}
+
+	ids, err := data.ListQuestionIDsByUserTag(ctx, userID, req.UserTag)
+	if err != nil {
+		return filter, false, fmt.Errorf("list tagged buildUserQuestionFilter: %w", err)
+	}
+	if len(ids) == 0 {
+		return filter, true, nil
+	}
+	filter.QuestionIDs = ids
+	return filter, false, nil
+}
+
 // toOneQuestion 把 data 层的题目转成响应里的 OneQuestion，list 和 detail 共用。
 // 只做字段搬运和时间格式化；content 截断、UserTag / UserLiked 由调用方按登录状态处理
 func toOneQuestion(q *data.Question) model.OneQuestion {
@@ -127,10 +153,17 @@ func toOneQuestion(q *data.Question) model.OneQuestion {
 	}
 }
 
-// ListQuestions 分页查询题目列表。目前还没有登录，所有请求都按游客处理。
-func ListQuestions(ctx context.Context, req *model.ListQuestionReq) (model.ListQuestionData, error) {
+// ListQuestions 分页查询题目列表，userID 为空表示游客。
+// 登录用户可以按掌握状态筛选；返回的题目内容目前都按游客处理（content 截断，user_tag / user_liked 为零值）
+func ListQuestions(ctx context.Context, req *model.ListQuestionReq, userID string) (model.ListQuestionData, error) {
 	// ① 把请求参数转成 data 层的查询条件，查出当前页和总数
-	filter := buildQuestionFilter(req)
+	filter, empty, err := buildUserQuestionFilter(ctx, req, userID)
+	if err != nil {
+		return model.ListQuestionData{}, err
+	}
+	if empty {
+		return model.ListQuestionData{Total: 0, List: make([]model.OneQuestion, 0)}, nil
+	}
 	list, total, err := data.FilterQuestions(ctx, filter)
 	if err != nil {
 		return model.ListQuestionData{}, err
@@ -148,10 +181,16 @@ func ListQuestions(ctx context.Context, req *model.ListQuestionReq) (model.ListQ
 	return model.ListQuestionData{Total: total, List: result}, nil
 }
 
-// ListQuestionsMeta 分页查询题目元数据（只有 ID 和标题），过滤和排序与 ListQuestions 完全一致。
-func ListQuestionsMeta(ctx context.Context, req *model.ListQuestionMetaReq) (model.ListQuestionMetaData, error) {
+// ListQuestionsMeta 分页查询题目元数据（只有 ID 和标题），过滤和排序与 ListQuestions 完全一致，userID 为空表示游客。
+func ListQuestionsMeta(ctx context.Context, req *model.ListQuestionMetaReq, userID string) (model.ListQuestionMetaData, error) {
 	// ① 和 ListQuestions 走同一套过滤条件和查询
-	filter := buildQuestionFilter(req)
+	filter, empty, err := buildUserQuestionFilter(ctx, req, userID)
+	if err != nil {
+		return model.ListQuestionMetaData{}, err
+	}
+	if empty {
+		return model.ListQuestionMetaData{Total: 0, List: make([]model.QuestionMeta, 0)}, nil
+	}
 	filter.MetaOnly = true // 侧边栏只要 ID 和标题，不从库里取 content
 	list, total, err := data.FilterQuestions(ctx, filter)
 	if err != nil {
@@ -226,4 +265,81 @@ func GetHotQuestions(ctx context.Context, req *model.GetHotQuestionListReq) (mod
 	}
 
 	return model.GetHotQuestionListData{List: result}, nil
+}
+
+// maxRandomSeed 服务端生成的随机种子不超过 2^53：前端 JavaScript 的整数超过这个值会丢精度，带回来就不是同一个种子了
+const maxRandomSeed = 1 << 53
+
+// shuffleKey 题目在某个种子下的排序键：种子和 question_id 拼起来算 SHA-256，取前 8 字节当随机数。
+// 同一个种子、同一道题永远算出同一个值，所以顺序固定，翻页不重不漏；
+// 新增或下线一道题只是在顺序里插进或抽掉它，其他题的先后不变（整体洗牌的话所有题都会换位置）
+func shuffleKey(seed int64, questionID string) uint64 {
+	sum := sha256.Sum256([]byte(strconv.FormatInt(seed, 10) + ":" + questionID))
+	return binary.BigEndian.Uint64(sum[:8])
+}
+
+// ListRandomQuestions 按种子打乱全部正常题目后分页，只返回 ID 和标题，沉浸式刷题的推荐模式用。
+// 没传种子（≤ 0）时生成一个，随响应返回，前端翻页时带上它
+func ListRandomQuestions(ctx context.Context, req *model.ListRandomQuestionReq) (model.ListRandomQuestionData, error) {
+	seed := req.Seed
+	if seed <= 0 {
+		seed = rand.Int64N(maxRandomSeed) + 1
+	}
+
+	// ① 取全部题目 ID，按排序键排好。排序键相同（概率可以忽略）时按 ID 排，保证顺序完全确定
+	ids, err := data.ListQuestionIDs(ctx)
+	if err != nil {
+		return model.ListRandomQuestionData{}, fmt.Errorf("list ids ListRandomQuestions: %w", err)
+	}
+	keys := make(map[string]uint64, len(ids))
+	for _, id := range ids {
+		keys[id] = shuffleKey(seed, id)
+	}
+	slices.SortFunc(ids, func(a, b string) int {
+		return cmp.Or(cmp.Compare(keys[a], keys[b]), strings.Compare(a, b))
+	})
+
+	// ② 切出这一页。调用方保证 page 已限制在上限内，这里的乘法不会溢出
+	result := model.ListRandomQuestionData{
+		Seed:  seed,
+		Total: int64(len(ids)),
+		List:  make([]model.QuestionMeta, 0, req.PageSize), // 用 make：没数据时返回 [] 而不是 null
+	}
+	start := (req.Page - 1) * req.PageSize
+	if start >= len(ids) {
+		return result, nil
+	}
+	pageIDs := ids[start:min(start+req.PageSize, len(ids))]
+
+	// ③ 查这一页的标题，按打乱后的顺序放进结果
+	list, err := data.ListQuestionMetaByIDs(ctx, pageIDs)
+	if err != nil {
+		return model.ListRandomQuestionData{}, fmt.Errorf("list meta ListRandomQuestions: %w", err)
+	}
+	titles := make(map[string]string, len(list))
+	for _, q := range list {
+		titles[q.QuestionID] = q.Title
+	}
+	for _, id := range pageIDs {
+		title, ok := titles[id]
+		if !ok { // 两次查询之间被隐藏或删除了
+			continue
+		}
+		result.List = append(result.List, model.QuestionMeta{QuestionID: id, Title: title})
+	}
+	return result, nil
+}
+
+// ListQuestionTags 统计正常题目的标签和题目数，按题目数从多到少排；bank_id 不为空时只统计这个题库
+func ListQuestionTags(ctx context.Context, req *model.ListQuestionTagReq) (model.ListQuestionTagData, error) {
+	rows, err := data.ListQuestionTags(ctx, req.BankID)
+	if err != nil {
+		return model.ListQuestionTagData{}, fmt.Errorf("aggregate ListQuestionTags: %w", err)
+	}
+
+	result := make([]model.QuestionTagInfo, 0, len(rows)) // 用 make：没数据时返回 [] 而不是 null
+	for _, row := range rows {
+		result = append(result, model.QuestionTagInfo{Tag: row.Tag, Count: row.Count})
+	}
+	return model.ListQuestionTagData{List: result}, nil
 }
