@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import IconChevronDown from '~icons/solar/alt-arrow-down-linear'
 import IconFire from '~icons/solar/fire-linear'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
+import { RankBadge } from '@/components/RankBadge'
 import { Button } from '@/components/ui/button'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useHotQuestions } from '@/hooks/useQuestionQueries'
@@ -13,7 +14,7 @@ import { questionPath } from '@/utils/route'
 const HOT_LIMIT = 10
 
 /**
- * 热门题目前 10 条，首页、题库页和全部题目页的侧栏共用，点击进入详情。
+ * 热门题目前 10 条，题库目录、题库页和全部题目页的侧栏共用，点击进入详情；前三名的序号是金银铜色块（RankBadge）。
  * jobName 为空时取全站热门；enabled 为 false 时（职位方向还没查出来）先显示骨架。
  * bankId 是当前题库：热门题目也属于它时，链接带上它，详情页左侧就停在这个题库。
  * sticky 给列表页用：桌面端（≥1024px）吸顶在筛选栏旁边、行距收紧，往下滚列表时收起成标题栏，往上滚或回到顶部时展开，
@@ -110,19 +111,11 @@ export function HotContent({
                   <Link
                     to={questionPath(q.question_id, bankId && q.bank_list.includes(bankId) ? bankId : q.bank_list[0])}
                     className={cn(
-                      'flex gap-3 px-4 py-3 transition-colors hover:bg-muted focus-visible:outline-offset-[-2px]',
+                      'flex items-baseline gap-3 px-4 py-3 transition-colors hover:bg-muted focus-visible:outline-offset-[-2px]',
                       sticky && 'lg:py-2 lg:text-meta',
                     )}
                   >
-                    {/* 前三名加粗 */}
-                    <span
-                      className={cn(
-                        'w-5 shrink-0 text-right tabular-nums',
-                        index < 3 ? 'font-bold text-foreground' : 'text-muted-foreground',
-                      )}
-                    >
-                      {index + 1}
-                    </span>
+                    <RankBadge rank={index + 1} />
                     <span className="line-clamp-2 min-w-0 flex-1">{q.title}</span>
                   </Link>
                 </li>
@@ -145,7 +138,7 @@ function HotSkeleton({ compact }: { compact: boolean }) {
     <div className="skeleton divide-y" aria-hidden>
       {Array.from({ length: HOT_LIMIT }, (_, i) => (
         <div key={i} className={cn('flex gap-3 px-4 py-3', compact && 'lg:py-2 lg:text-meta')}>
-          <div className={cn(line, 'w-5 shrink-0')} />
+          <div className={cn(line, 'w-[1.5em] shrink-0')} />
           <div className="flex-1">
             <div className={cn(line, i % 3 === 0 ? 'w-full' : 'w-4/5')} />
             <div className={cn(line, 'hidden w-1/2 lg:block')} />

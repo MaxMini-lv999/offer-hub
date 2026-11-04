@@ -1,10 +1,12 @@
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { Layout } from '@/components/layout'
 import { LoginProvider } from '@/components/provider/LoginProvider'
 import { QueryProvider } from '@/components/provider/query-provider'
 import { RouteLoading } from '@/components/RouteLoading'
+import { BankCatalogPage } from '@/pages/BankCatalog'
 import { ErrorPage } from '@/pages/ErrorPage'
 import { HomePage } from '@/pages/home'
+import { HotContentPage } from '@/pages/HotContent'
 import { NotFoundPage } from '@/pages/not-found'
 import { QuestionBankPage } from '@/pages/QuestionBank'
 import { QuestionsPage } from '@/pages/Questions'
@@ -40,12 +42,12 @@ const router = createBrowserRouter(
             { index: true, element: <HomePage /> },
             { path: 'bank/:bankId', element: <QuestionBankPage /> },
             { path: 'questions', element: <QuestionsPage /> },
+            { path: 'collections', element: <BankCatalogPage /> },
+            { path: 'hot', element: <HotContentPage /> },
             {
               path: 'question/:questionId',
               lazy: async () => ({ Component: (await loadQuestionDetail()).QuestionDetailPage }),
             },
-            // 旧的题库分类页已并入首页
-            { path: 'collections', element: <Navigate to="/" replace /> },
             // 登录页带着表单校验库（zod、react-hook-form），进入时再加载
             { path: 'login', lazy: () => loadLoginPage('login') },
             { path: 'register', lazy: () => loadLoginPage('register') },

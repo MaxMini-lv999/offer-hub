@@ -64,12 +64,12 @@ export function QuestionBankPage() {
 function Breadcrumb({ jobName }: { jobName: string }) {
   return (
     <nav aria-label="面包屑" className="flex min-w-0 gap-2 text-meta text-muted-foreground">
-      <Link to="/" className="shrink-0 decoration-2 underline-offset-4 hover:text-foreground hover:underline">
-        首页
+      <Link to="/collections" className="shrink-0 decoration-2 underline-offset-4 hover:text-foreground hover:underline">
+        题库目录
       </Link>
       <span aria-hidden>/</span>
       <Link
-        to={{ pathname: '/', search: `?job=${encodeURIComponent(jobName)}` }}
+        to={{ pathname: '/collections', search: `?job=${encodeURIComponent(jobName)}` }}
         className="truncate decoration-2 underline-offset-4 hover:text-foreground hover:underline"
       >
         {jobName}

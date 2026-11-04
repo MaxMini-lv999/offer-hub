@@ -124,6 +124,13 @@ export default {
   			easy: 'oklch(var(--easy) / <alpha-value>)',
   			medium: 'oklch(var(--medium) / <alpha-value>)',
   			hard: 'oklch(var(--hard) / <alpha-value>)',
+  			// 金银铜：只给热门榜前三名的序号色块，块上的序号用 medal-foreground（亮暗主题都是墨色）
+  			medal: {
+  				gold: 'oklch(var(--medal-gold) / <alpha-value>)',
+  				silver: 'oklch(var(--medal-silver) / <alpha-value>)',
+  				bronze: 'oklch(var(--medal-bronze) / <alpha-value>)',
+  				foreground: 'oklch(var(--medal-foreground) / <alpha-value>)'
+  			},
   			dialogue: {
   				DEFAULT: 'oklch(var(--dialogue) / <alpha-value>)',
   				foreground: 'oklch(var(--dialogue-foreground) / <alpha-value>)'

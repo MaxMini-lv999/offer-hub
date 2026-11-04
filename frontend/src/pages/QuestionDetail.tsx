@@ -120,7 +120,7 @@ export function QuestionDetailPage() {
         className={cn('h-full justify-center', className)}
         action={
           <Button variant="outline" size="sm" asChild>
-            <Link to="/">浏览题库</Link>
+            <Link to="/collections">浏览题库</Link>
           </Button>
         }
       />

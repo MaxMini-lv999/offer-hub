@@ -18,10 +18,12 @@ import { setTheme, useTheme } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 import type { UserInfo } from '@/types/auth'
 
-/** 顶部导航项；题库页从首页进入，所以也算在「首页」下 */
+/** 顶部导航项；题库页从题库目录进入，所以也算在「题库」下 */
 const NAV_ITEMS = [
-  { to: '/', label: '首页', isActive: (path: string) => path === '/' || path.startsWith('/bank/') },
+  { to: '/', label: '首页', isActive: (path: string) => path === '/' },
+  { to: '/collections', label: '题库', isActive: (path: string) => path === '/collections' || path.startsWith('/bank/') },
   { to: '/questions', label: '全部题目', isActive: (path: string) => path === '/questions' },
+  { to: '/hot', label: '热门', isActive: (path: string) => path === '/hot' },
 ]
 
 /** 站点标识：两本书夹一枚樱红书签。墨色和纸白跟随主题 token，暗色下自动反色；favicon 是同一个图形（public/favicon.svg） */
@@ -52,7 +54,7 @@ export function Header() {
           <span className="hidden font-title text-heading font-semibold leading-none sm:inline">Offer Hub</span>
         </Link>
 
-        <nav aria-label="主导航" className="flex h-full gap-6 justify-self-center whitespace-nowrap">
+        <nav aria-label="主导航" className="flex h-full gap-4 justify-self-center whitespace-nowrap sm:gap-6">
           {NAV_ITEMS.map((item) => {
             const active = item.isActive(pathname)
             return (
