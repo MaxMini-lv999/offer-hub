@@ -81,8 +81,11 @@ func GetUserByUserID(ctx context.Context, userID string) (*UserInfo, error) {
 	return &u, nil
 }
 
-// UserStatusDisabled 账号状态：禁用
-const UserStatusDisabled = -1
+// 账号状态（t_user_info.user_status）
+const (
+	UserStatusActive   = 1  // 正常，只有这个状态能登录、能过强制鉴权
+	UserStatusDisabled = -1 // 禁用
+)
 
 func ListUsersByUserIDs(ctx context.Context, userIDs []string) ([]UserInfo, error) {
 	if len(userIDs) == 0 {

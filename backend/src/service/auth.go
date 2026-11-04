@@ -48,7 +48,8 @@ func Register(ctx context.Context, req *model.PasswordRegisterReq) error {
 // ErrInvalidCredentials 用户名不存在或密码错误，ctrl 据此返回"用户名或密码错误"
 var ErrInvalidCredentials = errors.New("invalid username or password")
 
-// ErrUserDisabled 账号已被禁用，ctrl 据此返回"账号已被禁用"
+// ErrUserDisabled 账号不是正常状态（user_status != 1，比如被禁用），
+// 登录时 ctrl 返回"账号已被禁用"，强制鉴权时返回"账号不可用"
 var ErrUserDisabled = errors.New("user disabled")
 
 // Login 用户名密码登录，成功返回 token 和用户信息
@@ -68,7 +69,8 @@ func Login(ctx context.Context, req *model.PasswordLoginReq) (*model.PasswordLog
 		return nil, fmt.Errorf("compare password Login: %w", err)
 	}
 
-	if userInfo.UserStatus == data.UserStatusDisabled {
+	// 只认正常状态：以后新增的状态（注销、冻结等）默认不能登录
+	if userInfo.UserStatus != data.UserStatusActive {
 		return nil, ErrUserDisabled
 	}
 	token, err := GenerateToken(userInfo.UserID)
@@ -108,6 +110,23 @@ func AuthenticateToken(ctx context.Context, tokenStr string) (*Claims, error) {
 	}
 
 	return claims, nil
+}
+
+// CheckUserActive 检查 token 对应的用户还能不能用，只给强制鉴权调用：
+// 用户已不存在返回 ErrInvalidToken，账号不是正常状态返回 ErrUserDisabled，
+// 数据库出错返回包装后的错误，都通过返回 nil
+func CheckUserActive(ctx context.Context, userID string) error {
+	u, err := data.GetUserByUserID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, data.ErrUserNotFound) {
+			return ErrInvalidToken
+		}
+		return fmt.Errorf("get user CheckUserActive: %w", err)
+	}
+	if u.UserStatus != data.UserStatusActive {
+		return ErrUserDisabled
+	}
+	return nil
 }
 
 // Logout 登出：把 token 写入黑名单，TTL 等于剩余有效期

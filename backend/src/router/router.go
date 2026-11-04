@@ -49,9 +49,11 @@ func RegisterRouter(r *gin.Engine) {
 	userInfo := v1.Group("/user_info")
 	userInfo.GET("/get_user_info", middleware.JWTAuth(), rateLimit, userCtrl.GetUserInfo)
 
-	// 注册、登录没有 token，按 IP 限流，同时防暴力破解密码
+	// 注册、登录没有 token，按 IP 限流；额外挂一层额度更小的 authRateLimit 防暴力破解密码，
+	// 放在前面，被它拦下的请求不再占用全站限流的额度
+	authRateLimit := middleware.AuthRateLimit()
 	auth := r.Group("/auth")
-	auth.POST("/register", rateLimit, authCtrl.Register)
-	auth.POST("/login", rateLimit, authCtrl.Login)
+	auth.POST("/register", authRateLimit, rateLimit, authCtrl.Register)
+	auth.POST("/login", authRateLimit, rateLimit, authCtrl.Login)
 	auth.POST("/logout", middleware.JWTAuth(), rateLimit, authCtrl.Logout)
 }

@@ -11,12 +11,13 @@ import (
 var Conf *TomlConfig
 
 type TomlConfig struct {
-	Common    CommonConfig    `toml:"COMMON"`
-	MySQL     MySQLConfig     `toml:"MySQL"`
-	MongoDB   MongoDBConfig   `toml:"MongoDB"`
-	Redis     RedisConfig     `toml:"Redis"`
-	JWT       JWTConfig       `toml:"JWT"`
-	RateLimit RateLimitConfig `toml:"RateLimit"`
+	Common        CommonConfig    `toml:"COMMON"`
+	MySQL         MySQLConfig     `toml:"MySQL"`
+	MongoDB       MongoDBConfig   `toml:"MongoDB"`
+	Redis         RedisConfig     `toml:"Redis"`
+	JWT           JWTConfig       `toml:"JWT"`
+	RateLimit     RateLimitConfig `toml:"RateLimit"`
+	AuthRateLimit RateLimitConfig `toml:"AuthRateLimit"` // 登录、注册专用，按 IP 计数，和 RateLimit 分开计
 }
 
 type CommonConfig struct {
@@ -70,13 +71,32 @@ func Init(configPath string) error {
 	}
 
 	var c TomlConfig
-	if _, err := toml.DecodeFile(configPath, &c); err != nil {
+	md, err := toml.DecodeFile(configPath, &c)
+	if err != nil {
 		return fmt.Errorf("load config %s: %w", configPath, err)
 	}
-	// 窗口为 0 时算窗口号会除以 0；上限为 0 时所有请求都会被拒绝
-	if rl := c.RateLimit; rl.Enable && (rl.WindowSeconds <= 0 || rl.MaxRequests <= 0) {
-		return fmt.Errorf("config %s: RateLimit window_seconds and max_requests must be > 0", configPath)
+	// 漏写 [AuthRateLimit] 时按默认值开启，不能因为少一段配置就没了防暴力破解；要关闭得显式写 enable = false
+	if !md.IsDefined("AuthRateLimit") {
+		c.AuthRateLimit = defaultAuthRateLimit
+	}
+	if err := checkRateLimit("RateLimit", c.RateLimit); err != nil {
+		return fmt.Errorf("config %s: %w", configPath, err)
+	}
+	if err := checkRateLimit("AuthRateLimit", c.AuthRateLimit); err != nil {
+		return fmt.Errorf("config %s: %w", configPath, err)
 	}
 	Conf = &c
+	return nil
+}
+
+// defaultAuthRateLimit 登录、注册限流的默认值：每个 IP 每 60 秒最多 10 次
+var defaultAuthRateLimit = RateLimitConfig{Enable: true, WindowSeconds: 60, MaxRequests: 10}
+
+// checkRateLimit 开启限流时窗口和上限都必须大于 0：
+// 窗口为 0 时算窗口号会除以 0；上限为 0 时所有请求都会被拒绝
+func checkRateLimit(name string, rl RateLimitConfig) error {
+	if rl.Enable && (rl.WindowSeconds <= 0 || rl.MaxRequests <= 0) {
+		return fmt.Errorf("%s window_seconds and max_requests must be > 0", name)
+	}
 	return nil
 }

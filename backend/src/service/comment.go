@@ -155,7 +155,7 @@ var ErrParentCommentNotFound = errors.New("parent comment not found")
 // AddComment 以 userID 的身份发表评论，返回新评论，格式和评论列表里的一致。
 // req.ParentID 为空是顶层评论；不为空是回复，req.ReplyTo 为空时默认回复父评论的作者
 func AddComment(ctx context.Context, req *model.AddCommentReq, userID string) (model.AddCommentData, error) {
-	// ① 查评论者：token 有效但用户已不存在按未登录处理；被禁用的账号不能发评论
+	// ① 查评论者：token 有效但用户已不存在按未登录处理；不是正常状态（被禁用等）的账号不能发评论
 	author, err := data.GetUserByUserID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, data.ErrUserNotFound) {
@@ -163,7 +163,7 @@ func AddComment(ctx context.Context, req *model.AddCommentReq, userID string) (m
 		}
 		return model.AddCommentData{}, fmt.Errorf("get user AddComment: %w", err)
 	}
-	if author.UserStatus == data.UserStatusDisabled {
+	if author.UserStatus != data.UserStatusActive {
 		return model.AddCommentData{}, ErrUserDisabled
 	}
 
@@ -279,7 +279,7 @@ func DeleteComment(ctx context.Context, req *model.DeleteCommentReq, userID stri
 // UpdateComment 以 userID 的身份修改评论内容，只能改自己的。
 // 改内容等于发新内容，所以和 AddComment 一样，被禁用的账号不能改
 func UpdateComment(ctx context.Context, req *model.UpdateCommentReq, userID string) (model.UpdateCommentData, error) {
-	// ① 查当前用户：token 有效但用户已不存在按未登录处理；被禁用的账号不能改评论
+	// ① 查当前用户：token 有效但用户已不存在按未登录处理；不是正常状态（被禁用等）的账号不能改评论
 	author, err := data.GetUserByUserID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, data.ErrUserNotFound) {
@@ -287,7 +287,7 @@ func UpdateComment(ctx context.Context, req *model.UpdateCommentReq, userID stri
 		}
 		return model.UpdateCommentData{}, fmt.Errorf("get user UpdateComment: %w", err)
 	}
-	if author.UserStatus == data.UserStatusDisabled {
+	if author.UserStatus != data.UserStatusActive {
 		return model.UpdateCommentData{}, ErrUserDisabled
 	}
 

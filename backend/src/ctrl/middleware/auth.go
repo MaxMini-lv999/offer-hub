@@ -18,7 +18,8 @@ const (
 	CtxKeyTokenExp = "token_exp" // time.Time，token 过期时间
 )
 
-// JWTAuth 强制鉴权：没有有效 token 返回 401，通过后把 user_id、token、过期时间存进 context
+// JWTAuth 强制鉴权：没有有效 token 返回 401，用户已不存在或账号不是正常状态也返回 401；
+// 通过后把 user_id、token、过期时间存进 context
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, found := strings.CutPrefix(c.GetHeader("Authorization"), "Bearer ")
@@ -41,6 +42,32 @@ func JWTAuth() gin.HandlerFunc {
 				return
 			}
 			log.Printf("service.AuthenticateToken: %v", err)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"code": 500,
+				"msg":  "服务器内部错误",
+				"data": nil,
+			})
+			return
+		}
+		// token 有效不代表账号还能用：签发之后被禁用的账号，要在 token 过期前就拦下来
+		if err := service.CheckUserActive(c.Request.Context(), claims.UserID); err != nil {
+			if errors.Is(err, service.ErrInvalidToken) {
+				c.AbortWithStatusJSON(http.StatusOK, gin.H{
+					"code": 401,
+					"msg":  "未登录或登录已过期",
+					"data": nil,
+				})
+				return
+			}
+			if errors.Is(err, service.ErrUserDisabled) {
+				c.AbortWithStatusJSON(http.StatusOK, gin.H{
+					"code": 401,
+					"msg":  "账号不可用",
+					"data": nil,
+				})
+				return
+			}
+			log.Printf("service.CheckUserActive: %v", err)
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"code": 500,
 				"msg":  "服务器内部错误",

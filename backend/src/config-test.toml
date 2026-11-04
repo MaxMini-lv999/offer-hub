@@ -30,3 +30,9 @@ enable = true
 enable = true
 window_seconds = 60
 max_requests = 120
+
+# 登录、注册专用，按 IP 计数，和 [RateLimit] 分开计；不写这一段时默认 60 秒 10 次
+[AuthRateLimit]
+enable = true
+window_seconds = 60
+max_requests = 10
