@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"offer-hub/data"
 	"offer-hub/model"
@@ -21,7 +20,6 @@ func GetUserInfo(ctx context.Context, userID string) (*model.GetUserInfoData, er
 		return nil, fmt.Errorf("get user GetUserInfo: %w", err)
 	}
 
-	// MySQL DSN 里 loc=Asia/Shanghai，读出来的时间已经是北京时间，不要再 .Local()
 	return &model.GetUserInfoData{
 		UserID:       u.UserID,
 		Username:     u.Username,
@@ -35,7 +33,7 @@ func GetUserInfo(ctx context.Context, userID string) (*model.GetUserInfoData, er
 		AvatarURL:    u.Avatar,
 		UserStatus:   u.UserStatus,
 		UserType:     u.UserType,
-		CreateTime:   u.CreateTime.Format(time.DateTime),
-		UpdateTime:   u.UpdateTime.Format(time.DateTime),
+		CreateTime:   formatTime(u.CreateTime),
+		UpdateTime:   formatTime(u.UpdateTime),
 	}, nil
 }

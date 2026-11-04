@@ -11,7 +11,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"offer-hub/data"
 	"offer-hub/model"
@@ -148,8 +147,8 @@ func toOneQuestion(q *data.Question) model.OneQuestion {
 		ThumbsUpCount: q.ThumbsUpCount,
 		DislikeCount:  q.DislikeCount,
 		Order:         q.Order,
-		CreateTime:    q.CreateTime.Local().Format(time.DateTime),
-		UpdateTime:    q.UpdateTime.Local().Format(time.DateTime),
+		CreateTime:    formatTime(q.CreateTime),
+		UpdateTime:    formatTime(q.UpdateTime),
 	}
 }
 

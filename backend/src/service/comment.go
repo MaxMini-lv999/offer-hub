@@ -42,8 +42,8 @@ func toCommentItem(c *data.Comment, users map[string]data.UserInfo, liked map[st
 		ReplyToName: users[c.ReplyTo].NickName, // 顶层评论 ReplyTo 为空，取到零值即空串
 		UserLiked:   liked[c.CommentID],
 		SubComments: make([]model.CommentItem, 0), // 输出 [] 而不是 null
-		CreateTime:  c.CreateTime.Local().Format(time.DateTime),
-		UpdateTime:  c.UpdateTime.Local().Format(time.DateTime),
+		CreateTime:  formatTime(c.CreateTime),
+		UpdateTime:  formatTime(c.UpdateTime),
 	}
 }
 
