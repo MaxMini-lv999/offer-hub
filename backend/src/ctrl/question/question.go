@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"offer-hub/ctrl"
 	"offer-hub/ctrl/middleware"
 	"offer-hub/model"
 	"offer-hub/service"
@@ -49,8 +50,6 @@ const (
 	// 随机题目列表每次要把全部题目 ID 排一遍，一页给少一点，上限也比题目列表小
 	defaultRandomPageSize = 20
 	maxRandomPageSize     = 50
-	// maxListOffset 分页最多跳过多少条。skip 越大，MongoDB 要先数过去的文档越多，再往后翻直接返回参数错误
-	maxListOffset = 10000
 	// maxKeywordLen 关键词最多多少个字符（按字符算，不是按字节），每个词都是一次正则匹配
 	maxKeywordLen = 50
 	// maxUserTag 掌握状态的最大值：0未标记（不过滤） / 1已掌握 / 2晚点再刷 / 3未掌握
@@ -67,26 +66,10 @@ var sortByDefaultOrder = map[string]string{
 	"dislike_count":   "desc",
 }
 
-// normalizePage 给分页参数补默认值：page 默认 1，page_size 默认 defaultSize、超过 maxSize 按 maxSize 处理。
-// 要跳过的条数超过 maxListOffset 时返回 false。题目列表和随机题目列表共用
-func normalizePage(page, pageSize *int, defaultSize, maxSize int) bool {
-	if *page <= 0 {
-		*page = 1
-	}
-	if *pageSize <= 0 {
-		*pageSize = defaultSize
-	}
-	if *pageSize > maxSize {
-		*pageSize = maxSize
-	}
-	// 等价于 (page-1)*page_size > maxListOffset。用除法比：page 特别大时乘法会溢出成负数，反而通过检查
-	return *page-1 <= maxListOffset / *pageSize
-}
-
 // normalizeListReq 给题目列表请求补默认值并校验，list 和 meta/list 共用。参数不合法时返回 false
 func normalizeListReq(req *model.ListQuestionReq) bool {
 	// ① 分页
-	if !normalizePage(&req.Page, &req.PageSize, defaultPageSize, maxPageSize) {
+	if !ctrl.NormalizePage(&req.Page, &req.PageSize, defaultPageSize, maxPageSize) {
 		return false
 	}
 
@@ -280,7 +263,7 @@ func ListRandomQuestions(c *gin.Context) {
 	}
 
 	// ② 补默认值 + 校验分页，seed 由 service 处理
-	if !normalizePage(&req.Page, &req.PageSize, defaultRandomPageSize, maxRandomPageSize) {
+	if !ctrl.NormalizePage(&req.Page, &req.PageSize, defaultRandomPageSize, maxRandomPageSize) {
 		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误", "data": nil})
 		return
 	}

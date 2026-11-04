@@ -15,7 +15,7 @@ import (
 )
 
 // pageOf 取 list 的第 page 页（每页 size 条），越界时返回空切片。
-// 调用方保证 page ≥ 1、size ≥ 1，否则 start 为负数会 panic
+// 调用方保证 page ≥ 1、size ≥ 1，且 (page-1)*size 不溢出（ctrl 限制了翻页深度），否则 start 为负数会 panic
 func pageOf(list []data.Comment, page, size int) []data.Comment {
 	start := (page - 1) * size
 	if start >= len(list) {

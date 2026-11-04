@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"offer-hub/ctrl"
 	"offer-hub/ctrl/middleware"
 	"offer-hub/model"
 	"offer-hub/service"
@@ -21,25 +22,15 @@ var sortByWhitelist = map[string]bool{
 }
 
 // normalizeListCommentsReq 给评论列表请求补默认值并校验，参数不合法时返回 false。
-// 补完后 page / size 都 ≥ 1，service 里的 pageOf 依赖这一点
+// 补完后 page / size 都 ≥ 1，且 (page-1)*size 不超过 ctrl.MaxListOffset，service 里的 pageOf 依赖这一点
 func normalizeListCommentsReq(req *model.ListCommentsReq) bool {
-	if req.Page <= 0 {
-		req.Page = 1
+	// 顶层评论和子评论两套分页都要限制翻页深度：页码特别大时 (page-1)*size 会溢出成负数，
+	// 顶层的 skip 变成负数（MongoDB 报错）、子评论的 pageOf 切片越界（panic）
+	if !ctrl.NormalizePage(&req.Page, &req.PageSize, 20, 100) {
+		return false
 	}
-	if req.PageSize <= 0 {
-		req.PageSize = 20
-	}
-	if req.PageSize > 100 {
-		req.PageSize = 100
-	}
-	if req.SubCommentPage <= 0 {
-		req.SubCommentPage = 1
-	}
-	if req.SubCommentSize <= 0 {
-		req.SubCommentSize = 5
-	}
-	if req.SubCommentSize > 20 {
-		req.SubCommentSize = 20
+	if !ctrl.NormalizePage(&req.SubCommentPage, &req.SubCommentSize, 5, 20) {
+		return false
 	}
 
 	if req.SortBy == "" {
