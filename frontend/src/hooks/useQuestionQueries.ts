@@ -6,6 +6,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import { LIKE_TARGET_QUESTION } from '@/constants/interaction'
+import { showGuideCue } from '@/lib/guideCue'
 import { cancelInFlight } from '@/lib/query'
 import { isUncertainError } from '@/lib/request'
 import { predictToggleLike, toggleLike } from '@/services/interaction'
@@ -177,7 +178,8 @@ export function useLikeQuestion() {
 
 /**
  * 标记题目的掌握状态，tag 传 0 取消标记。悲观更新：接口成功后才改详情缓存里的 user_tag；
- * 题目列表能按掌握状态筛选，一并标记过期，回到列表时重新请求
+ * 题目列表能按掌握状态筛选，一并标记过期，回到列表时重新请求。
+ * 标成「已掌握」并且保存成功后，澜汐在提示条里庆祝一次（详情页和沉浸刷题都走这里）
  */
 export function useTagQuestion() {
   const queryClient = useQueryClient()
@@ -188,6 +190,7 @@ export function useTagQuestion() {
         old ? { ...old, user_tag: tag } : old
       )
       void queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
+      if (tag === 1) showGuideCue('celebrate', '标成已掌握了，又拿下一题')
     },
   })
 }

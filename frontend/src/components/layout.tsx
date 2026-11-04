@@ -1,6 +1,7 @@
 import { Outlet, ScrollRestoration, useMatches } from 'react-router-dom'
 import IconLink from '~icons/solar/link-minimalistic-linear'
 import { LoginDialog } from '@/components/auth/LoginDialog'
+import { GuideCue } from '@/components/guide'
 import { Header } from '@/components/Header'
 import { cn } from '@/lib/utils'
 
@@ -49,6 +50,7 @@ export function Layout() {
       </footer>
 
       <LoginDialog />
+      <GuideCue immersive={immersive} />
 
       {/* 换页时回到顶部，浏览器后退时还原滚动位置；改筛选条件的 setSearchParams 传了 preventScrollReset，不会跳 */}
       <ScrollRestoration />

@@ -12,7 +12,9 @@ import { ART } from '@/constants/art'
 import { useLogin } from '@/hooks/useLogin'
 import { useIsDesktop } from '@/hooks/useMediaQuery'
 import { useQuestionBanks, useQuestionList } from '@/hooks/useQuestionQueries'
+import { useGuideCuePlaying } from '@/lib/guideCue'
 import { useTheme } from '@/lib/theme'
+import { cn } from '@/lib/utils'
 
 /**
  * 首页：落地页，从上到下是 Hero（标题、简介、题库概况数字）、热门榜单、平台特性、开始刷题引导。
@@ -31,11 +33,13 @@ export function HomePage() {
 
 /**
  * Hero：墨线框左边是标题、简介、沉浸刷题和题库目录两个入口、概况数字，右边是书房场景 + 澜汐的半身立绘（独立容器，文字不压在图上）。
- * 立绘从右边淡入、之后轻微呼吸；手机端只留文字，不加载插画。一屏最多一个角色，下面各区块都只用图标
+ * 立绘从右边淡入、之后轻微呼吸；手机端只留文字，不加载插画。下面各区块都只用图标。
+ * 提示条（如登录成功后的挥手）在播动作时立绘先不呼吸，同一时刻只有一个澜汐在动
  */
 function HeroSection() {
   const theme = useTheme()
   const isDesktop = useIsDesktop()
+  const cuePlaying = useGuideCuePlaying()
 
   return (
     <BentoCard className="flex-row p-0 md:p-0">
@@ -73,7 +77,7 @@ function HeroSection() {
           />
           {/* 立绘按 Hero 高度的 1.8 倍放，只露出头到腰，伸出的手朝向左边的标题 */}
           <div className="ohm-character-enter absolute right-[8%] top-3 h-[180%]">
-            <div className="ohm-breathe h-full">
+            <div className={cn('h-full', !cuePlaying && 'ohm-breathe')}>
               <ArtImage art={ART.portraitWelcome} priority className="h-full w-auto max-w-none" />
             </div>
           </div>

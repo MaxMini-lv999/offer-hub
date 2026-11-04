@@ -24,6 +24,7 @@ import {
 import { Input } from '@/components/ui/input'
 import type { AuthMode } from '@/constants/auth'
 import { useLogin } from '@/hooks/useLogin'
+import { showGuideCue } from '@/lib/guideCue'
 import { ApiError } from '@/lib/request'
 import { cn } from '@/lib/utils'
 import { postAuthLogin, postAuthRegister } from '@/services/auth'
@@ -164,6 +165,9 @@ function ModeForm({
       const { token, userInfo } = await postAuthLogin(username, password)
       login(userInfo, token)
       onSuccess?.()
+      // 弹窗关掉、页面跳走之后提示条还在（挂在全站布局里），澜汐挥手欢迎一次
+      const name = userInfo.nickName || userInfo.username
+      showGuideCue('wave', registered ? `注册成功，欢迎你，${name}` : `欢迎回来，${name}`)
     } catch (err) {
       const reason = err instanceof ApiError ? err.message : '出了点问题，请稍后再试'
       if (registered) {

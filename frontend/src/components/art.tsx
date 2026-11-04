@@ -8,6 +8,7 @@ import {
   type VectorName,
 } from '@/constants/art'
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery'
+import { useGuideCuePlaying } from '@/lib/guideCue'
 import { useTheme } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 
@@ -56,6 +57,7 @@ function usePageVisible() {
  * 澜汐的 Q 版动作（8 帧序列图，CSS steps 逐帧播放）。96px 以内用 192px 档，更大用 288px 档，高分屏下都不糊。
  * 先显示静态封面，序列图下载解码完、进入视口才开始播；系统减少动态效果、页面切到后台、离开视口时停在封面，
  * 回来后从头播。一次性动作（挥手、庆祝）播完停在封面，换 playKey 重播。
+ * 同一时刻只让一个澜汐在动：全站提示条（GuideCue）的动作播放期间，其他动作都停在封面，播完再从头播。
  * 动作要跟真实状态绑定：请求结束、步骤切换时由调用方换掉 name 或改成 still
  */
 export function CharacterSprite({
@@ -64,6 +66,7 @@ export function CharacterSprite({
   playKey = 0,
   loop,
   still = false,
+  cue = false,
   label,
   className,
 }: {
@@ -74,6 +77,8 @@ export function CharacterSprite({
   loop?: boolean
   /** 只显示静态封面，不下载序列图 */
   still?: boolean
+  /** 提示条自己的动作，不给自己让路 */
+  cue?: boolean
   /** 有含义时给读屏软件的说明；不传当装饰 */
   label?: string
   className?: string
@@ -87,6 +92,7 @@ export function CharacterSprite({
 
   const reducedMotion = usePrefersReducedMotion()
   const pageVisible = usePageVisible()
+  const yielded = useGuideCuePlaying() && !cue
   const ref = useRef<HTMLSpanElement>(null)
   const [inView, setInView] = useState(false)
   const [loadedSheet, setLoadedSheet] = useState<string>()
@@ -124,7 +130,7 @@ export function CharacterSprite({
   }, [wantSheet, sheet])
 
   const active =
-    playable && pageVisible && inView && loadedSheet === sheet && finishedKey !== runKey
+    playable && pageVisible && !yielded && inView && loadedSheet === sheet && finishedKey !== runKey
   const style: CSSProperties = {
     width: size,
     backgroundImage: `url(${active ? sheet : poster})`,

@@ -49,6 +49,21 @@
   }
 }
 
+/* 澜汐提示条入场：从下面 8px 淡入；消失时直接卸载 */
+.ohm-cue-enter {
+  animation: ohm-cue var(--duration-panel) var(--ease-standard) both;
+}
+@keyframes ohm-cue {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* VN 推进提示：台词显示完、可以继续时横向轻推 */
 .ohm-continue {
   display: inline-block;
@@ -79,6 +94,7 @@
 @media (prefers-reduced-motion: reduce) {
   .ohm-sprite,
   .ohm-character-enter,
+  .ohm-cue-enter,
   .ohm-breathe,
   .ohm-continue,
   .ohm-retry {
