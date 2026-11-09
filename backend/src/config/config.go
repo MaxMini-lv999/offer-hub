@@ -24,6 +24,9 @@ type TomlConfig struct {
 type CommonConfig struct {
 	Port    int  `toml:"port"`
 	OpenTLS bool `toml:"open_tls"`
+	// TrustedProxies 可信反向代理的 IP 或 CIDR，来自这些地址的请求从 X-Real-IP 取访客 IP。
+	// 不写或为空时不信任任何代理（本地开发直连）。见 ngin.CreateGin
+	TrustedProxies []string `toml:"trusted_proxies"`
 }
 
 type MySQLConfig struct {

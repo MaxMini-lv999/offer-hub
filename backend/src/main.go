@@ -79,7 +79,10 @@ func run() error {
 		}
 	}()
 
-	router := ngin.CreateGin()
+	router, err := ngin.CreateGin(config.Conf.Common.TrustedProxies)
+	if err != nil {
+		return fmt.Errorf("create gin: %w", err)
+	}
 	rt.RegisterRouter(router)
 
 	// 不设超时的话，一个连接可以无限期地慢慢发请求头（Slowloris），或者连上之后什么都不发，一直占着连接和 goroutine
