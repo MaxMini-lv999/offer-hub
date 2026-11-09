@@ -1,0 +1,48 @@
+# 线上配置模板。deploy.sh 首次部署时把 __XXX__ 换成 .env 里的随机密码，
+# 生成服务器上的 config-online.toml（权限 600，不入库）。
+
+[COMMON]
+port = 8180
+open_tls = false # TLS 在 nginx 终止
+# nginx 经 docker-proxy 连进来，源地址是 compose 网络的网关（docker-compose.yml 里固定为 172.30.0.1）。
+# 只有它转发的请求才从 X-Real-IP 取访客 IP；nginx 用 Cloudflare 的 CF-Connecting-IP 覆盖写这个头
+trusted_proxies = ["172.30.0.1"]
+
+[MySQL]
+url = "mysql:3306"
+user = "root"
+pwd = "__MYSQL_ROOT_PASSWORD__"
+db_name = "offer_hub"
+
+[MongoDB]
+url = "mongodb://mongo:27017"
+user = "root"
+pwd = "__MONGO_ROOT_PASSWORD__"
+database = "offer_hub"
+max_pool = 50
+min_pool = 2
+
+[Redis]
+url = "redis:6379"
+pwd = "__REDIS_PASSWORD__"
+db = 0
+
+[JWT]
+secret = "__JWT_SECRET__"
+expire = 24 # 小时
+enable = true
+
+# 后端按访客真实 IP（游客）或 user_id（登录用户）限流；nginx 那层的 limit_req 只是额外的一道按 IP 的粗限流
+[RateLimit]
+enable = true
+window_seconds = 60
+max_requests = 120
+
+[AuthRateLimit]
+enable = true
+window_seconds = 60
+max_requests = 10
+
+[Sensitive]
+words_file = "sensitive_words.txt"
+reload_interval_seconds = 5
